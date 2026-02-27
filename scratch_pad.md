@@ -1,10 +1,16 @@
 # Notes
 
-#### Map:
+Exposure = normalized % flood area
+Socioeconomic = average of standardized vulnerability proxies
+Investment = normailzed mitigation per capita
 
-Federal and State map polygons match. Same with FEMA NFHL, but I don't have half of the states.
+Adaptation Gap = Exposure * Socioeconomic - Investment
 
-#### ACS variables:
+#### GIS (physical hazard footprint):
+
+Federal and State map polygons match. Same with FEMA NFHL, but I don't have half of the states. I do have River Corridors for the entire state.
+
+#### ACS variables (socioeconomic proxy vulnerability):
 
 Median income (resilience proxy)
 % over 65 (vulnerability proxy)
@@ -17,12 +23,30 @@ Renters vs owners (recovery stability proxy)
 % disability status (evacuation / recovery proxy)
 % mobile home (vulnerability)
 
-#### Funding:
+#### Hazard Funding (public mirigation allocation):
 
 HMGP (Hazard Mitigation Grant Program) (the biggie)
 FMA (Flood Mitigation Assistance)
 BRIC (Building Resilient Infrastructure and Communities)
 
+#### Model funding alignment
 
+Investment as a function of flood risk and socioeconomic vulnerability
+Tells me which towns are under-/overfunded
 
-#### Model risk resemblance?
+#### Sensitivity Analysis
+
+Play with weights in the index
+
+#### Thoughts / Ideas
+
+Stress-test exposure (compare NFHL overlap of river corridors)?
+Typology instead of ranking (based on exposure and investment)?
+
+Flood risk: % flood zone / town area?
+Give equal weight to each (z-scored) ACS variable?
+Normalize investment: per capita? per housing unit? per exposed acre?
+
+What do I do with "Statewide" funding? per capita? per housing unit? per exposed acre? exclude altogether?
+
+Track down other sources of funding?

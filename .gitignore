@@ -1,3 +1,6 @@
+# large files
+VT_river_corridors/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
