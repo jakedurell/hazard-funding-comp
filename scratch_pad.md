@@ -50,3 +50,17 @@ Normalize investment: per capita? per housing unit? per exposed acre?
 What do I do with "Statewide" funding? per capita? per housing unit? per exposed acre? exclude altogether?
 
 Track down other sources of funding?
+
+
+
+
+
+
+#### GIS questions
+
+What's the overlap between river corridors and NFHL? How are they calculated / where do they come from? River corridors are about erosion / river movement / channel migration / flooding, NFHL about inundation, so..... some towns have more erosion risk, or a wide buffer, while others have broad floodplains, or detailed federal mapping?
+
+How'd the river corridor data get made?
+
+#### Flood Planning questions
+
