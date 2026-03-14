@@ -53,6 +53,9 @@ Track down other sources of funding?
 
 
 
+#### Ghost towns
+
+Surprise! Vermont has ghost towns with little or no population (Glastenbury, Lewis, Avery’s Gore, Warner’s Grant, Warren’s Gore, Somerset) and therefore little or no ACS data. 
 
 
 
