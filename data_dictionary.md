@@ -17,12 +17,16 @@
 - **town_name**: Name of the town, extracted from the ACS “Geographic Area Name” field.  
 - **median_income**: Median household income in the past 12 months (in 2024 inflation-adjusted dollars).  
 - **median_income_moe**: Margin of error for median household income (dollars).  
+- **total_population**: Total number of people residing in the town.  
+- **total_population_moe**: Margin of error for total population (number of persons).  
 - **percent_elderly**: Percentage of the total population age 65 and over.  
 - **percent_elderly_moe**: Margin of error for percent elderly (percentage points).  
 - **median_year_house_built**: Median year structure was built.  
 - **median_year_house_built_moe**: Margin of error for median year structure built (years).  
 - **pct_no_vehicle**: Percentage of occupied households with no vehicle available.  
 - **pct_no_vehicle_moe**: Margin of error for percent of households with no vehicle (percentage points).  
+- **occupied_housing_units**: Total number of occupied housing units in the town.  
+- **occupied_housing_units_moe**: Margin of error for occupied housing units (number of units).  
 - **pct_renter_occupied**: Percentage of occupied housing units that are renter-occupied.  
 - **pct_renter_occupied_moe**: Margin of error for percent renter-occupied (percentage points).  
 - **pct_bachelors_or_higher**: Percentage of the population age 25 and over with a bachelor’s degree or higher.  
