@@ -59,6 +59,11 @@
 - **B18101 (Disability Status)**: Universe = civilian noninstitutionalized population  
 - **B25024 (Units in Structure / Mobile Homes)**: Universe = all housing units  
 
-Margin of error (MOE) for derived percentages is calculated using the ACS-recommended formula for ratios, combining numerator and denominator MOEs in quadrature:
+Margin of error (MOE) for derived percentages is calculated using the [ACS-recommended formula for ratios](https://www2.census.gov/programs-surveys/acs/tech_docs/accuracy/2024_ACS_Accuracy_Document_Worked_Examples.pdf), combining numerator and denominator MOEs in quadrature:
 
 > `MOE = 100 * sqrt((numerator_moe / denominator)^2 + ((numerator * denominator_moe) / denominator^2)^2)`
+
+### FEMA Project Codes
+
+FEMA project types were classified using the official [FEMA Mitigation eGrants Guide to Eligible Activities and Codes](https://www.fema.gov/sites/default/files/2020-08/fema_mt-egrants-guide-to-eligible-activities-and-codes_job_aid_March_2018.pdf).
+
