@@ -68,3 +68,7 @@ How'd the river corridor data get made?
 #### Flood Planning questions
 
 What's the breakdown of flood mitigation funding? Specifically FEMA HMGP, but also state and town level. Know where I can get the data?
+
+What the hell do i do with unincorporated villages within a town? White River Junction in Hartford?
+
+Villages in towns? Jeffersonville in Cambridge? Orleans in Barton? Enosburg Falls in Enosburgh?
