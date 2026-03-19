@@ -65,9 +65,13 @@ What's the overlap between river corridors and NFHL? How are they calculated / w
 
 How'd the river corridor data get made?
 
+Can I get watershed GIS data? (And then somehow break funding down that way?)
+
 #### Flood Planning questions
 
-What's the breakdown of flood mitigation funding? Specifically FEMA HMGP, but also state and town level. Know where I can get the data?
+Tell me about flood planning in Lamoille County. Policy, projects, process.
+
+What's the breakdown on flood mitigation funding? Sources of funding? Interested in FEMA HMGP, but also state and town level. Know where I can get the data?
 
 What the hell do i do with unincorporated villages within a town? White River Junction in Hartford?
 
