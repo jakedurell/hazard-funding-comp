@@ -121,8 +121,15 @@
 
 ### Normalized Claims Metrics
 
-- **claims_per_capita**: Total dollar amount of NFIP claims paid divided by total population (USD/person).
-- **claims_per_housing_unit**: Total dollar amount of NFIP claims paid divided by number of occupied housing units (USD/unit).
+- **claims_paid_per_capita**: Total dollar amount of NFIP claims paid divided by total population (USD/person).
+- **claims_paid_per_housing_unit**: Total dollar amount of NFIP claims paid divided by number of occupied housing units (USD/unit).
+
+### Policy Counts by Period
+
+- **irene_policies**: Number of active NFIP insurance policies in force in the town on August 28, 2011 (the date of Hurricane Irene).
+- **flood2023_policies**: Number of active NFIP insurance policies in force in the town on July 10, 2023 (the date of the 2023 Vermont flood event).
+- **today_policies**: Number of active NFIP insurance policies in force in the town as of the most recent data extraction date.
+- **current_insurance_penetration**: Proportion of occupied housing units in the town with an active NFIP insurance policy as of the most recent data extraction date (today_policies divided by occupied_housing_units).
 
 # Notes:
 
