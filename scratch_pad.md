@@ -12,6 +12,8 @@ Federal and State map polygons match. Same with FEMA NFHL, but I don't have half
 
 #### ACS variables (socioeconomic proxy vulnerability):
 
+(Inspired by the CDC SVI - Social Vulnerability Index)
+
 Median income (resilience proxy)  
 % elderly (vulnerability proxy)  
 Housing age (flood resiliencee)  
@@ -22,6 +24,8 @@ Renter-occupied (recovery stability proxy)
 % below poverty line (sub for median income?)  
 % disability status (evacuation / recovery proxy)  
 % mobile home (vulnerability)  
+
+? Median property value (B25077 - owner-occupied properties) ?
 
 #### Hazard Funding (public mirigation allocation):
 
@@ -76,3 +80,7 @@ What's the breakdown on flood mitigation funding? Sources of funding? Interested
 What the hell do i do with unincorporated villages within a town? White River Junction in Hartford?
 
 Villages in towns? Jeffersonville in Cambridge? Orleans in Barton? Enosburg Falls in Enosburgh?
+
+Do people rebuild in a flood plain? How do towns handle that?
+
+How much funding is mitigatory, how much is clean-up?

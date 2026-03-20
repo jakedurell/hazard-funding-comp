@@ -62,6 +62,10 @@
 - **numberOfFinalProperties**: 	Actual number of properties mitigated by the project as provided by project closeout activities.
 - **numberOfProperties**: Proposed number of properties to be mitigated by the project. Note, a zero values means the project does not apply mitigation directly to structures.
 
+- **pre_2011**: FEMA obligated funding for projects before 2011 (USD).  
+- **2011_2022**: FEMA obligated funding for projects from 2011 to 2022, including funding awarded in response to Hurricane Irene flooding in 2011 (USD).  
+- **2023_plus**: FEMA obligated funding for projects in 2023 or later, including funding awarded in response to flood events from 2023 (USD).  
+
 ### Derived Funding Metrics
 
 - **cost_per_property**: Average FEMA funding per property included in funded projects (USD/property).
