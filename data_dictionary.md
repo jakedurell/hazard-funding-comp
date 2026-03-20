@@ -38,7 +38,7 @@
 - **pct_mobile_home**: Percentage of all housing units that are mobile homes.  
 - **pct_mobile_home_moe**: Margin of error for percent mobile home (percentage points).  
 
-## Town-Level Funding Summary Data Dictionary
+## Town-Level FEMA Funding Summary Data Dictionary
 
 - **GEOID**: Unique 10-digit Census identifier for the town (FIPS code), a concatenation of the state (50), county (3 digits), and place (5 digits) codes.
 - **town_name**: Name of the town, standardized for merging across datasets.
@@ -95,6 +95,34 @@
 
 - **has_funding**: Boolean flag indicating whether the town received any FEMA mitigation funding (`True` if funding_per_capita > 0, else `False`).
 
+## NFIP Claims Summary Data Dictionary
+
+- **GEOID**: Unique 10-digit Census identifier for the town (FIPS code), a concatenation of the state (50), county (3 digits), and place (5 digits) codes.
+- **town_name**: Name of the town, standardized for merging across datasets.
+- **total_population**: Total number of people residing in the town (from ACS).
+- **occupied_housing_units**: Total number of occupied housing units in the town (from ACS).
+
+### NFIP Claims Variables
+
+- **nfip_claims**: Total number of NFIP insurance claims filed in the town (count, all years).
+- **total_nfip_claims_paid**: Total dollar amount paid out for NFIP insurance claims in the town (USD, all years).
+
+### Claims by Period (all dollar amounts are cumulative for the period):
+
+- **pre_2011_nfip_claims**: Total dollar amount paid for NFIP claims with loss dates before 2011 (USD).
+- **2011_2022_nfip_claims**: Total dollar amount paid for NFIP claims with loss dates from 2011 to 2022 (USD).
+- **2023_plus_nfip_claims**: Total dollar amount paid for NFIP claims with loss dates in 2023 or later (USD).
+
+### Claim Counts by Period
+
+- **pre_2011_nfip_claims_count**: Number of NFIP claims with loss dates before 2011.
+- **2011_2022_nfip_claims_count**: Number of NFIP claims with loss dates from 2011 to 2022.
+- **2023_plus_nfip_claims_count**: Number of NFIP claims with loss dates in 2023 or later.
+
+### Normalized Claims Metrics
+
+- **claims_per_capita**: Total dollar amount of NFIP claims paid divided by total population (USD/person).
+- **claims_per_housing_unit**: Total dollar amount of NFIP claims paid divided by number of occupied housing units (USD/unit).
 
 # Notes:
 
