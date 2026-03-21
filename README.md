@@ -31,3 +31,9 @@ VT flood risk, adaptation capacity, and funding
 
 - [UnitedStatesZipCodes.org ZIP Code Database](https://www.unitedstateszipcodes.org/zip-code-database/)  
   Used to assign Vermont towns to policies with missing community names via ZIP code crosswalk.
+
+  ## Author
+
+Bryan Johns, March 2026  
+[bryan.johns@informedwanderer.com](mailto:bryan.johns@informedwanderer.com) | [LinkedIn](https://www.linkedin.com/in/b-johns/) | [GitHub](https://github.com/johbry17) | [Portfolio](https://informedwanderer.com)  
+— Fluent in Data. Fluent in Human.
