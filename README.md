@@ -8,6 +8,9 @@ VT flood risk, adaptation capacity, and funding
 - [U.S. Census Bureau, 2025 TIGER/Line Shapefiles: Vermont County Subdivisions](https://www2.census.gov/geo/tiger/TIGER2025/COUSUB/tl_2025_50_cousub.zip)  
   Used for Vermont town (county subdivision) boundaries and spatial joins.
 
+- [U.S. Census Bureau, 2025 TIGER/Line Shapefiles: Vermont Areawater (Chittenden County)](https://www2.census.gov/geo/tiger/TIGER2025/AREAWATER/tl_2025_50007_areawater.zip)
+  Used for delineating water bodies (including Lake Champlain) in Chittenden County for spatial masking of flood zones.
+
 - [National Flood Hazard Layer (NFHL) Database](https://hazards.fema.gov/femaportal/NFHL/searchResult/)  
   Used for FEMA flood zone boundaries and risk mapping.
 
@@ -23,6 +26,9 @@ VT flood risk, adaptation capacity, and funding
 - [FEMA Mitigation eGrants Guide to Eligible Activities and Codes](https://www.fema.gov/sites/default/files/2020-08/fema_mt-egrants-guide-to-eligible-activities-and-codes_job_aid_March_2018.pdf)  
   Used to classify FEMA project types.
 
+- [Federal Reserve Economic Data (FRED): Consumer Price Index for All Urban Consumers (CPI-U), U.S. City Average](https://fred.stlouisfed.org/series/CPIAUCSL)  
+  Used for inflation adjustment of funding and economic variables to constant dollars. Downloaded as CSV for annual CPI values.
+
 - [OpenFEMA Dataset: NFIP Redacted Claims](https://www.fema.gov/openfema-data-page/fima-nfip-redacted-claims-v2)  
   Used for town-level flood insurance claims analysis.
 
@@ -31,9 +37,6 @@ VT flood risk, adaptation capacity, and funding
 
 - [UnitedStatesZipCodes.org ZIP Code Database](https://www.unitedstateszipcodes.org/zip-code-database/)  
   Used to assign Vermont towns to policies with missing community names via ZIP code crosswalk.
-
-- [Federal Reserve Economic Data (FRED): Consumer Price Index for All Urban Consumers (CPI-U), U.S. City Average](https://fred.stlouisfed.org/series/CPIAUCSL)  
-Used for inflation adjustment of funding and economic variables to constant dollars. Downloaded as CSV for annual CPI values.
 
   ## Author
 
