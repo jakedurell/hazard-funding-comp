@@ -32,6 +32,9 @@ VT flood risk, adaptation capacity, and funding
 - [UnitedStatesZipCodes.org ZIP Code Database](https://www.unitedstateszipcodes.org/zip-code-database/)  
   Used to assign Vermont towns to policies with missing community names via ZIP code crosswalk.
 
+- [Federal Reserve Economic Data (FRED): Consumer Price Index for All Urban Consumers (CPI-U), U.S. City Average](https://fred.stlouisfed.org/series/CPIAUCSL)  
+Used for inflation adjustment of funding and economic variables to constant dollars. Downloaded as CSV for annual CPI values.
+
   ## Author
 
 Bryan Johns, March 2026  
