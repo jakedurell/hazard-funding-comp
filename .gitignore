@@ -1,5 +1,6 @@
 # large files
 VT_river_corridors/
+NRI_TABLE_censusTracts.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
