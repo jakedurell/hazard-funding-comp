@@ -38,6 +38,9 @@ VT flood risk, adaptation capacity, and funding
 - [UnitedStatesZipCodes.org ZIP Code Database](https://www.unitedstateszipcodes.org/zip-code-database/)  
   Used to assign Vermont towns to policies with missing community names via ZIP code crosswalk.
 
+- [FEMA National Risk Index (NRI) Data](https://www.fema.gov/about/openfema/data-sets/national-risk-index-data)  
+  Used for town-level expected annual loss, social vulnerability, and community resilience scores as risk and vulnerability benchmarks.
+
   ## Author
 
 Bryan Johns, March 2026  
