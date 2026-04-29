@@ -1,254 +1,149 @@
 # Floodlines
-### Insert witty subtitle
+### Insert witty subtitle 
+(When Disaster Funding Follows the Past, Not the Future)  
+(Why Vermont’s Flood Money Misses the Mark)  
+(The Mismatch Between Risk and Relief)  
 
-May 2026
+May 2026  
 Bryan Johns
 
-#### Link to dashboard "Explore the data"
+[Link to dashboard "Explore the data"]
 
-## Hook - tension, curiosity
+## After every flood, money flows
 
-Does flood mitigation funding actually mitigate funding? This Vermont expat, schooled in environmental policy and spatial data analysis, set out to answer that question.
+_The assumption is simple: it goes where it’s needed most._
 
-Nestled within picturesque mountainous terrain, the towns, villages, and hamlets of Vermont were settled along river beds, taking advantage of coursing waterways for saw- and gristmills, easy transportation, waste disposal, and the fertile soil of floodplains for agriculture. Humans development, from removing wetlands to damming and straightening the rivers, has increased the risk of flash flooding. The settlement of much of the state’s lower income population by river beds increases vulnerability. Famously, the state flooded back in 1927, during the Coolidge administration, and repairs stretched into the Depression.
+That’s the story we tell ourselves, anyway.
 
-In recent memory, the state rebounded from the devastating effects of Hurricane Irene in 2011, which the population’s resilient spirit proudly displayed in the fundraising “Vermont Strong” front license plates. But another devastating series of flash flooding hit in 2023, and has prompted a more somber spirit of recovery. The reality of climate change-fueled devastating storms is sinking in across the state, and long-term adaptation begins, in an increasingly resource-constrained insecure world.
+Flood mitigation funding is supposed to reduce future risk. But in Vermont, it seems to follow something more familiar: **past damage**.
 
-Considering the scale of recent disasters, the need to effectively target flood mitigation efforts is obvious. One would assume that flood funding matches need but, as this analysis found out, it doesn’t. It matches… something else.
+That distinction matters. If funding primarily follows where flooding has already occurred, rather than where it is most likely to occur next, some communities may remain exposed.
 
-## What was built
+This project tests a simple idea: **Does mitigation funding actually line up with need?**
 
-Nerds - please see the Technical Methodology Appendix for details if you’re curious.
+## A landscape shaped by water
 
-In order to track need, we (the royal we) first constructed an index of need. Lacking the resources to measure the state’s actual properties at risk (half the state has yet to be mapped for the FEMA National Flood Hazard Layer), we tried a number of quick-and-dirty proxies to build a composite index of risk, vulnerability, and socioeconomic capacity.
-Risk was approximated a number of ways, included land exposure based on the FEMA NFHL and state river corridors, and past damage claims from the woefully undersubscribed NFIP (~1% of the state participates in the NFIP, despite 90% of towns being eligible). We ended up using Expected Annual Loss from Inland Flooding, extracted from FEMA’s National Risk Index, a balance of building, agricultural, and human loss.
+Vermont’s towns were built along rivers: they powered mills, moved goods, and supported agriculture with nutrient-rich alluvial soil. Over time, wetlands were drained, channels altered, and development pushed into floodplains. The waters have proved to be a tremendous assest, and a growing source of risk.
 
-Inspired by the CDC’s Social Vulnerability Index (SOVI), socioeconomic resilience or precarity was estimated using a variety of variables from the Census Bureau’s American Community Survey. Final variables selected were the percent below the poverty line, percent elderly, and access to a vehicle.
+Flooding isn't new. But its frequency, and the way the state is thinking about it, has changed.
 
-Risk and socioeconomic variables were equally weighted and summed to create a composite need index. 
+Vermont school children were raised hearing about the catastrophic 1927 floods, a relic of the time before Man had tamed Nature. In 2011 Hurricane Irene swept the state, a one-off crisis that pulled communities together in "Vermont Strong" resiliency.
 
-The need index was stress-tested for effectiveness, dropping and exchanging variables, and adjusting the weights. Although town rankings varied somewhat, results were directionally consistent, indicating index robustness. It was further checked against the FEMA National Risk Index, a similar index of need, and found to be broadly consistent.
-Funding includes only projects funded by FEMA’s Hazard Mitigation Assistance Program (mostly acquisition and buyout projects), the principal source of funding for disaster response and recovery.
+Then the 2023 floods hit.
 
-The need index was subtracted from funding to map out exactly how effectively funding was allocated.
+This time, the tone shifted. Less resilience narrative, more grim recognition: these floods aren’t rare events anymore. As one VT Digger article put it the following month, _Lamoille County was ranked safest in the nation from climate change. After flood, ‘that doesn’t bode well.’_
 
-## Funding doesn't track need
+The pattern is becoming harder to ignore. This is the new normal.
 
-Funding only loosely correlates with need. It's not mitigatory. _It tracks something else_
+## Measuring “need”
 
-## Who's missed?
+To make this question testable, I built a simple index of relative need across towns. Nothing fancy. Just a structured way to compare places:
 
-First, half the state has received zero HMA funding. These towns fall across the entire spectrum of the need index, and vary widely in terms of population size, risk, and socioeconomic vulnerability.
+- **Risk**: Expected annual flood loss
+- **Vulnerability**: Socioeconomic factors like poverty, age, and access to transportation
 
-Describe some towns from each quadrant - one or two from each. Definitely include Johnson as a case study. Maybe a Chittenden County one. A small town. Dunno. Gotta look.
+It’s a model, not reality. (_All models are wrong, but some are useful._) But it’s consistent, and good enough to see whether funding broadly tracks where risk and vulnerability are highest.
 
-Towns not funded. HIgh need towns more likely to be underfunded. Byzantine application process. Understaffed small towns. etc.
+## The result
 
-And many towns get zero funding at all.
+It doesn't track. At least, not very well. **Funding is only weakly aligned with this measure of need.**
 
-[Quadrant plot] - [Map of state] - color coded to match
+Some high-risk, high-vulnerability towns receive little or no funding. Others receive more than their relative risk might suggest. But one variable _does_ stand out:
 
-So what explains these disparate results?
+**past damage.**
 
-## Past damage - reactive vs proactive
+Towns with more insurance claims are significantly more likely to receive mitigation funding.
 
-Of all the inputs to the need index, the only thing that significantly boosted the ability to predict funding allocation was insurance claims. Perhaps unsurprisingly, mitigation funding correlates to past damage claims.
+## So… is that a problem?
 
-Funding appears more aligned with past damages than future needs. It’s reactive, not proactive.
+At first glance, it looks like one. But it’s not that simple. 
 
-[NFIP plot?]
+Past damage is often one of the best real-world indicators of risk. Places that have flooded before tend to flood again. And mitigation funding may already be reducing future losses in ways this analysis can’t fully see.
 
-## Discussion / Implications
+So this isn’t a clean “gotcha.” It’s more of a tension:
 
-Funding appears, if anything, structured around past damages, and other things unaccounted for in the data.
+**Funding appears to follow experienced risk more than modeled future need.**
 
-These conclusions match similar results found in analyzing disaster response and recovery. FEMA HMA funding faces several access barriers. A Byzantine application process faces towns, and often the person(s) responsible for applying are overworked, quite possibly volunteers. And getting the technical support necessary to plan a mitigation project may be inaccessible. Another barrier is the match - HMA only funds 75% of the project. While the state of Vermont has stepped in to help provide the match, not every town can afford it.
+Which raises a different question, less about correctness, more about coverage.
 
-And just because funding more closely matches past damages, that doesn't mean funding is wrong, but it may be solving a different problem.
+## Who gets missed
 
-## Personal Note?
+Even with that caveat, some patterns are hard to ignore:
 
-VT childhood, interest in data / policy / GIS
+- Roughly half of Vermont towns receive no mitigation funding
+- High-need towns show up disproportionately among the underfunded
+- Smaller, more vulnerable places appear less consistently served
 
-## Closing / CTA
+Not everywhere that’s at risk is in the system.
 
-The need index can help identify underserved communities in need of mitigation funding. More flooding is coming; it’s only a matter of time.
+## The quiet variable: access
 
-Moreover, this can inspire a conversation about the future, one that Vermont is actively facing. We may need to rethink how we define 'need' and mitigation funding.
+Mitigation funding doesn’t just get magically allocated; it’s applied for. And that process isn’t neutral. It rewards places that have:
+
+- time
+- staff
+- technical expertise
+- and the ability to front matching funds
+
+If you’re a small town with limited capacity, that’s a high bar.
+
+So funding patterns may reflect not just risk, but **who is able to navigate the system in the first place**.
+
+## Reactive vs. proactive
+
+There’s a logic to how things work now. After a flood, the need is visible. Damage is documented. Funding follows.
+
+But that creates a lag. A system designed to prevent damage ends up being driven by damage that has already happened.
+
+## What this means
+
+Flooding in Vermont isn’t a question of _if_. I’s a question of _where next_.
+
+If funding continues to rely heavily on past damage and local capacity, some high-risk communities may remain under-protected—not because they’re low risk, but because they haven’t been hit yet, or can’t access the system as easily.
+
+A more proactive layer, something that looks forward as well as backward, could help close that gap.
+
+## Explore the data
+
+This analysis is interactive—maps, rankings, and town-level breakdowns:
 
 [Add link to dashboard. Again.]
 
+## Final thought
+
+Floods will keep coming.
+
+The question is whether funding shows up before them—or after.
+
 ## Technical Methodology Appendix
 
-This analysis evaluates whether flood mitigation funding in Vermont aligns with underlying need. “Need” is treated as a normative construct (what funding should target), while observed funding patterns reflect real-world allocation dynamics. Models are used as validation tools, not as ends in themselves.
+This analysis evaluates whether flood mitigation funding in Vermont aligns with underlying need. “Need” is treated as a normative construct (what funding should target), while observed funding patterns reflect real-world allocation dynamics.
 
 ### Data Sources
 
-This project integrates multiple federal and spatial datasets at the town level:
-- FEMA National Risk Index (NRI) – expected annual loss (EAL), risk, vulnerability, and resilience indicators
-- FEMA Hazard Mitigation Assistance (HMA) – project-level mitigation funding data
-- National Flood Insurance Program (NFIP) – claims and policy data
-- U.S. Census Bureau American Community Survey (ACS) – demographic and socioeconomic variables
-- FEMA National Flood Hazard Layer (NFHL) and Vermont river corridors – spatial flood exposure proxies
-- Vermont town boundaries – base geography for aggregation
+- FEMA National Risk Index (expected annual loss, risk indicators)
+- FEMA Hazard Mitigation Assistance (project-level funding)
+- National Flood Insurance Program (claims data)
+- U.S. Census American Community Survey (socioeconomic variables)
+- FEMA National Flood Hazard Layer and Vermont river corridors (exposure)
+- Vermont town boundaries
 
-### Data Processing and Integration
+### Approach
 
-#### Spatial Data
-- All spatial datasets were standardized to an equal-area coordinate system (EPSG:5070) for accurate area calculations, then converted to WGS84 (EPSG:4326) for web mapping.
-- Flood exposure was estimated by calculating the percent of each town’s land area within:
-    - FEMA high-risk flood zones (NFHL)
-    - State-defined river corridors
-- NFHL coverage varies across the state; a coverage flag was included to account for incomplete mapping.
+- Built a composite need index combining risk and vulnerability
+- Aggregated all data to the town level
+- Compared funding patterns against need and other variables
 
-#### NRI Aggregation
-- FEMA NRI data is available at the census tract level and was spatially intersected with town boundaries.
-- Tract-level values were allocated to towns using area-weighted proportions.
-- Sliver overlaps (<1%) were removed and weights renormalized.
-- Aggregated metrics include:
-    - Expected annual loss (EAL)
-    - Population, building value, and agricultural value
-    - Risk, vulnerability (SOVI), and resilience indices
+### Key findings
 
-#### ACS Socioeconomic Data
-- Multiple ACS tables were cleaned and merged using GEOID identifiers.
-- Key indicators were calculated following Census guidance, including:
-    - Percent below poverty line
-    - Percent elderly
-    - Percent without vehicle access
-- Margins of error (MOE) were retained and propagated where appropriate.
+- Need vs. funding:  weak correlation
+- Claims vs. funding:  stronger correlation
+- ~50% of towns receive no funding
+- High-need towns are disproportionately underfunded
 
-#### FEMA HMA Funding Data
-- Project-level funding was:
-    - Inflation-adjusted to 2025 dollars using CPI data (FRED)
-    - Filtered to flood-related mitigation projects
-- Projects were assigned to towns using:
-    - Regex parsing
-    - Manual mapping
-    - Fuzzy matching for ambiguous cases
-- Funding was aggregated to the town level, including:
-    - Total funding
-    - Funding per capita and per housing unit (log-transformed)
-    - Funding by time period (pre-2011, 2011–2022, 2023+)
+### Limitations
 
-#### NFIP Claims and Policies
-- Claims and policies were cleaned and matched to towns.
-- Claims were inflation-adjusted and aggregated by town and period.
-- Insurance penetration rates were calculated using active policy counts.
-
-#### Final Dataset
-- All datasets were merged at the town level using GEOID and town name.
-- Consistency checks ensured alignment across population and housing variables.
-- The final dataset includes all Vermont towns, including those with zero funding.
-
-### Construction of the Need Index
-
-A composite need index was developed to estimate relative flood mitigation need across towns.
-
-#### Components
-- Risk (Exposure):
-    - Primary measure: Expected Annual Loss (EAL) from FEMA NRI
-- Vulnerability (Socioeconomic):
-    - Percent below poverty
-    - Percent elderly
-    - Percent without vehicle access
-
-#### Method
-- Variables were normalized using both:
-    - Z-score standardization
-    - Rank-based scaling
-- Risk and vulnerability components were equally weighted (50/50) and summed.
-
-#### Rationale
-- EAL was selected as the primary risk variable due to its ability to capture multi-dimensional loss (buildings, agriculture, population).
-- A parsimonious set of vulnerability variables was chosen to balance interpretability and signal strength.
-
-### Model Evaluation and Validation
-
-#### Robustness Checks
-- Need indices were highly consistent across normalization methods
-    - Spearman correlation ≈ 0.91–1.00
-- Rankings were stable, with only modest variation at the extremes.
-
-#### Sensitivity Analysis  
-Two approaches were used:
-- Leave-One-Variable-Out (LOVO):  
-Tested how removing each variable affected rankings and underfunded town identification.
-- Weight Variation:  
-Tested alternative weightings (e.g., 70/30, 30/70 risk vs. vulnerability)
-
-Key result:
-- The model is robust to weighting choices
-- The choice of risk variable (EAL vs. exposure) is the most consequential decision
-
-#### Model Comparison  
-Multiple specifications were tested, including:
-- Exposure-based models (river corridors, NFHL)
-- EAL-based models
-- Per capita risk models
-- FEMA NRI composite indices
-
-Finding:
-- EAL-based models are more stable and policy-relevant than simple exposure measures
-- Adding more variables provides limited additional explanatory power (parsimony preferred)
-
-### Funding Alignment Analysis
-
-#### Gap Index  
-To evaluate allocation effectiveness:
-- Gap = Funding − Need
-
-Interpretation:
-- Negative values → underfunded relative to need
-- Positive values → overfunded relative to need
-
-The gap index shows:
-- Moderate negative correlation with need (~ -0.25 to -0.45), indicating it captures allocation mismatch, not just need.
-
-#### Correlation Analysis
-- Need vs. funding: weak correlation (~0.10–0.30)
-- Claims vs. funding: stronger correlation (~0.55)
-
-Interpretation:  
-- Funding aligns more with past damage (claims) than with forward-looking need.
-
-#### Regression Analysis
-- Logistic regression (funding access):
-    - AUC ≈ 0.6–0.8 → moderate ability to predict which towns receive funding
-- OLS regression (funding amount):
-    - R² ≈ 0 → near-zero explanatory power
-
-Interpretation:
-- Structural variables weakly explain who gets funding
-- They do not explain how much funding is allocated
-
-### Spatial Analysis
-- Moran’s I indicates significant spatial clustering of need
-- Choropleth maps confirm geographic consistency of risk patterns
-- Funding does not exhibit the same spatial alignment
-
-### Quadrant Analysis
-
-Towns were categorized based on need and funding:
-- Zero funding
-- Underfunded (high need, low funding)
-- Aligned
-- Overfunded
-- Low priority (low need, low funding)
-
-Key observations:
-- ~52% of towns received zero funding
-- High-need towns are disproportionately represented among underfunded and zero-funded groups
-- Distribution across quadrants is consistent across model specifications, though specific towns vary
-
-### Key Limitations
-- NFHL flood mapping is incomplete across Vermont
-- NFIP participation is extremely low (~1%), limiting claims as a comprehensive risk proxy
-- Town-level aggregation may obscure within-town variation
-- Funding data reflects approved projects, not unmet demand or unsuccessful applications
-
-### Summary
-- The need index is methodologically robust and stable across specifications
-- Funding is weakly aligned with structural need, but more strongly aligned with past damages
-- Results suggest a reactive funding system, rather than a proactive, risk-based allocation model
-- The framework reliably identifies systemic patterns, though precise rankings of individual towns should be interpreted with caution
+- Incomplete flood mapping coverage
+- Low NFIP participation (~1%)
+- Town-level aggregation masks within-town variation
+- Funding reflects approved projects, not unmet demand
