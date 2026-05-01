@@ -20,7 +20,7 @@ const choroplethConfig = {
     label: "Funding",
   },
   funding_scaled_vs_state_mean: {
-    scale: d3.scaleDiverging(d3.interpolatePRGn).domain([0.5, 1, 1.5]),
+    scale: d3.scaleDiverging(d3.interpolatePRGn).domain([0, 1, 1.5]),
     label: "Funding vs VT Avg",
   },
   need_eal: {
@@ -44,7 +44,7 @@ const choroplethConfig = {
     label: "Vulnerability",
   },
   vulnerability_index_vs_state_mean: {
-    scale: d3.scaleDiverging(d3.interpolatePiYG).domain([-100, 0, 100]),
+    scale: d3.scaleDiverging(d3.interpolatePiYG).domain([0, 1, 2]),
     label: "Vulnerability vs VT Avg",
   },
   // total_listings: {
