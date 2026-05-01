@@ -1,0 +1,312 @@
+/* ---------- Base Layout ---------- */
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  background-color: #ffffff;
+  color: #1f2933;
+  line-height: 1.65;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-Notebook,
+.notebook-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem 2rem;
+  background: #ffffff;
+}
+
+/* ---------- Headings ---------- */
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: 1.6rem;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+h3::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: #1f2933;
+  width: 60px;
+  margin-bottom: 1.5rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  font-weight: 600;
+}
+
+/* ---------- Executive Summary ---------- */
+
+em {
+  display: block;
+  font-style: normal;
+  font-size: 1.05rem;
+  background: #f1f5f9;
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid #111827;
+  border-radius: 6px;
+  margin-bottom: 2.5rem;
+  color: #334155;
+}
+
+/* ---------- Case Study Link/Button ---------- */
+
+.analysis-link {
+  margin-top: 18px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+.analysis-button {
+  display: inline-block;
+  padding: 8px 18px;
+  border: 1.5px solid #222;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  color: #222 !important;
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+.analysis-button .arrow {
+  margin-left: 6px;
+  transition: transform 0.2s ease-in-out;
+}
+.analysis-button:hover {
+  background-color: #222;
+  color: #fff !important;
+  text-decoration: none !important;
+}
+.analysis-button:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* ---------- Footnote ---------- */
+
+.footnote-ref {
+  font-size: 0.75em;
+  vertical-align: super;
+  color: #4e79a7;
+  cursor: pointer;
+}
+.footnotes {
+  font-size: 0.95em;
+  color: #555;
+  border-top: 1px solid #eee;
+  margin-top: 2em;
+  padding-top: 1em;
+}
+.footnotes ol {
+  margin: 0;
+  padding-left: 1.2em;
+}
+.footnotes li {
+  margin-bottom: 0.5em;
+}
+.footnotes a {
+  color: #4e79a7;
+  text-decoration: underline;
+}
+
+/* ---------- Paragraphs ---------- */
+
+p {
+  margin-bottom: 1.2rem;
+  font-size: 1rem;
+}
+
+/* ---------- Lists ---------- */
+
+ul {
+  margin: 1rem 0 1.5rem 1.5rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+}
+
+/* ---------- Section Dividers ---------- */
+
+h2::before {
+  content: "";
+  display: block;
+  height: 1px;
+  background: #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- Plot Styling ---------- */
+
+img {
+  display: block;
+  margin: 1.5rem auto 2.5rem auto;
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.output_png {
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------- Code Blocks ---------- */
+
+/* pre {
+  background: #111827;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+}
+
+code {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+} */
+
+/* ---------- Subtle Figure Caption Style ---------- */
+
+.caption {
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: -1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* ---------- Footer Feel ---------- */
+
+hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 3rem 0;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  .jp-Notebook,
+  .notebook-container {
+    padding: 2rem 1.25rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+
+/* Footer styles */
+.site-footer {
+  margin-top: 2em;
+  padding: 1em 0;
+  background: #f8f9fa;
+  border-top: 2px solid #e5e5e5;
+  text-align: center;
+  font-size: 1em;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5em;
+}
+
+.site-footer .footer-tagline {
+  width: 100%;
+  text-align: center;
+  font-size: 1.05em;
+  color: #444;
+  margin-bottom: 0.4em;
+  margin-top: 0.2em;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  line-height: 1.4;
+}
+
+.site-footer .footer-owner {
+  color: #888;
+  font-weight: normal;
+  font-size: 1em;
+  letter-spacing: 0.01em;
+}
+
+.site-footer .footer-author {
+  font-weight: 600;
+  color: #888;
+  margin-left: 0.2em;
+}
+
+.site-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-footer .footer-icon {
+  margin-right: 0.3em;
+  vertical-align: middle;
+}
+
+.site-footer .portfolio-link {
+  color: #333 !important;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.site-footer .linkedin-link {
+  color: #0077b5;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.site-footer .github-link {
+  color: #333 !important;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.site-footer .footer-links a:hover,
+.site-footer .footer-links a:focus {
+  color: #0085a1 !important;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .site-footer {
+    flex-direction: column;
+    gap: 0.8em;
+    font-size: 0.97em;
+    padding: 1.5em 0.5em;
+  }
+  .site-footer .footer-tagline {
+    font-size: 0.98em;
+    margin-bottom: 0.4em;
+    color: #555;
+  }
+  .site-footer .footer-links {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+}

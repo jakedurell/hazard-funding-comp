@@ -1,0 +1,996 @@
+// variables
+$primary-color: #0085a1;
+$hover-color: #00a8cc;
+$disabled-color: #6c757d;
+$map-border-color: #d1d9ee;
+$box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+$background-color: #f9f9f9;
+$text-color: #333333;
+$border-color: #e0e0e0;
+$border-radius: 10px;
+$padding: 10px;
+// $background-image: url("../images/background.jpg");
+
+// mixins
+@mixin flex-center($direction: row, $justify: center) {
+  display: flex;
+  justify-content: $justify;
+  align-items: center;
+  flex-direction: $direction;
+}
+
+// general styles
+body {
+  padding-top: 100px; // space for fixed navbar
+}
+
+.navbar {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: $padding;
+  text-align: center;
+  border-bottom: 2px solid white;
+}
+
+// towns drop down
+#towns-control {
+  padding: $padding;
+  @include flex-center(column);
+}
+#towns-dropdown {
+  min-width: 200px;
+  max-width: 100%;
+  border-radius: $border-radius;
+  padding: 5px;
+  box-sizing: border-box;
+  color: $text-color;
+  font-size: 1.2em;
+
+  option {
+    white-space: nowrap;
+  }
+}
+
+// header / title
+.dashboard-header {
+  text-align: center;
+  margin: 1.5em 0 1em 0;
+}
+.dashboard-header h1 {
+  font-size: 2.1em;
+  font-weight: 700;
+  color: #1a237e;
+  margin-bottom: 0.15em;
+  letter-spacing: 0.01em;
+}
+.dashboard-header h2 {
+  font-size: 1.35em;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 0.3em;
+  letter-spacing: 0.01em;
+}
+.dashboard-subtitle {
+  font-size: 1em;
+  color: #666;
+  margin-bottom: 0.4em;
+  font-weight: 400;
+}
+.dashboard-date {
+  font-size: 0.9em;
+  color: #888;
+  margin-bottom: 0.2em;
+}
+// case study link/button
+.analysis-link {
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+.analysis-button {
+  display: inline-block;
+  padding: 8px 18px;
+  border: 1.5px solid #222;
+  border-radius: 999px;
+  font-size: 1.35rem;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  color: #222;
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+.analysis-button .arrow {
+  margin-left: 6px;
+  transition: transform 0.2s ease-in-out;
+}
+.analysis-button:hover {
+  background-color: #222;
+  color: #fff;
+  text-decoration: none;
+}
+.analysis-button:hover .arrow {
+  transform: translateX(4px);
+}
+
+
+// lede line
+.lede {
+  text-align: center;
+  font-size: 0.98em;
+  color: #888;
+  margin: 0.7em auto 1.2em auto;
+  max-width: 800px;
+  font-style: italic;
+  letter-spacing: 0.01em;
+}
+
+.why-brief {
+  // background: #f7f7fa;
+  // border-radius: 8px;
+  border-left: 4px solid #b0b6c3;
+  max-width: 700px;
+  margin: 1.5em auto 1.5em auto;
+  padding: 1em 1.5em;
+  font-style: normal;
+  color: #444;
+  text-align: center;
+}
+
+// about band
+.context-band {
+  background: #f7fafd;
+  border-radius: 6px;
+  border: 1px solid #f0f2fa;
+  max-width: 900px;
+  margin: 1.2em auto;
+  padding: 0.9em 1.2em;
+  box-shadow: 0 1px 4px rgba(26, 35, 126, 0.02);
+  text-align: center;
+}
+.context-title {
+  font-size: 1.05em;
+  font-weight: 500;
+  color: #3a4a8c;
+  margin-bottom: 0.25em;
+  letter-spacing: 0.01em;
+}
+.context-body {
+  font-size: 0.98em;
+  color: #555;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+// Leaflet tile bug fix
+.leaflet-container.leaflet-touch-drag {
+  -ms-touch-action: pinch-zoom;
+  touch-action: pinch-zoom;
+  width: 100%;
+  height: 100vh;
+}
+
+// Leaflet layers control
+.leaflet-control-layers,
+.leaflet-control-layers-expanded {
+  font-size: 10px;
+  font-family: Arial;
+  font-weight: bold;
+  background-color: $background-color;
+  border: 1px solid #ccc;
+  border-radius: $border-radius;
+  padding: 5px;
+}
+.leaflet-control-layers-list label {
+  color: $text-color;
+}
+
+// map container
+.map-container {
+  width: 90%;
+  height: 80vh;
+  margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1em;
+}
+
+// // listing popups
+// .marker-popup-wrapper {
+//   max-height: 260px;
+//   overflow-y: auto;
+//   border: 3px solid;
+//   border-radius: 8px;
+//   padding: 10px 12px;
+//   font-family:
+//     system-ui,
+//     -apple-system,
+//     sans-serif;
+// }
+// .popup-card {
+//   margin-bottom: 8px;
+// }
+// .popup-head {
+//   font-weight: 600;
+//   font-size: 14px;
+//   margin-bottom: 4px;
+// }
+// .popup-desc-muted {
+//   color: #aaa;
+//   font-size: 11px;
+//   font-style: italic;
+//   display: block;
+//   margin-bottom: 2px;
+// }
+// .popup-sub {
+//   font-size: 12px;
+//   color: #555;
+//   margin-bottom: 4px;
+// }
+// .popup-meta {
+//   font-size: 11px;
+//   color: #777;
+//   margin-bottom: 6px;
+// }
+// .popup-link {
+//   font-size: 12px;
+//   text-decoration: none;
+//   color: #355f8a;
+// }
+// .popup-link:hover {
+//   text-decoration: underline;
+// }
+// .popup-divider {
+//   height: 1px;
+//   background: #eee;
+//   margin: 8px 0;
+// }
+
+// .leaflet-popup-close-button {
+//   top: -15px !important; // Move above the popup
+//   right: -15px !important; // Move to the right of the popup
+//   color: black !important;
+//   background-color: white !important;
+//   border: none;
+//   border-radius: 50%;
+//   width: 20px;
+//   height: 20px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   cursor: pointer;
+//   box-shadow: $box-shadow;
+//   z-index: 1000; // Ensure it is above the popup content
+
+//   &:hover {
+//     color: $map-border-color !important;
+//   }
+// }
+
+// choropleth markers
+.choropleth-label {
+  @include flex-center();
+  font-size: 15px;
+  color: black;
+  font-weight: bold;
+}
+
+// bubble markers
+.bubble-text {
+  @include flex-center();
+  font-size: 12px;
+  color: white;
+}
+
+// right-align choropleth and bubble popup text
+.popup-text-right {
+  display: block;
+  text-align: right;
+  // font-weight: bold;
+}
+.popup-text-right-larger {
+  display: block;
+  font-size: 1.2em;
+}
+
+// map legend box
+.custom-legend {
+  background: rgba(255, 255, 255, 0.9);
+  padding: $padding;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  font-size: 10px;
+  line-height: 18px;
+  color: #555;
+  // font-weight: bold;
+
+  .legend-title {
+    font-weight: bold;
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  .legend-color {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    border-radius: 2px;
+  }
+}
+
+// map reset button
+.reset-map-button {
+  background-color: white;
+  color: black;
+  border: 2px solid $border-color;
+  border-radius: 5px;
+  box-shadow: $box-shadow;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: background-color 0.3s;
+
+  i {
+    font-size: 16px;
+    color: black;
+  }
+
+  &:hover {
+    background-color: $background-color;
+  }
+}
+
+// marker overlay segmented control
+.marker-controls-label {
+  font-size: 0.95em;
+  color: #888;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.01em;
+  opacity: 0.8;
+}
+
+#marker-overlay-group {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 0.5em auto;
+  margin-top: 0 !important;
+  font-size: 0.85em;
+  opacity: 0.7;
+  background: none;
+  box-shadow: none;
+  border-radius: 4px;
+  gap: 0;
+
+  label {
+    margin: 0 1px;
+    padding: 0;
+
+    &.btn {
+      background: #f5f5f5;
+      color: #666;
+      border: 1px solid #e0e0e0;
+      border-radius: 0;
+      box-shadow: none;
+      font-size: 0.95em;
+      padding: 4px 10px;
+      min-width: 60px;
+      transition:
+        background 0.2s,
+        color 0.2s;
+
+      &:hover,
+      &:focus {
+        background: #e0e0e0;
+        color: #333;
+      }
+    }
+
+    &.active {
+      background: #e0e0e0;
+      color: #222;
+      font-weight: 600;
+      border-bottom: 2px solid $primary-color;
+      z-index: 2;
+    }
+  }
+}
+
+// choropleth control (radio buttons)
+#choropleth-control {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 5px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+
+  button {
+    background-color: $primary-color;
+    color: white;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    box-shadow: $box-shadow;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: $hover-color;
+    }
+
+    &:disabled {
+      background-color: $disabled-color;
+      cursor: not-allowed;
+    }
+    // active
+    &.active {
+      background-color: $hover-color;
+    }
+  }
+
+  @media (max-width: 600px) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 8px;
+    position: static;
+    left: unset;
+    transform: none;
+    margin: 0 auto 10px auto;
+    width: 98vw;
+    max-width: 400px;
+    justify-items: stretch;
+
+    button {
+      min-width: 0;
+      font-size: 1.2em;
+      padding: 10px 2px;
+      white-space: normal;
+    }
+  }
+}
+
+// slider styling
+.slider-label {
+  font-size: 0.95em;
+  color: #888;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 1em !important;
+}
+.switch {
+  margin-top: 0 !important;
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 25px;
+  margin: 10px; // space between switch and label
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: $primary-color;
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 17px;
+  width: 17px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  border-radius: 50%; // circle inside toggle
+  transition: transform 0.3s ease;
+}
+.switch input:checked + .slider:before {
+  transform: translateX(25px); // move circle right
+}
+// default toggle label
+.toggle-label {
+  font-size: 1.2em;
+  color: $text-color;
+  font-weight: normal;
+  vertical-align: middle; // middle of toggle
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+// change relative label color when checked on
+.switch:has(input:checked) + .toggle-label {
+  color: $primary-color;
+  font-weight: bold;
+}
+// change absolute label color when unchecked
+.toggle-label.active {
+  color: $primary-color;
+  font-weight: bold;
+}
+
+// metric definitions
+.metric-definitions {
+  max-width: 900px;
+  margin: 1.5em auto 1.5em auto;
+  background: #f7fafd;
+  border: 1px solid #e3eafc;
+  border-radius: 8px;
+  padding: 1.2em 1.5em;
+  box-shadow: 0 1px 6px rgba(26, 35, 126, 0.04);
+}
+.metric-definition {
+  margin-bottom: 1.1em;
+  color: #444;
+  font-size: 1em;
+  line-height: 1.5;
+  display: none; /* hide by default for toggle */
+}
+.metric-definition strong {
+  color: #1a237e;
+  font-weight: 600;
+  font-size: 1.04em;
+}
+
+// town stats card styles
+.stats-card {
+  // background: #ffffff;
+  // border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  // box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  font-size: 0.95rem;
+}
+.stats-title h3 {
+  margin-bottom: 15px;
+  font-size: 1.35em;
+  font-weight: 600;
+  text-align: center;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+.stats-section h4 {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #666;
+}
+.stats-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.stats-section li {
+  margin-bottom: 6px;
+}
+.stats-section span {
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+// plot header
+.plot-title {
+  text-align: center;
+  font-size: 1.35em;
+  font-weight: 600;
+  color: #333;
+  margin: 1.2em 0 0.6em 0;
+  letter-spacing: 0.01em;
+}
+
+// plot captions
+.plot-captions {
+  max-width: 940px;
+  margin: 0.8rem auto;
+}
+.plot-caption {
+  display: none;
+  text-align: center;
+  color: #444;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.plot-caption h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #222;
+}
+.plot-caption p {
+  margin: 0;
+  color: #555;
+}
+
+// secondary controls (choropleth toggle, slider)
+#secondary-controls {
+  margin: 2em auto;
+  text-align: center;
+}
+.choropleth-muted {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 1em;
+
+  button {
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
+    padding: 5px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    &.active {
+      background: #e0e0e0;
+      color: #222;
+      font-weight: 600;
+      border-bottom: 2px solid $primary-color;
+    }
+  }
+}
+// muted slider
+.switch-muted .slider {
+  background-color: #ddd;
+}
+.switch-muted input:checked + .slider {
+  background-color: $primary-color;
+}
+
+// rankings table styles
+.rankings-title {
+  text-align: center;
+  font-size: 1.35em;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  color: #444;
+  letter-spacing: 0.01em;
+}
+.rankings-section-header {
+  text-align: center;
+  margin-bottom: 1em;
+}
+.rankings-section-main {
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.2em;
+  letter-spacing: 0.01em;
+}
+.rankings-section-sub {
+  font-size: 0.9em;
+  color: #888;
+  font-weight: 400;
+  margin-bottom: 0.2em;
+  line-height: 1.3;
+}
+#rankings-container {
+  width: 100%;
+  font-family: sans-serif;
+  position: relative;
+}
+// rows
+.rank-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+  &.selected {
+    background: rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+  }
+}
+// first column - rank number
+.rank-col {
+  width: 36px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 8px;
+  color: #777;
+}
+// second column - neighborhood name
+.name-col {
+  width: 180px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+// third column - bar chart
+.bar-col {
+  flex: 1;
+  position: relative;
+  height: 22px;
+  display: flex;
+  align-items: center;
+}
+// background track for bars
+.bar-track {
+  position: absolute;
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+// reference line for VT's absolute value
+.vt-ref-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: orange;
+  z-index: 3;
+  pointer-events: none;
+}
+// reference label for VT's absolute value
+.vt-ref-label {
+  position: absolute;
+  right: 6px;
+  font-size: 11px;
+  background: white;
+  padding: 0 4px;
+  z-index: 4;
+  pointer-events: none;
+}
+// zero line for diverging, relative values (e.g. % change)
+.bar-zero-line {
+  position: absolute;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: #bbb;
+}
+// main bar styles (absolute, positive, negative)
+.bar {
+  position: absolute;
+  height: 8px;
+  border-radius: 4px;
+
+  &.absolute {
+    background: #999;
+  }
+  &.positive {
+    background: #3b82f6;
+  }
+  &.negative {
+    background: #f97316;
+  }
+}
+// value label on right side of bars
+.value-label {
+  position: relative;
+  margin-left: auto;
+  font-size: 12px;
+  padding-left: 8px;
+  z-index: 2;
+}
+// responsive adjustments for rankings table
+@media (max-width: 600px) {
+  // hide rank column on mobile to save space
+  .rank-col {
+    display: none;
+  }
+  .name-col {
+    width: 120px;
+  }
+  .value-label {
+    font-size: 11px;
+  }
+}
+
+// data sources note
+.data-sources {
+  text-align: center;
+  font-size: 0.98em;
+  color: #888;
+  margin: 1.5em 0 0.5em 0;
+  letter-spacing: 0.01em;
+}
+.data-sources a {
+  color: #1976d2;
+  text-decoration: underline dotted;
+  transition: color 0.2s;
+}
+.data-sources a:hover {
+  color: #0d47a1;
+  text-decoration: underline solid;
+}
+
+// // tableau viz
+// #tableau-viz {
+//   margin: 0 auto;
+//   margin-bottom: 10px;
+//   padding: $padding;
+//   overflow-x: hidden;
+//   box-sizing: border-box;
+//   color: $text-color;
+//   border: 2px solid $border-color;
+//   border-radius: $border-radius;
+//   box-shadow: $box-shadow;
+//   width: 100%; // full viewport width to prevent right shifting
+//   @include flex-center(column); // prevent horizontal layout issues
+//   // flex-direction: column; // prevent horizontal layout issues
+//   max-width: 420px; // match tableau viz width
+
+//   // media queries
+//   @media (min-width: 768px) {
+//     max-width: 90%; // limit width for larger screens
+//   }
+
+//   @media (min-width: 1200px) {
+//     max-width: 80%; // on larger devices
+//   }
+// }
+
+/* Footer styles */
+.site-footer {
+  margin-top: 2em;
+  padding: 1em 0;
+  background: #f8f9fa;
+  border-top: 2px solid #e5e5e5;
+  text-align: center;
+  font-size: 1em;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5em;
+}
+.site-footer .footer-tagline {
+  width: 100%;
+  text-align: center;
+  font-size: 1.05em;
+  color: #444;
+  margin-bottom: 0.4em;
+  margin-top: 0.2em;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  line-height: 1.4;
+}
+.site-footer .footer-owner {
+  color: #888;
+  font-weight: normal;
+  font-size: 1em;
+  letter-spacing: 0.01em;
+}
+.site-footer .footer-author {
+  font-weight: 600;
+  color: #888;
+  margin-left: 0.2em;
+}
+.site-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2em;
+  align-items: center;
+  justify-content: center;
+}
+.site-footer .footer-icon {
+  margin-right: 0.3em;
+  vertical-align: middle;
+}
+.site-footer .portfolio-link {
+  color: #333 !important;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-footer .linkedin-link {
+  color: #0077b5;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-footer .github-link {
+  color: #333 !important;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.site-footer .footer-links a:hover,
+.site-footer .footer-links a:focus {
+  color: #0085a1 !important;
+  text-decoration: underline;
+}
+@media (max-width: 600px) {
+  .site-footer {
+    flex-direction: column;
+    gap: 0.8em;
+    font-size: 0.97em;
+    padding: 1.5em 0.5em;
+  }
+  .site-footer .footer-tagline {
+    font-size: 0.98em;
+    margin-bottom: 0.4em;
+    color: #555;
+  }
+  .site-footer .footer-links {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+}
+
+// modal
+.modal {
+  display: none; /* hide by default */
+  position: fixed;
+  z-index: 99999; /* on top of everything */
+  background-color: rgba(0, 0, 0, 0.5); /* slightly transparent */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+
+  .modal-content {
+    background-color: $background-color;
+    border-radius: $border-radius;
+    color: #111;
+    padding: 18px 20px;
+    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+    max-width: 560px;
+    width: calc(100% - 40px);
+    text-align: center;
+    pointer-events: auto;
+
+    .modal-content h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+    }
+
+    .modal-text {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1.2rem;
+      // text-align: center;
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 8px 14px;
+      border-radius: $border-radius;
+      width: calc(60% - 40px);
+    }
+  }
+}
+@media (max-width: 420px) {
+  #welcome-modal .modal-content {
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}

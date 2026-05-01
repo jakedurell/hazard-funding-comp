@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="description"
+      content="Interactive dashboard exploring flood risk in Vermont."
+    />
+    <meta name="author" content="Bryan C. Johns" />
+    <title>Floodlines</title>
+
+    <!-- Leaflet CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./static/css/styles.css" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico" />
+  </head>
+  <body>
+    <!-- navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header"></div>
+        <div id="towns-control" class="navbar-center">
+          <div class="control-header">
+            <label for="towns-dropdown">Select a Town</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Header -->
+    <div class="dashboard-header">
+      <h1>Floodlines</h1>
+      <h2>Witty subtitle</h2>
+      <!-- <div class="dashboard-subtitle">
+        Witty sub-subtitle
+      </div> -->
+      <div class="analysis-link">
+        <a href="" class="analysis-button">
+          Report & Analysis
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Lede -->
+    <div class="lede">Lorem ipsum dolor sit amet</div>
+    <div class="why-brief">Lorem ipsum dolor sit amet</div>
+
+    <!-- Context Band -->
+    <div class="context-band">
+      <div class="context-title">About This Dashboard</div>
+      <div class="context-body">Lorem ipsum dolor sit amet</div>
+    </div>
+
+    <!-- Map -->
+    <div class="row">
+      <div class="col-md-12">
+        <div class="map-container">
+          <div
+            id="map-id"
+            role="application"
+            aria-label="Map of Vermont."
+          ></div>
+          <!-- Choropleth Buttons -->
+          <div
+            id="choropleth-control"
+            aria-label="Toggle different data layers"
+          >
+            <button
+              id="gap-eal-button"
+              data-overlay="Gap (Funding vs Need)"
+              aria-label="Show Gap (Funding vs Need)"
+            >
+              Gap (Funding vs Need)
+            </button>
+            <button
+              id="funding-total-button"
+              data-overlay="Funding"
+              aria-label="Show Funding"
+            >
+              Funding
+            </button>
+            <button
+              id="need-eal-button"
+              data-overlay="Need Index"
+              aria-label="Show Need Index"
+            >
+              Need Index
+            </button>
+            <button
+              id="risk-eal-button"
+              data-overlay="Risk"
+              aria-label="Show Risk"
+            >
+              Risk
+            </button>
+            <button
+              id="vulnerability-index-button"
+              data-overlay="Social Vulnerability"
+              aria-label="Show Social Vulnerability"
+            >
+              Social Vulnerability
+            </button>
+            <!-- <button
+              id="total-listings-button"
+              data-overlay="Total Listings"
+              aria-label="Show Total Listings"
+            >
+              Total Listings
+            </button> -->
+            <button
+              id="population-button"
+              data-overlay="Population"
+              aria-label="Show Population"
+            >
+              Population
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Segmented Marker Overlay Button Group -->
+      <div class="col-md-12 text-center">
+        <div class="marker-controls-label">Model:</div>
+        <div
+          class="btn-group btn-group-toggle"
+          id="marker-overlay-group"
+          data-toggle="buttons"
+          role="group"
+          aria-label="Toggle marker overlays"
+          style="margin-top: 1em"
+        >
+          <label class="btn btn-primary active" aria-pressed="true">
+            <input
+              type="radio"
+              name="marker-overlay"
+              id="marker-eal"
+              autocomplete="off"
+              data-overlay="EAL"
+              checked
+            />
+            EAL
+          </label>
+          <label class="btn btn-primary" aria-pressed="false">
+            <input
+              type="radio"
+              name="marker-overlay"
+              id="marker-eal-per-capita"
+              autocomplete="off"
+              data-overlay="EAL per capita"
+            />
+            EAL per capita
+          </label>
+        </div>
+      </div>
+      <!-- Toggle for Absolute vs Relative Values (for choropleth color scales) -->
+      <div class="col-md-12 text-center">
+        <div class="slider-label">Show Values As:</div>
+        <div class="container-fluid justify-content-center">
+          <span class="toggle-label absolute-label">Absolute</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-relative" />
+            <span class="slider"></span>
+          </label>
+          <span class="toggle-label">Relative</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric Definitions -->
+    <div id="map-metric-definitions" class="metric-definitions">
+      <div class="metric-definition" id="def-gap_eal">
+        <strong>Gap (Funding vs Need)</strong><br />
+        Gap definition goes here. Lorem ipsum dolor sit amet, consectetur
+        adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-funding_total">
+        <strong>Funding</strong><br />
+        Funding definition goes here. Lorem ipsum dolor sit amet, consectetur
+        adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-need_eal">
+        <strong>Need Index</strong><br />
+        Need Index definition goes here. Lorem ipsum dolor sit amet, consectetur
+        adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-risk_eal">
+        <strong>Risk</strong><br />
+        Risk definition goes here. Lorem ipsum dolor sit amet, consectetur
+        adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-vulnerability_index">
+        <strong>Social Vulnerability</strong><br />
+        Social Vulnerability definition goes here. Lorem ipsum dolor sit amet,
+        consectetur adipiscing elit.
+      </div>
+      <!-- <div class="metric-definition" id="def-total_listings">
+        <strong>Total Listings</strong><br />
+        Total Listings definition goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      </div> -->
+    </div>
+
+    <!-- Stats Card Container -->
+    <div id="stats-card" class="stats-card">
+      <div class="stats-title">
+        <h3 id="stats-town-name">Town Snapshot</h3>
+        <p id="stats-quadrant" class="quadrant-label"></p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stats-section">
+          <h4>Risk & Exposure</h4>
+          <ul>
+            <li><span id="stat-risk"></span> risk index</li>
+            <li><span id="stat-risk-vs"></span> vs VT average</li>
+            <li><span id="stat-corridor"></span> in flood zone</li>
+          </ul>
+        </div>
+
+        <div class="stats-section">
+          <h4>Social Vulnerability</h4>
+          <ul>
+            <li><span id="stat-vuln"></span> vulnerability index</li>
+            <li><span id="stat-poverty"></span> below poverty</li>
+            <li><span id="stat-elderly"></span> elderly</li>
+          </ul>
+        </div>
+
+        <div class="stats-section">
+          <h4>Funding</h4>
+          <ul>
+            <li>$<span id="stat-funding-total"></span> total</li>
+            <li>$<span id="stat-funding-pc"></span> per capita</li>
+            <li>Rank: <span id="stat-funding-rank"></span></li>
+          </ul>
+        </div>
+
+        <div class="stats-section">
+          <h4>Need vs Funding</h4>
+          <ul>
+            <li><span id="stat-need"></span> need index</li>
+            <li><span id="stat-gap"></span> funding gap</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plot Container -->
+    <div id="plot-title" class="plot-title"></div>
+    <div id="plot-container"></div>
+
+    <div id="plot-captions" class="plot-captions">
+      <div class="plot-caption" id="caption-gap_eal">
+        <h3>Gap (Funding vs Need)</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-funding_total">
+        <h3>Funding</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-need_eal">
+        <h3>Need Index</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-risk_eal">
+        <h3>Risk</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-vulnerability_index">
+        <h3>Social Vulnerability</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <!-- <div class="plot-caption" id="caption-total_listings">
+        <h3>Pareto Concentration</h3>
+        <p>
+          Lorem ipsum dolor sit amet
+        </p>
+      </div> -->
+    </div>
+
+    <!-- Secondary Controls (Muted Version) -->
+    <div id="secondary-controls">
+      <div id="choropleth-control-secondary" class="choropleth-muted">
+        <button data-overlay="Gap (Funding vs Need)">Gap</button>
+        <button data-overlay="Funding">Funding</button>
+        <button data-overlay="Need Index">Need</button>
+        <button data-overlay="Risk">Risk</button>
+        <button data-overlay="Social Vulnerability">Vulnerability</button>
+        <!-- <button data-overlay="Total Listings">Total</button> -->
+      </div>
+
+      <div class="slider-muted-wrapper">
+        <span class="toggle-label absolute-label">Absolute</span>
+        <label class="switch switch-muted">
+          <input type="checkbox" id="toggle-relative-secondary" />
+          <span class="slider"></span>
+        </label>
+        <span class="toggle-label">Relative</span>
+      </div>
+    </div>
+
+    <!-- Rankings Table -->
+    <div id="rankings-title" class="rankings-title"></div>
+    <div class="rankings-section-header">
+      <!-- <div class="rankings-section-main">Neighborhood Comparison</div> -->
+      <div class="rankings-section-sub">
+        Neighborhoods ranked by selected metric.<br />
+        Baseline shown in both absolute and relative views for comparison.
+      </div>
+    </div>
+    <div id="rankings-container"></div>
+
+    <div class="data-sources">
+      <em>
+        Data sources:
+        <a
+          href="http://insideairbnb.com/get-the-data.html"
+          target="_blank"
+          rel="noopener"
+          >Inside Airbnb</a
+        >
+        (listing data) and
+        <a
+          href="https://censusreporter.org/profiles/16000US1150000-washington-dc/"
+          target="_blank"
+          rel="noopener"
+          >Census Reporter</a
+        >
+        (population data).
+      </em>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <span class="footer-tagline">Fluent in Data. Fluent in Human.</span>
+      <span class="footer-owner">
+        &copy; <span id="copyright-year">2025</span>
+        <span class="footer-author">Bryan C. Johns</span>
+      </span>
+      <span class="footer-links">
+        <a
+          href="https://informedwanderer.com/"
+          target="_blank"
+          class="portfolio-link"
+          aria-label="Portfolio"
+        >
+          <i
+            class="fas fa-laptop-code footer-icon"
+            aria-hidden="true"
+            title="Portfolio"
+          ></i
+          >Portfolio
+        </a>
+        <a
+          href="https://www.linkedin.com/in/b-johns/"
+          target="_blank"
+          class="linkedin-link"
+          aria-label="LinkedIn"
+        >
+          <i
+            class="fab fa-linkedin footer-icon"
+            aria-hidden="true"
+            title="LinkedIn"
+          ></i
+          >LinkedIn
+        </a>
+        <a
+          href="https://github.com/johbry17/Floodlines"
+          target="_blank"
+          class="github-link"
+          aria-label="GitHub"
+        >
+          <i
+            class="fab fa-github footer-icon"
+            aria-hidden="true"
+            title="GitHub"
+          ></i
+          >GitHub
+        </a>
+      </span>
+    </footer>
+    <script>
+      // Auto-update year
+      const yearElement = document.getElementById("copyright-year");
+      if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+      }
+    </script>
+
+    <!-- JavaScript -->
+    <!-- d3 JS -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Leaflet JS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <!-- ESRI plugin for base layers -->
+    <script src="https://cdn.jsdelivr.net/npm/esri-leaflet@2.3.3/dist/esri-leaflet.js"></script>
+    <!-- Turf JS for bubble chart -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+    <!-- DayJS for formatting calendar scrape date -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <!-- Plotly.js for box plots -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Chart.js core -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Annotation plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <!-- Custom JS files -->
+    <script src="./static/js/colors.js"></script>
+    <script src="./static/js/rankings.js"></script>
+    <script src="./static/js/plots.js"></script>
+    <script src="./static/js/statsCard.js"></script>
+    <script src="./static/js/mapLayers.js"></script>
+    <script src="./static/js/map.js"></script>
+    <script src="./static/js/app.js"></script>
+  </body>
+</html>
