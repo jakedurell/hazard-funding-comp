@@ -104,37 +104,19 @@ function calculateCentroid(feature) {
 function formatMetric(metric, value) {
   if (!metric || value == null || isNaN(value)) return "";
 
-  switch (metric) {
-    case "gap_eal":
-      return `${Math.round(value * 100)}%`;
-
-    case "funding_total":
-      return `$${d3.format(",.0f")(value)}`;
-
-    case "need_eal":
-      return d3.format(".2f")(value);
-
-    case "risk_eal":
-      return `${Math.round(value * 100)}%`;
-
-    case "vulnerability_index":
-      return d3.format(".2f")(value);
-
-    // case "total_listings":
-    //   return `${Math.round(value)}`;
-
-    // relative metrics - show percentage change with + or - sign
-    case "gap_eal_std":
-    case "funding_scaled_vs_state_mean":
-    case "need_eal_vs_state_mean":
-    case "risk_eal_vs_state_mean":
-    case "vulnerability_index_vs_state_mean":
-      // case "total_listings_vs_state_mean":
-      return `${value > 0 ? "+" : ""}${Math.round(value)}%`;
-
-    default:
-      return value;
+  if (metric.includes("funding_total")) {
+    return `$${d3.format(",.0f")(value)}`;
   }
+
+  if (metric.includes("_rel")) {
+    return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
+  }
+
+  if (metric.includes("rank")) {
+    return `${Math.round(value * 100)}%`;
+  }
+
+  return d3.format(".2f")(value);
 }
 
 //////////////////////////////////////////////////////////

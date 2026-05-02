@@ -21,18 +21,15 @@ function initializeRankings(data) {
   vtBaseline = data.find((d) => d.town_name === "State of Vermont");
 
   // Compute average total_listings for all towns except VT
-  const towns = data.filter(
-    (d) => d.town_name !== "State of Vermont",
-  );
+  const towns = data.filter((d) => d.town_name !== "State of Vermont");
   avgTotalListings =
-    towns.reduce((sum, d) => sum + (+d.total_listings || 0), 0) /
-    towns.length;
+    towns.reduce((sum, d) => sum + (+d.total_listings || 0), 0) / towns.length;
 }
 
 // render rankings table based on selected metric and town
 function renderRankings(metric, isRelative, selectedTown) {
   const container = d3.select("#rankings-container");
-  
+
   // populate title (before resolving metric)
   const title = reverseMetricMap[metric] || metric;
   document.getElementById("rankings-title").textContent = title;
@@ -64,9 +61,7 @@ function renderRankings(metric, isRelative, selectedTown) {
     : d3.scaleLinear().domain([0, max]).range([0, 100]);
 
   // bind data to rows by town name (unique identifier) for efficient re-rendering
-  const rows = container
-    .selectAll(".rank-row")
-    .data(towns, (d) => d.town_name);
+  const rows = container.selectAll(".rank-row").data(towns, (d) => d.town_name);
   // remove old rows that are no longer in the data
   rows.exit().remove();
 

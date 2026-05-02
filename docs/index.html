@@ -171,11 +171,11 @@
           </label>
         </div>
       </div>
-      <!-- Toggle for Absolute vs Relative Values (for choropleth color scales) -->
+      <!-- Toggle for Rank vs Relative Values (for choropleth color scales) -->
       <div class="col-md-12 text-center">
         <div class="slider-label">Show Values As:</div>
         <div class="container-fluid justify-content-center">
-          <span class="toggle-label absolute-label">Absolute</span>
+          <span class="toggle-label absolute-label">Rank</span>
           <label class="switch">
             <input type="checkbox" id="toggle-relative" />
             <span class="slider"></span>
@@ -189,28 +189,28 @@
     <div id="map-metric-definitions" class="metric-definitions">
       <div class="metric-definition" id="def-gap_eal">
         <strong>Gap (Funding vs Need)</strong><br />
-        Gap definition goes here. Lorem ipsum dolor sit amet, consectetur
-        adipiscing elit.
+        Gap definition goes here. Negative = underfunded = bad. Lorem ipsum
+        dolor sit amet, consectetur adipiscing elit.
       </div>
       <div class="metric-definition" id="def-funding_total">
         <strong>Funding</strong><br />
-        Funding definition goes here. Lorem ipsum dolor sit amet, consectetur
-        adipiscing elit.
+        Funding definition goes here. Higher funding = better. Lorem ipsum dolor
+        sit amet, consectetur adipiscing elit.
       </div>
       <div class="metric-definition" id="def-need_eal">
         <strong>Need Index</strong><br />
-        Need Index definition goes here. Lorem ipsum dolor sit amet, consectetur
-        adipiscing elit.
+        Need Index definition goes here. Higher need = higher rank. Lorem ipsum
+        dolor sit amet, consectetur adipiscing elit.
       </div>
       <div class="metric-definition" id="def-risk_eal">
         <strong>Risk</strong><br />
-        Risk definition goes here. Lorem ipsum dolor sit amet, consectetur
-        adipiscing elit.
+        Risk definition goes here. Higher risk = higher rank. Lorem ipsum dolor
+        sit amet, consectetur adipiscing elit.
       </div>
       <div class="metric-definition" id="def-vulnerability_index">
         <strong>Social Vulnerability</strong><br />
-        Social Vulnerability definition goes here. Lorem ipsum dolor sit amet,
-        consectetur adipiscing elit.
+        Social Vulnerability definition goes here. Higher vulnerability = higher
+        rank. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
       </div>
       <!-- <div class="metric-definition" id="def-total_listings">
         <strong>Total Listings</strong><br />
@@ -308,7 +308,7 @@
       </div>
 
       <div class="slider-muted-wrapper">
-        <span class="toggle-label absolute-label">Absolute</span>
+        <span class="toggle-label absolute-label">Rank</span>
         <label class="switch switch-muted">
           <input type="checkbox" id="toggle-relative-secondary" />
           <span class="slider"></span>

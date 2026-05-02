@@ -39,7 +39,7 @@ function createMap() {
   mapState.model = "default";
 
   // set initial choropleth metric and add layer to map
-  setChoroplethMetric("gap_eal");
+  setChoroplethMetric("gap_rank_eal");
   mapState.choroplethLayer.addTo(mapState.map);
   // renderStatsCard("top");
 
@@ -338,11 +338,11 @@ function handleOverlaySelection(selectedOverlay) {
 
   // map overlay names to metric keys for easier handling
   const metricMap = {
-    "Gap (Funding vs Need)": "gap_eal",
+    "Gap (Funding vs Need)": "gap_rank_eal",
     Funding: "funding_total",
-    "Need Index": "need_eal",
-    Risk: "risk_eal",
-    "Social Vulnerability": "vulnerability_index",
+    "Need Index": "need_rank_eal",
+    Risk: "risk_rank_eal",
+    "Social Vulnerability": "vulnerability_rank",
     // "Total Listings": "total_listings",
   };
 
@@ -396,12 +396,12 @@ function resolveMetric(baseMetric) {
 
   // mapping of base metrics to their relative counterparts
   const relativeMap = {
-    gap_eal: "gap_eal_std",
-    funding_total: "funding_scaled_vs_state_mean",
-    need_eal: "need_eal_vs_state_mean",
-    risk_eal: "risk_eal_vs_state_mean",
-    vulnerability_index: "vulnerability_index_vs_state_mean",
-    // total_listings: "total_listings_vs_state_mean",
+    gap_rank_eal: "gap_eal_rel",
+    funding_total: "funding_rel",
+    need_rank_eal: "need_eal_rel",
+    risk_rank_eal: "risk_eal_rel",
+    vulnerability_rank: "vulnerability_index_rel",
+    // total_listings: "total_listings_rel",
   };
 
   // return relative metric if available, else return base metric
