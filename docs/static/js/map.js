@@ -5,7 +5,7 @@ const mapState = {
   map: null,
   selectedTown: "top",
 
-  model: "default",
+  model: "eal",
 
   bubbleLayer: null,
   choroplethLayer: null,
@@ -36,10 +36,11 @@ function createMap() {
   mapState.map.invalidateSize();
 
   // set marker scheme to none initially
-  mapState.model = "default";
+  mapState.model = "eal";
 
   // set initial choropleth metric and add layer to map
-  setChoroplethMetric("gap_rank_eal");
+  metricEngine.baseMetric = "gap";
+  updateMetric();
   mapState.choroplethLayer.addTo(mapState.map);
   // renderStatsCard("top");
 
@@ -236,19 +237,21 @@ function wireRelativeToggle() {
   // event listener for toggle changes
   toggles.forEach((toggle) => {
     toggle.addEventListener("change", (e) => {
+      // set relative mode in mapState and metricEngine based on toggle state
       mapState.isRelative = e.target.checked;
+      metricEngine.isRelative = mapState.isRelative;
+
+      // only update choropleth if it's active (i.e., not bubble)
+      if (mapState.choroplethMetric !== null) {
+        // update choropleth metric to trigger style and legend updates
+        updateMetric();
+      }
 
       // sync both sliders
       toggles.forEach((t) => {
         t.checked = mapState.isRelative;
       });
-
       updateToggleLabels();
-
-      // update choropleth metric to trigger style and legend updates
-      if (mapState.choroplethMetric) {
-        setChoroplethMetric(mapState.choroplethMetric);
-      }
     });
   });
 }
@@ -269,6 +272,8 @@ function wireMarkerControls() {
 
     // update marker scheme in mapState and refresh markers
     mapState.model = resolveModel(scheme);
+    metricEngine.model = mapState.model;
+    updateMetric();
   });
 }
 
@@ -325,6 +330,60 @@ function moveChoroplethControl() {
 
 /////////////////////////////////////////////////////////////
 
+// render choropleth layer based on selected metric and model
+const metricEngine = {
+  // default to gap metric and EAL model on load
+  baseMetric: "gap",
+  model: "eal",
+  isRelative: false,
+
+  // mapping from user-friendly overlay labels to metric keys
+  overlayToBase: {
+    "Gap (Funding vs Need)": "gap",
+    Funding: "funding",
+    "Need Index": "need",
+    Risk: "risk",
+    "Social Vulnerability": "vulnerability",
+  },
+
+  // resolve metric key based on current base metric, model, and relative mode
+  getMetricKey() {
+    const { baseMetric, model, isRelative } = this;
+
+    // safety check
+    if (!baseMetric) return null;
+
+    // non-model metrics
+    if (baseMetric === "funding") {
+      return isRelative ? "funding_rel" : "funding_total";
+    }
+
+    if (baseMetric === "vulnerability") {
+      return isRelative ? "vulnerability_rel" : "vulnerability_rank";
+    }
+
+    // model-based
+    return isRelative
+      ? `${baseMetric}_${model}_rel`
+      : `${baseMetric}_rank_${model}`;
+  },
+
+  // resolve rank key for rankings table based on current base metric, model, and relative mode
+  getRankKey() {
+    const { baseMetric, model } = this;
+
+    // safety check
+    if (!baseMetric) return null;
+
+    if (baseMetric === "funding") return "funding_rank";
+    if (baseMetric === "vulnerability") return "vulnerability_rank";
+
+    return `${baseMetric}_rank_${model}`;
+  },
+};
+
+/////////////////////////////////////////////////////////////
+
 // change map overlay based on selected option
 function handleOverlaySelection(selectedOverlay) {
   // early exit if no overlay selected
@@ -336,22 +395,10 @@ function handleOverlaySelection(selectedOverlay) {
     return;
   }
 
-  // map overlay names to metric keys for easier handling
-  const metricMap = {
-    "Gap (Funding vs Need)": "gap_rank_eal",
-    Funding: "funding_total",
-    "Need Index": "need_rank_eal",
-    Risk: "risk_rank_eal",
-    "Social Vulnerability": "vulnerability_rank",
-    // "Total Listings": "total_listings",
-  };
-
-  // set choropleth metric to trigger style and legend updates
-  const metric = metricMap[selectedOverlay];
-  if (metric) {
-    removeBubbleLayerIfPresent();
-    setChoroplethMetric(metric);
-  }
+  // update base metric to trigger style and legend updates
+  metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
+  removeBubbleLayerIfPresent();
+  updateMetric();
 }
 
 // utility function to remove bubble layer if it exists
@@ -361,51 +408,29 @@ function removeBubbleLayerIfPresent() {
   }
 }
 
-// set choropleth metric and update layer style and legend
-function setChoroplethMetric(metric) {
-  // store selected metric in mapState
-  mapState.choroplethMetric = metric;
+// render choropleth based on selected metric and town
+function updateMetric() {
+  // set choropleth metric in mapState
+  const metricKey = metricEngine.getMetricKey();
+  mapState.choroplethMetric = metricKey;
 
-  // resolve metric key based on relative mode
-  const resolved = resolveMetric(metric);
-
-  // update choropleth layer style
-  mapState.choroplethLayer.options.metric = resolved;
+  // update choropleth layer style based on new metric
+  mapState.choroplethLayer.options.metric = metricKey;
   mapState.choroplethLayer.setStyle(mapState.choroplethLayer.options.style);
+
+  // update labels and legend for new metric
   updateChoroplethLabels();
   updateChoroplethLegend();
 
-  // update plot
-  renderPlot(mapState.choroplethMetric, mapState.selectedTown);
+  // update plot based on new metric
+  renderPlot(metricEngine.baseMetric, mapState.selectedTown);
 
-  // update rankings table
+  // update rankings table based on new metric
   renderRankings(
-    mapState.choroplethMetric,
-    mapState.isRelative,
+    metricEngine.baseMetric,
+    metricEngine.isRelative,
     mapState.selectedTown,
   );
-}
-
-// resolve metric key based on whether relative mode is toggled
-function resolveMetric(baseMetric) {
-  // safety check
-  if (!baseMetric) return null;
-
-  // return base metric if not in relative mode
-  if (!mapState.isRelative) return baseMetric;
-
-  // mapping of base metrics to their relative counterparts
-  const relativeMap = {
-    gap_rank_eal: "gap_eal_rel",
-    funding_total: "funding_rel",
-    need_rank_eal: "need_eal_rel",
-    risk_rank_eal: "risk_eal_rel",
-    vulnerability_rank: "vulnerability_index_rel",
-    // total_listings: "total_listings_rel",
-  };
-
-  // return relative metric if available, else return base metric
-  return relativeMap[baseMetric] || baseMetric;
 }
 
 // update choropleth legend based on current metric
@@ -443,15 +468,21 @@ function toggleBubbleLayer() {
   // if (ealLabel) ealLabel.classList.add("active");
 
   // set choropleth to null (default borders, no fill) and update legend
-  setChoroplethMetric(null);
+  mapState.choroplethMetric = null;
+  mapState.choroplethLayer.setStyle(() => ({
+    color: defaultColors.defaultGray,
+    weight: 2,
+    fillOpacity: 0,
+  }));
   updateChoroplethLegend();
 }
 
 // resolve model based on selected option
 function resolveModel(label) {
-  if (label === "EAL") return "default";
-  if (label === "EAL per capita") return "perCapita";
-  return "none";
+  if (label === "EAL") return "eal";
+  if (label === "EAL per capita") return "eal_per_capita";
+  if (label === "NRI") return "nri";
+  return "eal"; // safe default
 }
 
 //////////////////////////////////////////////////////////

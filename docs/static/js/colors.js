@@ -6,12 +6,11 @@ const defaultColors = {
 
 // choropleth colors
 const choroplethConfig = {
-  gap_rank_eal: {
+  gap_rank: {
     scale: d3.scaleSequential(d3.interpolateBlues).domain([0, 1]),
-    // scale: d3.scaleDiverging(d3.interpolateRdBu).domain([-1, 0, 1]),
     label: "Gap (Funding vs Need)",
   },
-  gap_eal_rel: {
+  gap_rel: {
     scale: d3.scaleDiverging(d3.interpolatePuOr).domain([-1, 0, 1]),
     label: "Gap (Funding vs Need) vs VT Avg",
   },
@@ -23,19 +22,19 @@ const choroplethConfig = {
     scale: d3.scaleDiverging(d3.interpolatePRGn).domain([-1, 0, 1]),
     label: "Funding vs VT Avg",
   },
-  need_rank_eal: {
+  need_rank: {
     scale: d3.scaleSequential(d3.interpolateGnBu).domain([0, 1]),
     label: "Need Index",
   },
-  need_eal_rel: {
+  need_rel: {
     scale: d3.scaleDiverging(d3.interpolateBrBG).domain([-1, 0, 1]),
     label: "Need Index vs VT Avg",
   },
-  risk_rank_eal: {
+  risk_rank: {
     scale: d3.scaleSequential(d3.interpolateOranges).domain([0, 1]),
     label: "Risk",
   },
-  risk_eal_rel: {
+  risk_rel: {
     scale: d3.scaleDiverging(d3.interpolateOrRd).domain([-1, 0, 1]),
     label: "Risk vs VT Avg",
   },
@@ -43,7 +42,7 @@ const choroplethConfig = {
     scale: d3.scaleSequential(d3.interpolateGreens).domain([0, 1]),
     label: "Vulnerability",
   },
-  vulnerability_index_rel: {
+  vulnerability_rel: {
     scale: d3.scaleDiverging(d3.interpolatePiYG).domain([-1, 0, 1]),
     label: "Vulnerability vs VT Avg",
   },

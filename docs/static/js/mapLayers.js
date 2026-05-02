@@ -5,7 +5,15 @@ let lockedPopupLayer = null;
 
 // get color for choropleth based on metric and value
 function getColorForMetric(metric, value) {
-  return choroplethConfig[metric].scale(value);
+  // Remove model suffix (order matters - check eal_per_capita before eal)
+  const base = metric.replace(/_(eal_per_capita|eal|nri)/, "");
+  const config = choroplethConfig[base];
+
+  // if no config or scale for this metric, return default gray
+  if (!config || !config.scale) {
+    return defaultColors.defaultGray;
+  }
+  return config.scale(value);
 }
 
 // initialize choropleth layer and zoomIn function to towns
@@ -22,7 +30,8 @@ function initializeChoroplethLayer() {
       }
 
       // get metric value for town to determine fill color
-      const metric = resolveMetric(mapState.choroplethMetric);
+      const metric = metricEngine.getMetricKey();
+      // const metric = mapState.choroplethLayer.options.metric;
       const value = statsByTown[feature.properties.town_name]?.[metric] || 0;
 
       return {
@@ -50,7 +59,7 @@ function initializeChoroplethLayer() {
 // create choropleth labels layer with metric values for each town
 function updateChoroplethLabels() {
   const map = mapState.map;
-  const metric = resolveMetric(mapState.choroplethMetric);
+  const metric = metricEngine.getMetricKey();
 
   // remove old layer if it exists
   if (mapState.choroplethLabels) {
@@ -131,7 +140,7 @@ function addLegend(type) {
 
     // choropleth legend -- create gradient bar and labels based on selected metric
     if (type === "choropleth") {
-      const metric = resolveMetric(mapState.choroplethMetric);
+      const metric = metricEngine.getMetricKey();
 
       // if no metric selected, return empty legend
       if (!metric || !choroplethConfig[metric]) {

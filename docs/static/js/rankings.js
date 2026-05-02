@@ -7,11 +7,11 @@ let avgTotalListings = null;
 
 // for rankings title
 reverseMetricMap = {
-  gap_eal: "Gap (Funding vs Need)",
-  funding_total: "Funding",
-  need_eal: "Need Index",
-  risk_eal: "Risk",
-  vulnerability_index: "Social Vulnerability",
+  gap: "Gap (Funding vs Need)",
+  funding: "Funding",
+  need: "Need Index",
+  risk: "Risk",
+  vulnerability: "Social Vulnerability",
   // total_listings: "Total Listings",
 };
 
@@ -35,20 +35,22 @@ function renderRankings(metric, isRelative, selectedTown) {
   document.getElementById("rankings-title").textContent = title;
 
   // resolve metric key based on whether relative mode is toggled
-  const resolved = resolveMetric(metric);
+  const metricKey = metricEngine.getMetricKey();
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank
-  const rankKey = metric + "_rank";
+  const rankKey = metricEngine.getRankKey();
   const towns = rankingsData
     .filter((d) => d.town_name !== "State of Vermont")
     .map((d) => ({
       ...d,
-      value: +d[resolved], // ensure number
-      rank: +d[rankKey], // ensure number
+      value: +d[metricKey],
+      rank: rankKey ? +d[rankKey] : null,
     }));
 
-  // sort towns by rank (ascending) for rendering
-  towns.sort((a, b) => a.rank - b.rank);
+  // sort by rank if available
+  if (rankKey) {
+    towns.sort((a, b) => a.rank - b.rank);
+  }
 
   // compute scale for bar widths based on min/max values in the current metric
   const values = towns.map((d) => d.value);
@@ -96,7 +98,9 @@ function renderRankings(metric, isRelative, selectedTown) {
   // update rank, name, and value label for all rows
   rowsMerge.select(".rank-col").text((d) => d.rank);
   rowsMerge.select(".name-col").text((d) => d.town_name);
-  rowsMerge.select(".value-label").text((d) => formatMetric(resolved, d.value));
+  rowsMerge
+    .select(".value-label")
+    .text((d) => formatMetric(metricKey, d.value));
 
   // update bar widths and positions based on metric values and relative vs absolute mode
   rowsMerge.each(function (d) {
@@ -144,11 +148,11 @@ function renderRankings(metric, isRelative, selectedTown) {
   if (!isRelative && vtBaseline) {
     let vtValue,
       vtLabel = "VT";
-    if (resolved === "total_listings") {
+    if (metricKey === "total_listings") {
       vtValue = avgTotalListings;
       vtLabel = "Avg";
     } else {
-      vtValue = vtBaseline[resolved];
+      vtValue = vtBaseline[metricKey];
     }
 
     // determine where VT would rank in the sorted towns
@@ -178,7 +182,7 @@ function renderRankings(metric, isRelative, selectedTown) {
         .append("div")
         .attr("class", "vt-ref-label")
         .style("top", topPx - 10 + "px")
-        .text(`${vtLabel}: ${formatMetric(resolved, vtValue)}`);
+        .text(`${vtLabel}: ${formatMetric(metricKey, vtValue)}`);
     }
   }
 }
