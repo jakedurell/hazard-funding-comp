@@ -31,7 +31,8 @@ function renderRankings(metric, isRelative, selectedTown) {
   const container = d3.select("#rankings-container");
 
   // populate title (before resolving metric)
-  const title = reverseMetricMap[metric] || metric;
+  const baseMetric = metricEngine.baseMetric;
+  const title = reverseMetricMap[baseMetric] || baseMetric;
   document.getElementById("rankings-title").textContent = title;
 
   // resolve metric key based on whether relative mode is toggled
@@ -57,7 +58,7 @@ function renderRankings(metric, isRelative, selectedTown) {
   const max = d3.max(values);
   const min = d3.min(values);
 
-  // set diverging or sequential scale based on relative vs absolute mode
+  // set diverging or sequential scale based on relative vs rank mode
   const scale = isRelative
     ? d3.scaleLinear().domain([min, 0, max]).range([0, 50, 100])
     : d3.scaleLinear().domain([0, max]).range([0, 100]);
@@ -102,7 +103,7 @@ function renderRankings(metric, isRelative, selectedTown) {
     .select(".value-label")
     .text((d) => formatMetric(metricKey, d.value));
 
-  // update bar widths and positions based on metric values and relative vs absolute mode
+  // update bar widths and positions based on metric values and relative vs rank mode
   rowsMerge.each(function (d) {
     const row = d3.select(this);
     const bar = row.select(".bar");
@@ -129,13 +130,13 @@ function renderRankings(metric, isRelative, selectedTown) {
           .style("left", scaled + "%")
           .style("width", center - scaled + "%");
       }
-      // absolute mode with sequential bars
+      // rank mode with sequential bars
     } else {
       // hide diverging zero line
       zeroLine.style("display", "none");
 
       bar
-        .attr("class", "bar absolute")
+        .attr("class", "bar rank")
         .style("left", "0%")
         .style("width", scale(d.value) + "%");
     }
@@ -144,13 +145,13 @@ function renderRankings(metric, isRelative, selectedTown) {
   // remove existing VT reference line and label
   container.selectAll(".vt-ref-line, .vt-ref-label").remove();
 
-  // add reference line for VT baseline if in absolute mode
+  // add reference line for VT baseline if in rank mode
   if (!isRelative && vtBaseline) {
     let vtValue,
       vtLabel = "VT";
-    if (metricKey === "total_listings") {
-      vtValue = avgTotalListings;
-      vtLabel = "Avg";
+    if (metricKey === "funding_total") {
+      vtValue = vtBaseline["funding_per_capita"];
+      vtLabel = "VT Avg";
     } else {
       vtValue = vtBaseline[metricKey];
     }

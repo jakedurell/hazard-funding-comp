@@ -42,7 +42,7 @@ function createMap() {
   metricEngine.baseMetric = "gap";
   updateMetric();
   mapState.choroplethLayer.addTo(mapState.map);
-  // renderStatsCard("top");
+  renderStatsCard("top");
 
   // setup UI control event listeners
   initializeUIControls();
@@ -180,7 +180,7 @@ function wireTownsDropdown() {
     mapState.selectedTown = selected;
 
     // update stats card with new town data
-    // renderStatsCard(mapState.selectedTown);
+    renderStatsCard(mapState.selectedTown);
 
     // update plot
     renderPlot(mapState.choroplethMetric, mapState.selectedTown);

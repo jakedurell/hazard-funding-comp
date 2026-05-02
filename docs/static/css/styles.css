@@ -452,7 +452,21 @@ body {
   text-align: center;
 }
 
+.quadrant-label {
+  text-align: center;
+  text-transform: capitalize;
+  font-size: 1.25em;
+  font-weight: 500;
+}
+
+.stats-note {
+  font-size: 0.85em;
+  color: #777;
+  text-align: center;
+}
+
 .stats-grid {
+  margin-top: 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
@@ -681,8 +695,8 @@ body {
   height: 8px;
   border-radius: 4px;
 }
-.bar.absolute {
-  background: #999;
+.bar.rank {
+  background: #3b82f6;
 }
 .bar.positive {
   background: #3b82f6;

@@ -514,7 +514,7 @@ body {
   color: $primary-color;
   font-weight: bold;
 }
-// change absolute label color when unchecked
+// change rank label color when unchecked
 .toggle-label.active {
   color: $primary-color;
   font-weight: bold;
@@ -558,7 +558,21 @@ body {
   font-weight: 600;
   text-align: center;
 }
+.quadrant-label {
+  text-align: center;
+  // margin-bottom: 20px;
+  text-transform: capitalize;
+  font-size: 1.25em;
+  font-weight: 500;
+}
+.stats-note {
+  font-size: 0.85em;
+  color: #777;
+  // margin-top: 12px;
+  text-align: center;
+}
 .stats-grid {
+  margin-top: 20px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
@@ -748,7 +762,7 @@ body {
   background: #f0f0f0;
   border-radius: 4px;
 }
-// reference line for VT's absolute value
+// reference line for VT's rank value
 .vt-ref-line {
   position: absolute;
   left: 0;
@@ -758,7 +772,7 @@ body {
   z-index: 3;
   pointer-events: none;
 }
-// reference label for VT's absolute value
+// reference label for VT's rank value
 .vt-ref-label {
   position: absolute;
   right: 6px;
@@ -776,14 +790,15 @@ body {
   height: 100%;
   background: #bbb;
 }
-// main bar styles (absolute, positive, negative)
+// main bar styles (rank, positive, negative)
 .bar {
   position: absolute;
   height: 8px;
   border-radius: 4px;
 
-  &.absolute {
-    background: #999;
+  &.rank {
+    // background: #999;
+    background: #3b82f6;
   }
   &.positive {
     background: #3b82f6;
