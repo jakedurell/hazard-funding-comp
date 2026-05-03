@@ -5,6 +5,7 @@ function renderStatsCard(town) {
   const stats = statsByTown[town === "top" ? "State of Vermont" : town];
   if (!stats) return;
 
+  // set town name in card header
   const nameEl = document.getElementById("stats-town-name");
   nameEl.textContent =
     town === "top" ? "State of Vermont Snapshot" : `${town} Snapshot`;
@@ -14,6 +15,7 @@ function renderStatsCard(town) {
   const noteEl = document.getElementById("stats-zero-pop-note");
   if (noteEl) noteEl.style.display = zeroPop ? "block" : "none";
 
+  // get current model from metric engine to determine which metric keys to use
   const model = metricEngine.model;
 
   // helpers (with safety checks ensuring type, handling missing/invalid data)
@@ -48,7 +50,7 @@ function renderStatsCard(town) {
   const quadKey = `quadrant_${model}`;
   const riskVsKey = `${riskKey}_rel`;
 
-  // --- populate ---
+  // populate stats values, using helpers for formatting
   document.getElementById("stat-risk").textContent = fmtIdx(stats[riskKey]);
 
   document.getElementById("stat-risk-vs").textContent = fmtRatio(
