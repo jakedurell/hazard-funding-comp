@@ -43,6 +43,6 @@ VT flood risk, adaptation capacity, and funding
 
   ## Author
 
-Bryan Johns, March 2026  
+Bryan Johns, May 2026  
 [bryan.johns@informedwanderer.com](mailto:bryan.johns@informedwanderer.com) | [LinkedIn](https://www.linkedin.com/in/b-johns/) | [GitHub](https://github.com/johbry17) | [Portfolio](https://informedwanderer.com)  
 — Fluent in Data. Fluent in Human.

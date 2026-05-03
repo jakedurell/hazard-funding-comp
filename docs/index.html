@@ -233,7 +233,9 @@
       <div class="stats-title">
         <h3 id="stats-town-name">Town Snapshot</h3>
         <p id="stats-quadrant" class="quadrant-label"></p>
-        <p class="stats-note">Values shown are index scores. Map shows relative ranking.</p>
+        <p class="stats-note">
+          Values shown are index scores. Map shows relative ranking.
+        </p>
         <p class="stats-note">Map = relative position. Card = actual values.</p>
       </div>
 
@@ -340,23 +342,58 @@
     </div>
     <div id="rankings-container"></div>
 
+    <!-- Data Sources -->
     <div class="data-sources">
       <em>
         Data sources:
         <a
-          href="http://insideairbnb.com/get-the-data.html"
+          href="https://www2.census.gov/geo/tiger/TIGER2025/COUSUB/tl_2025_50_cousub.zip"
           target="_blank"
           rel="noopener"
-          >Inside Airbnb</a
         >
-        (listing data) and
+          U.S. Census Bureau (TIGER/Line)
+        </a>
+        (town boundaries),
         <a
-          href="https://censusreporter.org/profiles/16000US1150000-washington-dc/"
+          href="https://data.census.gov/"
           target="_blank"
           rel="noopener"
-          >Census Reporter</a
         >
-        (population data).
+          American Community Survey
+        </a>
+        (demographics),
+        <a
+          href="https://hazards.fema.gov/femaportal/NFHL/searchResult/"
+          target="_blank"
+          rel="noopener"
+        >
+          FEMA National Flood Hazard Layer
+        </a>
+        and
+        <a
+          href="https://www.arcgis.com/home/item.html?id=51797aa9327343b9a04215e5e59e00c5"
+          target="_blank"
+          rel="noopener"
+        >
+          Vermont ANR River Corridors
+        </a>
+        (flood risk),
+        <a
+          href="https://www.fema.gov/openfema-data-page/hazard-mitigation-assistance-projects-v4"
+          target="_blank"
+          rel="noopener"
+        >
+          OpenFEMA Hazard Mitigation Assistance
+        </a>
+        (funding), and
+        <a
+          href="https://www.fema.gov/about/openfema/data-sets/national-risk-index-data"
+          target="_blank"
+          rel="noopener"
+        >
+          FEMA National Risk Index
+        </a>
+        (risk benchmarks).
       </em>
     </div>
 
