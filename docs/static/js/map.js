@@ -183,7 +183,7 @@ function wireTownsDropdown() {
     renderStatsCard(mapState.selectedTown);
 
     // update plot
-    renderPlot(mapState.choroplethMetric, mapState.selectedTown);
+    renderPlot(metricEngine.baseMetric, mapState.selectedTown);
 
     // update rankings table
     renderRankings(
