@@ -14,7 +14,7 @@ function renderStatsCard(town) {
   // helpers (with safety checks ensuring type, handling missing/invalid data)
   const fmtPct = (v) => {
     const num = Number(v);
-    return Number.isFinite(num) ? `${(num).toFixed(0)}%` : "—";
+    return Number.isFinite(num) ? `${num.toFixed(0)}%` : "—";
   };
 
   const fmtNum = (v) => {
@@ -78,7 +78,7 @@ function renderStatsCard(town) {
 
   document.getElementById("stat-gap").textContent = fmtIdx(stats[gapKey]);
 
-  // 🔥 headline insight
+  // headline insight
   document.getElementById("stats-quadrant").textContent = stats[quadKey]
     ? stats[quadKey].replace(/_/g, " ")
     : "—";

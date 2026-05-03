@@ -425,6 +425,9 @@ function updateMetric() {
   // update plot based on new metric
   renderPlot(metricEngine.baseMetric, mapState.selectedTown);
 
+  // update stats card for new model/metric
+  renderStatsCard(mapState.selectedTown);
+
   // update rankings table based on new metric
   renderRankings(
     metricEngine.baseMetric,
