@@ -140,7 +140,11 @@ function addLegend(type) {
 
     // choropleth legend -- create gradient bar and labels based on selected metric
     if (type === "choropleth") {
-      const metric = metricEngine.getMetricKey();
+      const rawMetric = metricEngine.getMetricKey();
+      // strip model suffix to match choroplethConfig keys (same as getColorForMetric)
+      const metric = rawMetric
+        ? rawMetric.replace(/_(eal_per_capita|eal|nri)/, "")
+        : null;
 
       // if no metric selected, return empty legend
       if (!metric || !choroplethConfig[metric]) {
