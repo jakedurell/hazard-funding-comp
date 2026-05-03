@@ -6,11 +6,11 @@ let vtBaseline = {};
 
 // for rankings title
 reverseMetricMap = {
-  gap: "Gap (Funding vs Need)",
-  funding: "Funding",
-  need: "Need Index",
   risk: "Risk",
   vulnerability: "Social Vulnerability",
+  need: "Need Index",
+  funding: "Funding",
+  gap: "Gap (Funding vs Need)",
   // total_listings: "Total Listings",
 };
 

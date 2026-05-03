@@ -339,11 +339,11 @@ const metricEngine = {
 
   // mapping from user-friendly overlay labels to metric keys
   overlayToBase: {
-    "Gap (Funding vs Need)": "gap",
-    Funding: "funding",
-    "Need Index": "need",
     Risk: "risk",
     "Social Vulnerability": "vulnerability",
+    "Need Index": "need",
+    Funding: "funding",
+    "Gap (Funding vs Need)": "gap",
   },
 
   // resolve metric key based on current base metric, model, and relative mode

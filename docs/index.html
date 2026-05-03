@@ -85,40 +85,36 @@
             id="choropleth-control"
             aria-label="Toggle different data layers"
           >
-            <button
-              id="gap-eal-button"
-              data-overlay="Gap (Funding vs Need)"
-              aria-label="Show Gap (Funding vs Need)"
-            >
-              Gap (Funding vs Need)
+            <button id="risk-button" data-overlay="Risk" aria-label="Show Risk">
+              Risk
             </button>
             <button
-              id="funding-total-button"
-              data-overlay="Funding"
-              aria-label="Show Funding"
+              id="vulnerability-button"
+              data-overlay="Social Vulnerability"
+              aria-label="Show Social Vulnerability"
             >
-              Funding
+              Social Vulnerability
             </button>
             <button
-              id="need-eal-button"
+              id="need-button"
               data-overlay="Need Index"
               aria-label="Show Need Index"
             >
               Need Index
             </button>
             <button
-              id="risk-eal-button"
-              data-overlay="Risk"
-              aria-label="Show Risk"
+              id="funding-button"
+              data-overlay="Funding"
+              aria-label="Show Funding"
             >
-              Risk
+              Funding
             </button>
             <button
-              id="vulnerability-index-button"
-              data-overlay="Social Vulnerability"
-              aria-label="Show Social Vulnerability"
+              id="gap-button"
+              data-overlay="Gap (Funding vs Need)"
+              aria-label="Show Gap (Funding vs Need)"
             >
-              Social Vulnerability
+              Gap (Funding vs Need)
             </button>
             <!-- <button
               id="total-listings-button"
@@ -197,21 +193,6 @@
 
     <!-- Metric Definitions -->
     <div id="map-metric-definitions" class="metric-definitions">
-      <div class="metric-definition" id="def-gap">
-        <strong>Gap (Funding vs Need)</strong><br />
-        Gap definition goes here. Negative = underfunded = bad. Lorem ipsum
-        dolor sit amet, consectetur adipiscing elit.
-      </div>
-      <div class="metric-definition" id="def-funding">
-        <strong>Funding</strong><br />
-        Funding definition goes here. Higher funding = better. Lorem ipsum dolor
-        sit amet, consectetur adipiscing elit.
-      </div>
-      <div class="metric-definition" id="def-need">
-        <strong>Need Index</strong><br />
-        Need Index definition goes here. Higher need = higher rank. Lorem ipsum
-        dolor sit amet, consectetur adipiscing elit.
-      </div>
       <div class="metric-definition" id="def-risk">
         <strong>Risk</strong><br />
         Risk definition goes here. Higher risk = higher rank. Lorem ipsum dolor
@@ -221,6 +202,21 @@
         <strong>Social Vulnerability</strong><br />
         Social Vulnerability definition goes here. Higher vulnerability = higher
         rank. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-need">
+        <strong>Need Index</strong><br />
+        Need Index definition goes here. Higher need = higher rank. Lorem ipsum
+        dolor sit amet, consectetur adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-funding">
+        <strong>Funding</strong><br />
+        Funding definition goes here. Higher funding = better. Lorem ipsum dolor
+        sit amet, consectetur adipiscing elit.
+      </div>
+      <div class="metric-definition" id="def-gap">
+        <strong>Gap (Funding vs Need)</strong><br />
+        Gap definition goes here. Negative = underfunded = bad. Lorem ipsum
+        dolor sit amet, consectetur adipiscing elit.
       </div>
       <!-- <div class="metric-definition" id="def-total_listings">
         <strong>Total Listings</strong><br />
@@ -282,24 +278,24 @@
     <div id="plot-container"></div>
 
     <div id="plot-captions" class="plot-captions">
-      <div class="plot-caption" id="caption-gap_eal">
-        <h3>Gap (Funding vs Need)</h3>
-        <p>Lorem ipsum dolor sit amet</p>
-      </div>
-      <div class="plot-caption" id="caption-funding_total">
-        <h3>Funding</h3>
-        <p>Lorem ipsum dolor sit amet</p>
-      </div>
-      <div class="plot-caption" id="caption-need_eal">
-        <h3>Need Index</h3>
-        <p>Lorem ipsum dolor sit amet</p>
-      </div>
-      <div class="plot-caption" id="caption-risk_eal">
+      <div class="plot-caption" id="caption-risk">
         <h3>Risk</h3>
         <p>Lorem ipsum dolor sit amet</p>
       </div>
-      <div class="plot-caption" id="caption-vulnerability_index">
+      <div class="plot-caption" id="caption-vulnerability">
         <h3>Social Vulnerability</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-need">
+        <h3>Need Index</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-funding">
+        <h3>Funding</h3>
+        <p>Lorem ipsum dolor sit amet</p>
+      </div>
+      <div class="plot-caption" id="caption-gap">
+        <h3>Gap (Funding vs Need)</h3>
         <p>Lorem ipsum dolor sit amet</p>
       </div>
       <!-- <div class="plot-caption" id="caption-total_listings">
@@ -313,11 +309,11 @@
     <!-- Secondary Controls (Muted Version) -->
     <div id="secondary-controls">
       <div id="choropleth-control-secondary" class="choropleth-muted">
-        <button data-overlay="Gap (Funding vs Need)">Gap</button>
-        <button data-overlay="Funding">Funding</button>
-        <button data-overlay="Need Index">Need</button>
         <button data-overlay="Risk">Risk</button>
         <button data-overlay="Social Vulnerability">Vulnerability</button>
+        <button data-overlay="Need Index">Need</button>
+        <button data-overlay="Funding">Funding</button>
+        <button data-overlay="Gap (Funding vs Need)">Gap</button>
         <!-- <button data-overlay="Total Listings">Total</button> -->
       </div>
 
@@ -354,11 +350,7 @@
           U.S. Census Bureau (TIGER/Line)
         </a>
         (town boundaries),
-        <a
-          href="https://data.census.gov/"
-          target="_blank"
-          rel="noopener"
-        >
+        <a href="https://data.census.gov/" target="_blank" rel="noopener">
           American Community Survey
         </a>
         (demographics),
