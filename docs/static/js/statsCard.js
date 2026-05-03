@@ -9,25 +9,34 @@ function renderStatsCard(town) {
   nameEl.textContent =
     town === "top" ? "State of Vermont Snapshot" : `${town} Snapshot`;
 
+  // show note for zero-population towns
+  const zeroPop = +stats.population === 0;
+  const noteEl = document.getElementById("stats-zero-pop-note");
+  if (noteEl) noteEl.style.display = zeroPop ? "block" : "none";
+
   const model = metricEngine.model;
 
   // helpers (with safety checks ensuring type, handling missing/invalid data)
   const fmtPct = (v) => {
+    if (v == null || v === "") return "—";
     const num = Number(v);
     return Number.isFinite(num) ? `${num.toFixed(0)}%` : "—";
   };
 
   const fmtNum = (v) => {
+    if (v == null || v === "") return "—";
     const num = Number(v);
     return Number.isFinite(num) ? num.toLocaleString() : "—";
   };
 
   const fmtIdx = (v) => {
+    if (v == null || v === "") return "—";
     const num = Number(v);
     return Number.isFinite(num) ? num.toFixed(2) : "—";
   };
 
   const fmtRatio = (v) => {
+    if (v == null || v === "") return "—";
     const num = Number(v);
     return Number.isFinite(num) ? `${num.toFixed(2)}x` : "—";
   };
