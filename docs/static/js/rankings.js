@@ -3,7 +3,6 @@
 // globals to store rankings data and VT baseline for relative metrics
 let rankingsData = [];
 let vtBaseline = {};
-let avgTotalListings = null;
 
 // for rankings title
 reverseMetricMap = {
@@ -19,11 +18,6 @@ reverseMetricMap = {
 function initializeRankings(data) {
   rankingsData = data;
   vtBaseline = data.find((d) => d.town_name === "State of Vermont");
-
-  // Compute average total_listings for all towns except VT
-  const towns = data.filter((d) => d.town_name !== "State of Vermont");
-  avgTotalListings =
-    towns.reduce((sum, d) => sum + (+d.total_listings || 0), 0) / towns.length;
 }
 
 // render rankings table based on selected metric and town
@@ -35,13 +29,17 @@ function renderRankings(metric, isRelative, selectedTown) {
   const title = reverseMetricMap[baseMetric] || baseMetric;
   document.getElementById("rankings-title").textContent = title;
 
-  // resolve metric key based on whether relative mode is toggled
+  // get appropriate keys for current metric and ranking, and derive raw value key for labels
   const metricKey = metricEngine.getMetricKey();
+  const rankKey = metricEngine.getRankKey();
+  const rawKey = metricKey
+    .replace(/^(\w+)_rank_(.+)$/, "$1_$2") // swaps a middle "_rank_" with "_" if present
+    .replace(/_rank$/, ""); // strips a trailing "_rank" if present
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank
-  const rankKey = metricEngine.getRankKey();
   const towns = rankingsData
     .filter((d) => d.town_name !== "State of Vermont")
+    .filter((d) => d.population > 0) // filter out towns with zero population to avoid skewing rankings
     .map((d) => ({
       ...d,
       value: +d[metricKey],
@@ -50,7 +48,7 @@ function renderRankings(metric, isRelative, selectedTown) {
 
   // sort by rank if available
   if (rankKey) {
-    towns.sort((a, b) => a.rank - b.rank);
+    towns.sort((a, b) => a.value - b.value); // sort by actual value, not rank
   }
 
   // compute scale for bar widths based on min/max values in the current metric
@@ -97,11 +95,11 @@ function renderRankings(metric, isRelative, selectedTown) {
   rowsMerge.classed("selected", (d) => d.town_name === selectedTown);
 
   // update rank, name, and value label for all rows
-  rowsMerge.select(".rank-col").text((d) => d.rank);
+  rowsMerge.select(".rank-col").text((d) => formatMetric(rankKey, +d[rankKey]));
   rowsMerge.select(".name-col").text((d) => d.town_name);
   rowsMerge
     .select(".value-label")
-    .text((d) => formatMetric(metricKey, d.value));
+    .text((d) => formatMetric(rawKey, +d[rawKey]));
 
   // update bar widths and positions based on metric values and relative vs rank mode
   rowsMerge.each(function (d) {
@@ -147,43 +145,52 @@ function renderRankings(metric, isRelative, selectedTown) {
 
   // add reference line for VT baseline if in rank mode
   if (!isRelative && vtBaseline) {
-    let vtValue,
-      vtLabel = "VT";
-    if (metricKey === "funding_total") {
-      vtValue = vtBaseline["funding_per_capita"];
-      vtLabel = "VT Avg";
-    } else {
-      vtValue = vtBaseline[metricKey];
-    }
+    // get value and label, handling special case for funding metric
+    if (!isRelative && vtBaseline) {
+      let vtValue;
+      let vtLabel = "VT";
+      // backend uses geometric mean of non-zero funding: expm1(mean(log1p(x)))
+      // log-transform non-zero values to compute mean, then reverse-transform to get VT baseline value for funding
+      if (metricKey === "funding_total") {
+        const nonZeroLogs = towns
+          .filter((d) => +d.funding_total > 0)
+          .map((d) => Math.log1p(+d.funding_total));
+        vtValue = nonZeroLogs.length > 0 ? Math.expm1(d3.mean(nonZeroLogs)) : 0;
+        vtLabel = "VT (geometric mean)";
+        // otherwise just take the value
+      } else {
+        vtValue = vtBaseline[rawKey];
+      }
 
-    // determine where VT would rank in the sorted towns
-    const sortedValues = towns.map((d) => d.value);
-    let vtRankIndex = sortedValues.findIndex((v) => v < vtValue);
+      // sorted towns by metric to compute's VT's rank position
+      const sortedValues = towns
+        .map((d) => +d[rawKey])
+        .filter((v) => !isNaN(v))
+        .sort(d3.ascending);
+      // use bisect to find the index where VT's value would fit in the sorted array of town values
+      const vtIndex =
+        sortedValues.length - d3.bisectLeft(sortedValues, vtValue);
 
-    // if VT value is worse than all towns, place at end of list
-    if (vtRankIndex === -1) {
-      vtRankIndex = sortedValues.length;
-    }
+      // place reference line at appropriate position based on computed rank index and row heights
+      const firstRow = container.select(".rank-row").node();
+      if (firstRow) {
+        // get row height, compute top position, subtract 1px to center the 2px line on the boundary between rows
+        const rowHeight = firstRow.offsetHeight;
+        const topPx = rowHeight * vtIndex - 1;
 
-    // place reference line at appropriate position based on computed rank index and row heights
-    const firstRow = container.select(".rank-row").node();
-    if (firstRow) {
-      // get row height, compute top position, subtract 1px to center the 2px line on the boundary between rows
-      const rowHeight = firstRow.offsetHeight;
-      const topPx = rowHeight * vtRankIndex - 1;
+        // add reference line at computed position
+        container
+          .append("div")
+          .attr("class", "vt-ref-line")
+          .style("top", topPx + "px");
 
-      // add reference line at computed position
-      container
-        .append("div")
-        .attr("class", "vt-ref-line")
-        .style("top", topPx + "px");
-
-      // add value label
-      container
-        .append("div")
-        .attr("class", "vt-ref-label")
-        .style("top", topPx - 10 + "px")
-        .text(`${vtLabel}: ${formatMetric(metricKey, vtValue)}`);
+        // add value label
+        container
+          .append("div")
+          .attr("class", "vt-ref-label")
+          .style("top", topPx - 10 + "px")
+          .text(`${vtLabel}: ${formatMetric(rawKey, vtValue)}`);
+      }
     }
   }
 }
