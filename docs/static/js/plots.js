@@ -1,42 +1,19 @@
 // Description: JavaScript file for creating plots
 
+// model display names for plot subtitle
+const modelDisplayNames = {
+  eal: "Expected Annual Loss (EAL)",
+  eal_per_capita: "EAL per Capita",
+  nri: "FEMA National Risk Index",
+};
+
 // render plot based on selected metric and town
 function renderPlot(metric, selectedTown) {
-  clearPlotContainer();
-
-  switch (metric) {
-    case "risk":
-    case "vulnerability":
-    case "need":
-    case "funding":
-    case "gap":
-      renderQuadrantScatter(selectedTown);
-      break;
-
-    default:
-      renderPlaceholder();
-  }
-
-  // show metric definition, plot title, and caption based on selected metric
   showMetricDefinition(metric);
-  // showPlotTitle(metric);
-  // showPlotCaption(metric);
-}
-
-// utility to clear plot container before rendering a new plot
-function clearPlotContainer() {
-  const container = document.getElementById("plot-container");
-  container.innerHTML = ""; // Remove all children
-  // add a canvas element for Chart.js plots (Plotly can render directly into the container)
-  const canvas = document.createElement("canvas");
-  canvas.id = "plot-canvas";
-  container.appendChild(canvas);
-}
-
-// renders a placeholder message
-function renderPlaceholder() {
-  document.getElementById("plot-container").innerHTML =
-    "<div style='text-align:center;color:#888;'>No plot selected</div>";
+  clearPlotContainer();
+  renderQuadrantScatter(selectedTown);
+  showPlotHeader(true);
+  showPlotCaption();
 }
 
 // toggle visibility of metric definitions based on selected metric
@@ -47,29 +24,35 @@ function showMetricDefinition(metricKey) {
   if (sel) sel.style.display = "block";
 }
 
-// // predefined plot titles for each metric key
-// const plotTitles = {
-//   license_compliance: "Minimum Stay Patterns by License Status",
-//   median_price: "Where Prices Cluster (Typical Nightly Cost)",
-//   reviews_per_month: "Booking Intensity: Availability vs Review Activity",
-//   multi_listing_pct: "Host Revenue Concentration (Who Controls Earnings?)",
-//   listings_per_1000: "Listings per 1,000 Residents — Density vs Scale",
-//   total_listings: "How Supply Concentrates Across Neighborhoods",
-// };
+// utility to clear plot container before rendering a new plot
+function clearPlotContainer() {
+  const container = document.getElementById("plot-container");
+  container.innerHTML = "";
+}
 
-// // toggle plot title based on selected metric
-// function showPlotTitle(metricKey) {
-//   const titleDiv = document.getElementById("plot-title");
-//   titleDiv.textContent = plotTitles[metricKey] || "";
-// }
+// show/hide plot title and model subtitle
+function showPlotHeader(visible) {
+  const titleDiv = document.getElementById("plot-title");
+  const subtitleDiv = document.getElementById("plot-subtitle");
+  if (titleDiv) titleDiv.style.display = visible ? "block" : "none";
+  if (subtitleDiv) {
+    subtitleDiv.style.display = visible ? "block" : "none";
+    subtitleDiv.textContent = visible
+      ? `Model: ${modelDisplayNames[metricEngine.model] ?? metricEngine.model}`
+      : "";
+  }
+}
 
-// // toggle visibility of plot captions based on selected metric
-// function showPlotCaption(metricKey) {
-//   const all = document.querySelectorAll(".plot-caption");
-//   all.forEach((el) => (el.style.display = "none"));
-//   const sel = document.getElementById("caption-" + metricKey);
-//   if (sel) sel.style.display = "block";
-// }
+// toggle visibility of plot captions based on active model
+function showPlotCaption() {
+  const all = document.querySelectorAll(".plot-caption");
+  all.forEach((el) => (el.style.display = "none"));
+  // caption IDs use hyphens: caption-eal, caption-eal-per-capita, caption-nri
+  const sel = document.getElementById(
+    "caption-" + metricEngine.model.replace(/_/g, "-"),
+  );
+  if (sel) sel.style.display = "block";
+}
 
 //////////////////////////////////////////////////////////
 
@@ -77,19 +60,16 @@ function showMetricDefinition(metricKey) {
 function buildScatterData(model) {
   const quadKey = `quadrant_${model}`;
 
-  return (
-    Object.entries(statsByTown)
-      // .filter(([name]) => name !== "State of Vermont")
-      .filter(([, d]) => d.town_name !== "State of Vermont")
-      .map(([town, d]) => ({
-        town_name: town,
-        need: +d[`need_${model}`],
-        funding: Math.log1p(+d.funding_total),
-        quadrant: d[quadKey],
-        population: +d.population || 0,
-      }))
-      .filter((d) => !isNaN(d.need) && !isNaN(d.funding))
-  );
+  return Object.entries(statsByTown)
+    .filter(([, d]) => d.town_name !== "State of Vermont")
+    .map(([town, d]) => ({
+      town_name: town,
+      need: +d[`need_${model}`],
+      funding: Math.log1p(+d.funding_total),
+      quadrant: d[quadKey],
+      population: +d.population || 0,
+    }))
+    .filter((d) => !isNaN(d.need) && !isNaN(d.funding));
 }
 
 // render quadrant scatter plot with median lines and interactive labels based on current model, highlighting selected town
