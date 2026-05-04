@@ -4,15 +4,13 @@
 const mapState = {
   map: null,
   selectedTown: "top",
-
   model: "eal",
+  isRelative: false,
 
   bubbleLayer: null,
   choroplethLayer: null,
   choroplethLabels: null,
   choroplethMetric: null,
-  isRelative: false,
-
   choroplethLegend: null,
 };
 
@@ -164,6 +162,7 @@ function initializeUIControls() {
   wireRelativeToggle();
   wireMarkerControls();
   wireResponsiveControlMove();
+  wireMapZoomLabelToggle();
 }
 
 // event listener for town dropdown changes to update map and other components
@@ -283,6 +282,17 @@ function wireResponsiveControlMove() {
   window.addEventListener("resize", moveChoroplethControl);
 }
 
+// toggle choropleth labels based on zoom level to avoid visual clutter
+function wireMapZoomLabelToggle() {
+  applyZoomLabelVisibility(); // apply on init
+  mapState.map.on("zoomend", applyZoomLabelVisibility);
+}
+
+/////////////////////////////////////////////////////////////
+
+// helpers for event listeners and UI state management
+
+// syncs active state of choropleth buttons for consistent UI feedback across multiple button groups
 function syncChoroplethButtons(selectedOverlay) {
   const allButtons = document.querySelectorAll(
     "#choropleth-control button, #choropleth-control-secondary button",
@@ -328,7 +338,46 @@ function moveChoroplethControl() {
   }
 }
 
+// toggle choropleth labels based on zoom level to avoid visual clutter
+function applyZoomLabelVisibility() {
+  // get zoom and bubble layer state to determine which labels to show/hide
+  const zoom = mapState.map.getZoom();
+  const bubbleActive =
+    mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+
+  // determine which label layer is active; only show that one
+  const activeLabels = bubbleActive
+    ? mapState.bubbleLabels
+    : mapState.choroplethLabels;
+  const inactiveLabels = bubbleActive
+    ? mapState.choroplethLabels
+    : mapState.bubbleLabels;
+
+  // always hide the inactive layer's labels
+  if (inactiveLabels) mapState.map.removeLayer(inactiveLabels);
+
+  // show active labels only if zoomed in enough
+  if (activeLabels) {
+    if (zoom >= 9) {
+      activeLabels.addTo(mapState.map);
+    } else {
+      mapState.map.removeLayer(activeLabels);
+    }
+  }
+}
+
 /////////////////////////////////////////////////////////////
+
+// track and set active metric for updating dashboard components based on user interactions
+// with helper to format metric values for labels based on metric type (e.g., percentage, currency, ratio)
+
+// resolve model based on selected option
+function resolveModel(label) {
+  if (label === "EAL") return "eal";
+  if (label === "EAL per capita") return "eal_per_capita";
+  if (label === "NRI") return "nri";
+  return "eal"; // safe default
+}
 
 // render choropleth layer based on selected metric and model
 const metricEngine = {
@@ -382,7 +431,28 @@ const metricEngine = {
   },
 };
 
+// helper function to format metric values for labels
+function formatMetric(metric, value) {
+  if (!metric || value == null || isNaN(value)) return "";
+
+  if (metric.includes("funding_total")) {
+    return `$${d3.format(",.0f")(value)}`;
+  }
+
+  if (metric.includes("_rel")) {
+    return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
+  }
+
+  if (metric.includes("rank")) {
+    return `${Math.round(value * 100)}%`;
+  }
+
+  return d3.format(".2f")(value);
+}
+
 /////////////////////////////////////////////////////////////
+
+// update map layers and dashboard components based on selected metric and model
 
 // change map overlay based on selected option
 function handleOverlaySelection(selectedOverlay) {
@@ -461,6 +531,7 @@ function toggleBubbleLayer() {
   // show bubble layer if not present
   if (!mapState.map.hasLayer(mapState.bubbleLayer)) {
     mapState.map.addLayer(mapState.bubbleLayer);
+    applyZoomLabelVisibility(); // apply zoom gating to bubble labels
   }
 
   // set choropleth to null (default borders, no fill), update legend, hide choropleth labels
@@ -476,15 +547,9 @@ function toggleBubbleLayer() {
   }
 }
 
-// resolve model based on selected option
-function resolveModel(label) {
-  if (label === "EAL") return "eal";
-  if (label === "EAL per capita") return "eal_per_capita";
-  if (label === "NRI") return "nri";
-  return "eal"; // safe default
-}
-
 //////////////////////////////////////////////////////////
+
+// map movement functions for resetting to VT view and zooming into selected town
 
 // enable || disable buttons
 function toggleButton(buttonId, enable = true) {

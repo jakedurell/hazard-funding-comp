@@ -98,34 +98,15 @@ function updateChoroplethLabels() {
     labelGroup.addLayer(label);
   });
 
-  // add label layer to map and save reference in mapState for future updates
+  // save reference; let zoom logic decide whether to show them
   mapState.choroplethLabels = labelGroup;
-  map.addLayer(labelGroup);
+  applyZoomLabelVisibility();
 }
 
 // calculates centroid for choropleth and bubble chart layers
 function calculateCentroid(feature) {
   const centroid = turf.centroid(feature);
   return [centroid.geometry.coordinates[1], centroid.geometry.coordinates[0]];
-}
-
-// helper function to format metric values for labels
-function formatMetric(metric, value) {
-  if (!metric || value == null || isNaN(value)) return "";
-
-  if (metric.includes("funding_total")) {
-    return `$${d3.format(",.0f")(value)}`;
-  }
-
-  if (metric.includes("_rel")) {
-    return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
-  }
-
-  if (metric.includes("rank")) {
-    return `${Math.round(value * 100)}%`;
-  }
-
-  return d3.format(".2f")(value);
 }
 
 //////////////////////////////////////////////////////////
@@ -311,6 +292,7 @@ function resetMarkerStyle(layer) {
 // create bubble chart layer, - neighoborhood outlines and bubbles of population
 function initializeBubbleChartLayer() {
   const bubbleLayerGroup = L.layerGroup(); // create layer group for circle markers
+  mapState.bubbleLabels = L.layerGroup(); // separate layer for zoom-gated text labels
   initializeTownOutlines(bubbleLayerGroup, towns);
   addBubbles(bubbleLayerGroup, towns, statsByTown);
   return bubbleLayerGroup;
@@ -369,7 +351,8 @@ function addBubbles(bubbleLayerGroup) {
     // open || close popup
     popupMouseEvents(circleMarker);
 
-    // add markers to layer group
-    bubbleLayerGroup.addLayer(circleMarker).addLayer(textMarker);
+    // add circle to main layer, text to separate label layer
+    bubbleLayerGroup.addLayer(circleMarker);
+    mapState.bubbleLabels.addLayer(textMarker);
   });
 }
