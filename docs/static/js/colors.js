@@ -4,6 +4,15 @@ const defaultColors = {
   townColor: "#ff9800",
 };
 
+// quadrant colors (categorical)
+const quadrantColors = {
+  zero_funding: "#888888",
+  underfunded: "#e41a1c",
+  aligned: "#377eb8",
+  overfunded: "#4daf4a",
+  low_priority: "#ff7f00",
+};
+
 // choropleth colors
 const choroplethConfig = {
   gap_rank: {
