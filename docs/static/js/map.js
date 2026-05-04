@@ -273,7 +273,38 @@ function wireMarkerControls() {
     mapState.model = resolveModel(scheme);
     metricEngine.model = mapState.model;
     updateMetric();
+
+    // disable Risk and Vulnerability buttons when NRI model is active (NRI score already embeds SOVI)
+    updateNriModelUI(scheme === "NRI");
   });
+}
+
+// disable risk/vulnerability choropleth buttons and show note when NRI model is active
+// if an incompatible overlay is currently active, auto-switch to Gap
+function updateNriModelUI(isNri) {
+  const riskBtn = document.getElementById("risk-button");
+  const vulnBtn = document.getElementById("vulnerability-button");
+  const note = document.getElementById("nri-model-note");
+
+  [riskBtn, vulnBtn].forEach((btn) => {
+    if (!btn) return;
+    btn.disabled = isNri;
+    btn.title = isNri
+      ? "Not available for NRI model — NRI Risk Score already includes social vulnerability"
+      : "";
+  });
+
+  if (note) note.style.display = isNri ? "block" : "none";
+
+  // if NRI is now active and an incompatible overlay is selected, switch to Gap
+  if (
+    isNri &&
+    (metricEngine.baseMetric === "risk" ||
+      metricEngine.baseMetric === "vulnerability")
+  ) {
+    handleOverlaySelection("Gap (Funding vs Need)");
+    syncChoroplethButtons("Gap (Funding vs Need)");
+  }
 }
 
 // move control on load and on resize for mobile responsiveness
