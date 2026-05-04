@@ -463,21 +463,17 @@ function toggleBubbleLayer() {
     mapState.map.addLayer(mapState.bubbleLayer);
   }
 
-  // reset marker radio button to "None" and update button state
-  // const markerLabels = document.querySelectorAll("#marker-overlay-group label");
-  // markerLabels.forEach((label) => label.classList.remove("active"));
-  // // set the first label (EAL) to active (hacky, but it works)
-  // let ealLabel = markerLabels[0];
-  // if (ealLabel) ealLabel.classList.add("active");
-
-  // set choropleth to null (default borders, no fill) and update legend
+  // set choropleth to null (default borders, no fill), update legend, hide choropleth labels
   mapState.choroplethMetric = null;
   mapState.choroplethLayer.setStyle(() => ({
     color: defaultColors.defaultGray,
-    weight: 2,
+    weight: 1,
     fillOpacity: 0,
   }));
   updateChoroplethLegend();
+  if (mapState.choroplethLabels) {
+    mapState.map.removeLayer(mapState.choroplethLabels);
+  }
 }
 
 // resolve model based on selected option

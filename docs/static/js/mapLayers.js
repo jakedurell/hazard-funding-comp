@@ -24,7 +24,7 @@ function initializeChoroplethLayer() {
       if (mapState.choroplethMetric == null) {
         return {
           color: defaultColors.defaultGray,
-          weight: 2,
+          weight: 1,
           fillOpacity: 0,
         };
       }
@@ -36,7 +36,7 @@ function initializeChoroplethLayer() {
 
       return {
         fillColor: getColorForMetric(metric, value),
-        weight: 2,
+        weight: 1,
         color: "white",
         fillOpacity: 0.6,
       };
@@ -321,7 +321,7 @@ function initializeTownOutlines(bubbleLayerGroup) {
   const townsOutlineLayer = L.geoJSON(towns, {
     style: {
       color: defaultColors.defaultGray,
-      weight: 2,
+      weight: 1,
       opacity: 1,
       fillOpacity: 0, // no fill, just outlines
     },

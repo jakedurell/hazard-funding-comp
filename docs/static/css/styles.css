@@ -183,8 +183,8 @@ body {
   align-items: center;
   flex-direction: row;
   font-size: 15px;
-  color: black;
-  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 2px black, 0 0 4px black;
 }
 
 .bubble-text {
@@ -194,6 +194,7 @@ body {
   flex-direction: row;
   font-size: 12px;
   color: white;
+  text-shadow: 0 0 2px black, 0 0 4px black;
 }
 
 .popup-text-right {
