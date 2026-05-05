@@ -147,16 +147,16 @@
         <div class="model-controls-label">Model:</div>
         <div
           class="btn-group btn-group-toggle"
-          id="model-overlay-group"
+          id="model-selector-group"
           data-toggle="buttons"
           role="group"
-          aria-label="Toggle model overlays"
+          aria-label="Select model"
           style="margin-top: 1em"
         >
           <label class="btn btn-primary active" aria-pressed="true">
             <input
               type="radio"
-              name="model-overlay"
+              name="model-selector"
               id="model-eal"
               autocomplete="off"
               data-overlay="EAL"
@@ -167,7 +167,7 @@
           <label class="btn btn-primary" aria-pressed="false">
             <input
               type="radio"
-              name="model-overlay"
+              name="model-selector"
               id="model-eal-per-capita"
               autocomplete="off"
               data-overlay="EAL per capita"
@@ -177,7 +177,7 @@
           <label class="btn btn-primary">
             <input
               type="radio"
-              name="model-overlay"
+              name="model-selector"
               id="model-nri"
               autocomplete="off"
               data-overlay="NRI"
@@ -333,7 +333,43 @@
         <button data-overlay="Need Index">Need</button>
         <button data-overlay="Funding">Funding</button>
         <button data-overlay="Gap (Funding vs Need)">Gap</button>
-        <!-- <button data-overlay="Total Listings">Total</button> -->
+      </div>
+
+      <div
+        class="btn-group btn-group-toggle model-selector-group-secondary"
+        id="model-selector-group-secondary"
+        data-toggle="buttons"
+        role="group"
+        aria-label="Select model"
+      >
+        <label class="btn btn-default active" aria-pressed="true">
+          <input
+            type="radio"
+            name="model-selector-secondary"
+            autocomplete="off"
+            data-overlay="EAL"
+            checked
+          />
+          EAL
+        </label>
+        <label class="btn btn-default" aria-pressed="false">
+          <input
+            type="radio"
+            name="model-selector-secondary"
+            autocomplete="off"
+            data-overlay="EAL per capita"
+          />
+          EAL per capita
+        </label>
+        <label class="btn btn-default">
+          <input
+            type="radio"
+            name="model-selector-secondary"
+            autocomplete="off"
+            data-overlay="NRI"
+          />
+          NRI
+        </label>
       </div>
 
       <div class="slider-muted-wrapper">

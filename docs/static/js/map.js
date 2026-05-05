@@ -277,25 +277,46 @@ function wireRelativeToggle() {
 
 // setup event listener for model scheme changes and toggle active class for buttons
 function wireModelControls() {
-  const container = document.getElementById("model-overlay-group");
-  const labels = container.querySelectorAll("label");
+  const containers = [
+    document.getElementById("model-selector-group"),
+    document.getElementById("model-selector-group-secondary"),
+  ].filter(Boolean);
 
-  // event listener for model scheme changes
-  container.addEventListener("change", (e) => {
-    const scheme = e.target.getAttribute("data-overlay");
-    if (!scheme) return;
+  // sync all groups to reflect the newly chosen model
+  function syncModelGroups(scheme) {
+    containers.forEach((container) => {
+      // remove active status from all buttons in the group
+      container.querySelectorAll("label").forEach((label) => {
+        label.classList.remove("active");
+        label.setAttribute("aria-pressed", "false");
+      });
+      // set active button based on selected scheme
+      container.querySelectorAll("input[type=radio]").forEach((input) => {
+        if (input.getAttribute("data-overlay") === scheme) {
+          input.checked = true;
+          input.parentElement.classList.add("active");
+          input.parentElement.setAttribute("aria-pressed", "true");
+        }
+      });
+    });
+  }
 
-    // toggle active class for ui visual feedback
-    labels.forEach((l) => l.classList.remove("active"));
-    e.target.parentElement.classList.add("active");
+  containers.forEach((container) => {
+    container.addEventListener("change", (e) => {
+      const scheme = e.target.getAttribute("data-overlay");
+      if (!scheme) return;
 
-    // update model scheme in mapState and refresh models
-    mapState.model = resolveModel(scheme);
-    metricEngine.model = mapState.model;
-    updateMetric();
+      // sync all model control groups to reflect the newly chosen model
+      syncModelGroups(scheme);
 
-    // disable Risk and Vulnerability buttons when NRI model is active (NRI score already embeds SOVI)
-    updateNriModelUI(scheme === "NRI");
+      // update model in mapState and metricEngine, update choropleth and other components
+      mapState.model = resolveModel(scheme);
+      metricEngine.model = mapState.model;
+      updateMetric();
+
+      // disable Risk and Vulnerability buttons when NRI model is active (NRI score already embeds SOVI)
+      updateNriModelUI(scheme === "NRI");
+    });
   });
 }
 
