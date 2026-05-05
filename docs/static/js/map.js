@@ -7,6 +7,9 @@ const mapState = {
   model: "eal",
   isRelative: false,
 
+  riverCorridorsLayer: null,
+  riverCorridorsTier2Layer: null,
+
   bubbleLayer: null,
   quadrantLayer: null,
   quadrantLegend: null,
@@ -39,6 +42,13 @@ function createMap() {
   // set marker scheme to none initially
   mapState.model = "eal";
 
+  // add river corridors tier 1 before choropleth so it renders beneath it
+  mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
+    riverCorridors,
+    1,
+  );
+  mapState.riverCorridorsLayer.addTo(mapState.map);
+
   // set initial choropleth metric and add layer to map
   metricEngine.baseMetric = "gap";
   updateMetric();
@@ -65,6 +75,11 @@ function initializeMap() {
     zoom: 8,
     layers: [baseLayer],
   });
+
+  // custom pane below overlayPane (400) so river corridors always sit under towns
+  mapState.map.createPane("riverCorridorsPane");
+  mapState.map.getPane("riverCorridorsPane").style.zIndex = 350;
+
   addResetButton();
   return mapState.map;
 }
@@ -158,7 +173,7 @@ function createOption(text, value) {
 
 //////////////////////////////////////////////////////////
 
-// setup event listeners for UI controls
+// setup event listeners, mostly for UI controls
 function initializeUIControls() {
   wireTownsDropdown();
   wireChoroplethButtons();
@@ -166,6 +181,7 @@ function initializeUIControls() {
   wireMarkerControls();
   wireResponsiveControlMove();
   wireMapZoomLabelToggle();
+  wireRiverCorridorsTier2();
 }
 
 // event listener for town dropdown changes to update map and other components
@@ -321,6 +337,118 @@ function wireResponsiveControlMove() {
 function wireMapZoomLabelToggle() {
   applyZoomLabelVisibility(); // apply on init
   mapState.map.on("zoomend", applyZoomLabelVisibility);
+}
+
+// swap between tier 1 (simplified) and tier 2 (detailed) river corridors based on zoom level
+// tier 2 is lazy-loaded on the first zoom-in to level 11+
+function wireRiverCorridorsTier2() {
+  // tier2Features: precomputed array of {feature, bbox: [minX, minY, maxX, maxY]}
+  let tier2Features = null;
+  let tier2Loading = false;
+
+  // compute flat bbox from any Polygon or MultiPolygon feature
+  function bboxOf(feature) {
+    // flatten all coordinates to a single array of [x, y] pairs, then compute min/max for x and y
+    const flat = feature.geometry.coordinates.flat(Infinity);
+    // initialize min/max with the first coordinate pair (any real lat/long immediately replaces +/-Infinity)
+    let minX = Infinity, // West
+      minY = Infinity, // South
+      maxX = -Infinity, // East
+      maxY = -Infinity; // North
+    // loop to find min/max
+    for (let i = 0; i < flat.length; i += 2) {
+      if (flat[i] < minX) minX = flat[i];
+      if (flat[i + 1] < minY) minY = flat[i + 1];
+      if (flat[i] > maxX) maxX = flat[i];
+      if (flat[i + 1] > maxY) maxY = flat[i + 1];
+    }
+    return [minX, minY, maxX, maxY];
+  }
+
+  // build (or rebuild) the tier 2 layer from only the features that intersect the current viewport
+  function buildViewportLayer() {
+    // safety check
+    if (!tier2Features) return;
+
+    // get current viewport bounds
+    const b = mapState.map.getBounds();
+    const vW = b.getWest(),
+      vS = b.getSouth(),
+      vE = b.getEast(),
+      vN = b.getNorth();
+
+    // filter tier 2 features to those that intersect the viewport bbox, using precomputed bboxes for performance
+    const inView = tier2Features
+      .filter(
+        // only exclude features that are completely outside the viewport
+        ({ bbox: [minX, minY, maxX, maxY] }) =>
+          maxX >= vW && minX <= vE && maxY >= vS && minY <= vN,
+      )
+      .map(({ feature }) => feature);
+
+    // remove previous viewport layer
+    if (mapState.riverCorridorsTier2Layer) {
+      mapState.map.removeLayer(mapState.riverCorridorsTier2Layer);
+      mapState.riverCorridorsTier2Layer = null;
+    }
+
+    // safety check
+    if (inView.length === 0) return;
+
+    // build and add new layer
+    mapState.riverCorridorsTier2Layer = initializeRiverCorridorsLayer(
+      {
+        type: "FeatureCollection",
+        features: inView,
+      },
+      2,
+    );
+    mapState.riverCorridorsTier2Layer.addTo(mapState.map);
+  }
+
+  // hide tier 1 and render only in-viewport tier 2 features
+  function activateTier2() {
+    if (mapState.riverCorridorsLayer) {
+      mapState.map.removeLayer(mapState.riverCorridorsLayer);
+    }
+    buildViewportLayer();
+  }
+
+  mapState.map.on("zoomend moveend", () => {
+    const zoom = mapState.map.getZoom();
+
+    if (zoom >= 11) {
+      if (!tier2Features && !tier2Loading) {
+        // first zoom-in: lazy-load once, then precompute bboxes
+        tier2Loading = true;
+        fetch("./static/resources/river_corridors_tier2.geojson")
+          .then((r) => r.json())
+          .then((data) => {
+            tier2Features = data.features.map((feature) => ({
+              feature,
+              bbox: bboxOf(feature),
+            }));
+            tier2Loading = false;
+            activateTier2();
+          });
+      } else if (tier2Features) {
+        // already loaded: rebuild for new viewport (pan or zoom)
+        activateTier2();
+      }
+    } else {
+      // zoomed back out: remove tier 2, restore tier 1
+      if (mapState.riverCorridorsTier2Layer) {
+        mapState.map.removeLayer(mapState.riverCorridorsTier2Layer);
+        mapState.riverCorridorsTier2Layer = null;
+      }
+      if (
+        mapState.riverCorridorsLayer &&
+        !mapState.map.hasLayer(mapState.riverCorridorsLayer)
+      ) {
+        mapState.riverCorridorsLayer.addTo(mapState.map);
+      }
+    }
+  });
 }
 
 /////////////////////////////////////////////////////////////

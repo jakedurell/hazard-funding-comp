@@ -3,6 +3,7 @@
 // globals for data
 let towns = {};
 let statsByTown = {};
+let riverCorridors = {};
 
 // fetch data and geojson, clean data, populate scrape date, create map
 Promise.all([
@@ -10,8 +11,12 @@ Promise.all([
     response.json(),
   ),
   d3.csv("./static/resources/town_stats.csv"),
-]).then(([tb, ts]) => {
+  fetch("./static/resources/river_corridors_tier1.geojson").then((response) =>
+    response.json(),
+  ),
+]).then(([tb, ts, rc]) => {
   towns = tb;
+  riverCorridors = rc;
   statsByTown = ts;
 
   // convert town stats to a javascript object for easy lookup

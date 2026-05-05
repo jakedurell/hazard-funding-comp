@@ -415,3 +415,31 @@ function initializeQuadrantLayer() {
     },
   });
 }
+
+//////////////////////////////////////////////////////////
+
+// create river corridors layer (used for both tier 1 and tier 2)
+function initializeRiverCorridorsLayer(
+  data,
+  tier = 1,
+  pane = "riverCorridorsPane",
+) {
+  // tier 1: stroked outlines help sparse simplified polygons stand out at state zoom
+  // tier 2: no stroke — adjacent detailed polygons create visible seams with a stroke
+  const style =
+    tier === 1
+      ? {
+          color: defaultColors.riverColor,
+          weight: 1,
+          opacity: 0.7,
+          fillColor: defaultColors.riverColor,
+          fillOpacity: 0.2,
+        }
+      : {
+          stroke: false,
+          fillColor: defaultColors.riverColor,
+          fillOpacity: 0.3,
+        };
+
+  return L.geoJSON(data, { style, pane, interactive: false });
+}

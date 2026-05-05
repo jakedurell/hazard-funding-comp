@@ -2,6 +2,8 @@
 const defaultColors = {
   defaultGray: "#343a40", // #6c757d
   townColor: "#ff9800",
+  // riverColor: "#1f78b4",
+  riverColor: "#2e86c1",
 };
 
 // quadrant colors (categorical)
