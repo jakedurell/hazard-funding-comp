@@ -433,6 +433,11 @@ body {
       background-color: darken($secondary-color, 10%);
     }
 
+    &:disabled {
+      background-color: $disabled-color;
+      cursor: not-allowed;
+    }
+
     &.active {
       background-color: darken($secondary-color, 10%);
     }

@@ -392,6 +392,10 @@ body {
 #choropleth-control-special button:hover {
   background-color: #304669;
 }
+#choropleth-control-special button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
 #choropleth-control-special button.active {
   background-color: #304669;
 }
