@@ -261,7 +261,7 @@ body {
   background-color: #f9f9f9;
 }
 
-.marker-controls-label {
+.model-controls-label {
   margin-top: 1em !important;
   font-size: 0.95em;
   color: #888;
@@ -271,7 +271,7 @@ body {
   opacity: 0.8;
 }
 
-#marker-overlay-group {
+#model-overlay-group {
   display: flex;
   justify-content: center;
   margin: 0 auto 0.5em auto;
@@ -283,11 +283,11 @@ body {
   border-radius: 4px;
   gap: 0;
 }
-#marker-overlay-group label {
+#model-overlay-group label {
   margin: 0 1px;
   padding: 0;
 }
-#marker-overlay-group label.btn {
+#model-overlay-group label.btn {
   background: #f5f5f5;
   color: #666;
   border: 1px solid #e0e0e0;
@@ -298,11 +298,11 @@ body {
   min-width: 60px;
   transition: background 0.2s, color 0.2s;
 }
-#marker-overlay-group label.btn:hover, #marker-overlay-group label.btn:focus {
+#model-overlay-group label.btn:hover, #model-overlay-group label.btn:focus {
   background: #e0e0e0;
   color: #333;
 }
-#marker-overlay-group label.active {
+#model-overlay-group label.active {
   background: #e0e0e0;
   color: #222;
   font-weight: 600;

@@ -288,8 +288,8 @@ body {
   }
 }
 
-// marker overlay segmented control
-.marker-controls-label {
+// model overlay segmented control
+.model-controls-label {
   margin-top: 1em !important;
   font-size: 0.95em;
   color: #888;
@@ -299,7 +299,7 @@ body {
   opacity: 0.8;
 }
 
-#marker-overlay-group {
+#model-overlay-group {
   display: flex;
   justify-content: center;
   margin: 0 auto 0.5em auto;

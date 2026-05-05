@@ -39,7 +39,7 @@ function createMap() {
   // resize map to ensure it loads correctly
   mapState.map.invalidateSize();
 
-  // set marker scheme to none initially
+  // set model scheme to none initially
   mapState.model = "eal";
 
   // add river corridors tier 1 before choropleth so it renders beneath it
@@ -178,7 +178,7 @@ function initializeUIControls() {
   wireTownsDropdown();
   wireChoroplethButtons();
   wireRelativeToggle();
-  wireMarkerControls();
+  wireModelControls();
   wireResponsiveControlMove();
   wireMapZoomLabelToggle();
   wireRiverCorridorsTier2();
@@ -275,12 +275,12 @@ function wireRelativeToggle() {
   });
 }
 
-// setup event listener for marker scheme changes and toggle active class for buttons
-function wireMarkerControls() {
-  const container = document.getElementById("marker-overlay-group");
+// setup event listener for model scheme changes and toggle active class for buttons
+function wireModelControls() {
+  const container = document.getElementById("model-overlay-group");
   const labels = container.querySelectorAll("label");
 
-  // event listener for marker scheme changes
+  // event listener for model scheme changes
   container.addEventListener("change", (e) => {
     const scheme = e.target.getAttribute("data-overlay");
     if (!scheme) return;
@@ -289,7 +289,7 @@ function wireMarkerControls() {
     labels.forEach((l) => l.classList.remove("active"));
     e.target.parentElement.classList.add("active");
 
-    // update marker scheme in mapState and refresh markers
+    // update model scheme in mapState and refresh models
     mapState.model = resolveModel(scheme);
     metricEngine.model = mapState.model;
     updateMetric();
