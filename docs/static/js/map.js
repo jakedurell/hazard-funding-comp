@@ -71,7 +71,7 @@ function initializeMap() {
     },
   );
   mapState.map = L.map("map-id", {
-    center: [44.0, -72.7], // center on Vermont
+    center: [43.75, -72.7], // center on Vermont
     zoom: 8,
     layers: [baseLayer],
   });
@@ -822,7 +822,7 @@ function toggleButton(buttonId, enable = true) {
 // resets map view to all of VT, updates infoBox and plots
 function resetMapView() {
   // center map on State of Vermont and reset zoom
-  mapState.map.setView([44.0, -72.7], 8);
+  mapState.map.setView([43.75, -72.7], 8);
   // reset choropleth style (towns may remain uncovered otherwise)
   if (mapState.choroplethLayer) {
     mapState.choroplethLayer.resetStyle();
