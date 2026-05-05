@@ -8,6 +8,9 @@ const mapState = {
   isRelative: false,
 
   bubbleLayer: null,
+  quadrantLayer: null,
+  quadrantLegend: null,
+
   choroplethLayer: null,
   choroplethLabels: null,
   choroplethMetric: null,
@@ -371,10 +374,20 @@ function moveChoroplethControl() {
 
 // toggle choropleth labels based on zoom level to avoid visual clutter
 function applyZoomLabelVisibility() {
-  // get zoom and bubble layer state to determine which labels to show/hide
+  // get current zoom level and active layers to determine which labels to show/hide
   const zoom = mapState.map.getZoom();
   const bubbleActive =
     mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+  const quadrantActive =
+    mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
+
+  // quadrant layer has no text labels — suppress everything
+  if (quadrantActive) {
+    if (mapState.choroplethLabels)
+      mapState.map.removeLayer(mapState.choroplethLabels);
+    if (mapState.bubbleLabels) mapState.map.removeLayer(mapState.bubbleLabels);
+    return;
+  }
 
   // determine which label layer is active; only show that one
   const activeLabels = bubbleActive
@@ -490,15 +503,21 @@ function handleOverlaySelection(selectedOverlay) {
   // early exit if no overlay selected
   if (!selectedOverlay) return;
 
-  // add bubble layer and exit if selected
+  // add bubble or quadrant layer and exit if selected
   if (selectedOverlay === "Population") {
+    removeQuadrantLayerIfPresent();
     toggleBubbleLayer();
+    return;
+  } else if (selectedOverlay === "Quadrants") {
+    removeBubbleLayerIfPresent();
+    toggleQuadrantLayer();
     return;
   }
 
   // update base metric to trigger style and legend updates
   metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
   removeBubbleLayerIfPresent();
+  removeQuadrantLayerIfPresent();
   updateMetric();
 }
 
@@ -509,27 +528,48 @@ function removeBubbleLayerIfPresent() {
   }
 }
 
+// utility function to remove quadrant layer if it exists
+function removeQuadrantLayerIfPresent() {
+  if (mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer)) {
+    mapState.map.removeLayer(mapState.quadrantLayer);
+  }
+}
+
 // render choropleth based on selected metric and town
 function updateMetric() {
-  // set choropleth metric in mapState
-  const metricKey = metricEngine.getMetricKey();
-  mapState.choroplethMetric = metricKey;
+  const quadrantActive =
+    mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
+  const bubbleActive =
+    mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
 
-  // update choropleth layer style based on new metric
-  mapState.choroplethLayer.options.metric = metricKey;
-  mapState.choroplethLayer.setStyle(mapState.choroplethLayer.options.style);
+  if (quadrantActive) {
+    // quadrant layer is visible: update its colors for the new model and keep its legend
+    mapState.quadrantLayer.setStyle((feature) => {
+      const town = feature.properties.town_name;
+      const quadrant = statsByTown[town]?.[`quadrant_${mapState.model}`];
+      return {
+        fillColor: quadrantColors[quadrant] || defaultColors.defaultGray,
+        weight: 1,
+        color: "white",
+        fillOpacity: 0.7,
+      };
+    });
+    updateQuadrantLegend();
+  } else if (bubbleActive) {
+    // bubble layer is visible: model changed, but don't touch the choropleth or its legend
+  } else {
+    // choropleth is active: update metric, style, labels, and legend
+    const metricKey = metricEngine.getMetricKey();
+    mapState.choroplethMetric = metricKey;
+    mapState.choroplethLayer.options.metric = metricKey;
+    mapState.choroplethLayer.setStyle(mapState.choroplethLayer.options.style);
+    updateChoroplethLabels();
+    updateChoroplethLegend();
+  }
 
-  // update labels and legend for new metric
-  updateChoroplethLabels();
-  updateChoroplethLegend();
-
-  // update plot based on new metric
+  // always update dashboard components
   renderPlot(metricEngine.baseMetric, mapState.selectedTown);
-
-  // update stats card for new model/metric
   renderStatsCard(mapState.selectedTown);
-
-  // update rankings table based on new metric
   renderRankings(
     metricEngine.baseMetric,
     metricEngine.isRelative,
@@ -576,6 +616,44 @@ function toggleBubbleLayer() {
   if (mapState.choroplethLabels) {
     mapState.map.removeLayer(mapState.choroplethLabels);
   }
+}
+
+// toggle quadrant layer on/off
+function toggleQuadrantLayer() {
+  // initialize quadrant layer if it doesn't exist yet (first time toggling on)
+  if (!mapState.quadrantLayer) {
+    mapState.quadrantLayer = initializeQuadrantLayer();
+  }
+
+  // remove other layers
+  removeBubbleLayerIfPresent();
+  // clear choropleth fill
+  mapState.choroplethMetric = null;
+  mapState.choroplethLayer.setStyle(() => ({
+    color: defaultColors.defaultGray,
+    weight: 1,
+    fillOpacity: 0,
+  }));
+
+  // add quadrant layer
+  if (!mapState.map.hasLayer(mapState.quadrantLayer)) {
+    mapState.map.addLayer(mapState.quadrantLayer);
+  }
+
+  // suppress any visible labels (quadrant has no text labels)
+  applyZoomLabelVisibility();
+  // update legend to quadrant legend
+  updateQuadrantLegend();
+}
+
+// update quadrant legend
+function updateQuadrantLegend() {
+  // remove existing choropleth legend if present
+  if (mapState.choroplethLegend) {
+    mapState.map.removeControl(mapState.choroplethLegend);
+  }
+
+  mapState.choroplethLegend = addLegend("quadrant").addTo(mapState.map);
 }
 
 //////////////////////////////////////////////////////////

@@ -147,6 +147,25 @@ function addLegend(type) {
       div.appendChild(rangeLabels);
 
       return div;
+      // quadrant legend -- create discrete legend based on quadrantColors mapping
+    } else if (type === "quadrant") {
+      div.innerHTML = `<div class="legend-title">Funding Alignment</div>`;
+
+      // build legend rows (color swatch + label)
+      const items = Object.entries(quadrantColors)
+        .map(
+          ([key, color]) => `
+        <div class="quadrants-legend-row">
+          <span class="legend-swatch" style="background:${color};"></span>
+          ${key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+        </div>
+      `,
+        )
+        .join("");
+
+      // add rows to legend container
+      div.innerHTML += items;
+      return div;
     }
   };
 
@@ -354,5 +373,45 @@ function addBubbles(bubbleLayerGroup) {
     // add circle to main layer, text to separate label layer
     bubbleLayerGroup.addLayer(circleMarker);
     mapState.bubbleLabels.addLayer(textMarker);
+  });
+}
+
+////////////////////////////////////////////////////////////
+
+// create quadrant choropleth layer with discrete colors based on quadrant assignment
+function initializeQuadrantLayer() {
+  return L.geoJSON(towns, {
+    // style based on quadrant assignment for current model
+    style: (feature) => {
+      const town = feature.properties.town_name;
+      const quadKey = `quadrant_${mapState.model}`;
+      const quadrant = statsByTown[town]?.[quadKey];
+
+      return {
+        fillColor: quadrantColors[quadrant] || defaultColors.defaultGray,
+        weight: 1,
+        color: "white",
+        fillOpacity: 0.7,
+      };
+    },
+
+    // add popup and sync town click with dropdown to update other components
+    onEachFeature: (feature, layer) => {
+      const town = feature.properties.town_name;
+      const quadKey = `quadrant_${mapState.model}`;
+      const quadrant = statsByTown[town]?.[quadKey];
+
+      // bind popup showing quadrant assignment
+      layer.bindPopup(
+        `<b>${town}</b><br>${quadrant ? quadrant.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "No data"}`,
+      );
+
+      // sync with dropdown on click to zoom in on town and update dashboard
+      layer.on("click", function () {
+        const dropdown = document.getElementById("towns-dropdown");
+        dropdown.value = town;
+        dropdown.dispatchEvent(new Event("change"));
+      });
+    },
   });
 }
