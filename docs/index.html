@@ -116,21 +116,30 @@
             >
               Gap (Funding vs Need)
             </button>
-            <button
-              id="quadrants-button"
-              data-overlay="Quadrants"
-              aria-label="Show Quadrants"
-            >
-              Quadrants
-            </button>
-            <button
-              id="population-button"
-              data-overlay="Population"
-              aria-label="Show Population"
-            >
-              Population
-            </button>
           </div>
+        </div>
+      </div>
+      <!-- Special Overlay Buttons (Quadrants, Population) — visualization modes, not index metrics -->
+      <div class="col-md-12 text-center">
+        <div class="special-overlay-label">Views:</div>
+        <div
+          id="choropleth-control-special"
+          aria-label="Toggle special map overlays"
+        >
+          <button
+            id="quadrants-button"
+            data-overlay="Quadrants"
+            aria-label="Show Quadrants"
+          >
+            Quadrant Analysis
+          </button>
+          <button
+            id="population-button"
+            data-overlay="Population"
+            aria-label="Show Population"
+          >
+            Population (Context)
+          </button>
         </div>
       </div>
       <!-- Segmented Marker Overlay Button Group -->
@@ -340,10 +349,10 @@
     <!-- Rankings Table -->
     <div id="rankings-title" class="rankings-title"></div>
     <div class="rankings-section-header">
-      <!-- <div class="rankings-section-main">Neighborhood Comparison</div> -->
+      <!-- <div class="rankings-section-main">Town Comparison</div> -->
       <div class="rankings-section-sub">
-        Neighborhoods ranked by selected metric.<br />
-        Baseline shown in both absolute and relative views for comparison.
+        Towns ranked by selected metric.<br />
+        Baseline shown in both rank and relative views for comparison.
       </div>
     </div>
     <div id="rankings-container"></div>

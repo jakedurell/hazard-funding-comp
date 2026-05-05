@@ -262,6 +262,7 @@ body {
 }
 
 .marker-controls-label {
+  margin-top: 1em !important;
   font-size: 0.95em;
   color: #888;
   font-weight: 500;
@@ -358,6 +359,54 @@ body {
     font-size: 1.2em;
     padding: 10px 2px;
     white-space: normal;
+  }
+}
+
+.special-overlay-label {
+  font-size: 1.05em;
+  color: #405d8c;
+  font-weight: 500;
+  margin-bottom: 0;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+#choropleth-control-special {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 1em auto;
+}
+#choropleth-control-special button {
+  background-color: #405d8c;
+  color: white;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+#choropleth-control-special button:hover {
+  background-color: #304669;
+}
+#choropleth-control-special button.active {
+  background-color: #304669;
+}
+@media (max-width: 600px) {
+  #choropleth-control-special {
+    gap: 8px;
+    width: 98vw;
+    max-width: 400px;
+  }
+  #choropleth-control-special button {
+    min-width: 0;
+    font-size: 1.2em;
+    padding: 10px 2px;
+    white-space: normal;
+    flex: 1;
   }
 }
 
@@ -861,51 +910,6 @@ body {
   .site-footer .footer-links {
     flex-direction: column;
     gap: 0.5em;
-  }
-}
-.modal {
-  display: none; /* hide by default */
-  position: fixed;
-  z-index: 99999; /* on top of everything */
-  background-color: rgba(0, 0, 0, 0.5); /* slightly transparent */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-}
-.modal .modal-content {
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  color: #111;
-  padding: 18px 20px;
-  border-radius: 10px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
-  max-width: 560px;
-  width: calc(100% - 40px);
-  text-align: center;
-  pointer-events: auto;
-}
-.modal .modal-content .modal-content h3 {
-  margin: 0 0 8px;
-  font-size: 1.05rem;
-}
-.modal .modal-content .modal-text {
-  position: absolute;
-  left: 50%;
-  bottom: 16px;
-  transform: translateX(-50%);
-  color: white;
-  font-size: 1.2rem;
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 8px 14px;
-  border-radius: 10px;
-  width: calc(60% - 40px);
-}
-
-@media (max-width: 420px) {
-  #welcome-modal .modal-content {
-    padding: 14px;
-    font-size: 0.95rem;
   }
 }
 

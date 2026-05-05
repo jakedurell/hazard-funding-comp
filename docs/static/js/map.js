@@ -208,6 +208,7 @@ function wireChoroplethButtons() {
   const containers = [
     document.getElementById("choropleth-control"),
     document.getElementById("choropleth-control-secondary"),
+    document.getElementById("choropleth-control-special"),
   ].filter(Boolean);
 
   // set initial active button on load
@@ -329,7 +330,7 @@ function wireMapZoomLabelToggle() {
 // syncs active state of choropleth buttons for consistent UI feedback across multiple button groups
 function syncChoroplethButtons(selectedOverlay) {
   const allButtons = document.querySelectorAll(
-    "#choropleth-control button, #choropleth-control-secondary button",
+    "#choropleth-control button, #choropleth-control-secondary button, #choropleth-control-special button",
   );
 
   allButtons.forEach((btn) => {
