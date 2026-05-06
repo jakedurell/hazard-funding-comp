@@ -182,7 +182,6 @@ function initializeUIControls() {
   wireChoroplethButtons();
   wireRelativeToggle();
   wireModelControls();
-  wireResponsiveControlMove();
   wireMapZoomLabelToggle();
   wireRiverCorridorsTier2();
 }
@@ -319,9 +318,15 @@ function updateNriModelUI(isNri) {
   const note = document.getElementById("nri-model-note");
 
   // secondary controls use data-overlay attributes instead of IDs
-  const secondaryContainer = document.getElementById("choropleth-control-secondary");
-  const riskBtnSecondary = secondaryContainer?.querySelector('[data-overlay="Risk"]');
-  const vulnBtnSecondary = secondaryContainer?.querySelector('[data-overlay="Social Vulnerability"]');
+  const secondaryContainer = document.getElementById(
+    "choropleth-control-secondary",
+  );
+  const riskBtnSecondary = secondaryContainer?.querySelector(
+    '[data-overlay="Risk"]',
+  );
+  const vulnBtnSecondary = secondaryContainer?.querySelector(
+    '[data-overlay="Social Vulnerability"]',
+  );
 
   [riskBtn, vulnBtn, riskBtnSecondary, vulnBtnSecondary].forEach((btn) => {
     if (!btn) return;
@@ -342,12 +347,6 @@ function updateNriModelUI(isNri) {
     handleOverlaySelection("Gap (Funding vs Need)");
     syncChoroplethButtons("Gap (Funding vs Need)");
   }
-}
-
-// move control on load and on resize for mobile responsiveness
-function wireResponsiveControlMove() {
-  moveChoroplethControl();
-  window.addEventListener("resize", moveChoroplethControl);
 }
 
 // toggle choropleth labels based on zoom level to avoid visual clutter
@@ -497,25 +496,6 @@ function updateToggleLabels() {
       label.classList.add("active");
     }
   });
-}
-
-// toggle to move choropleth control for mobile responsiveness
-function moveChoroplethControl() {
-  const control = document.getElementById("choropleth-control");
-  const mapContainer = document.querySelector(".map-container");
-  const parentRow = document.querySelector(".row");
-
-  if (window.innerWidth <= 600) {
-    // move below map
-    if (parentRow && control && control.parentNode !== parentRow) {
-      parentRow.appendChild(control);
-    }
-  } else {
-    // move inside map
-    if (mapContainer && control && control.parentNode !== mapContainer) {
-      mapContainer.appendChild(control);
-    }
-  }
 }
 
 // toggle choropleth labels based on zoom level to avoid visual clutter

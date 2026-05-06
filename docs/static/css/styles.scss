@@ -288,11 +288,65 @@ body {
   }
 }
 
+// choropleth controls
+#secondary-controls {
+  margin: 2em auto;
+  text-align: center;
+}
+.choropleth-muted-label {
+  font-size: 1.05em;
+  color: $secondary-color;
+  font-weight: 500;
+  margin-bottom: 0;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.choropleth-muted {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 1em;
+
+  button {
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
+    padding: 5px 12px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:hover {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    &.active {
+      background: #e0e0e0;
+      color: #222;
+      font-weight: 600;
+      border-bottom: 2px solid $primary-color;
+    }
+
+    &:disabled {
+      background: #f0f0f0;
+      color: #bbb;
+      border-color: #e0e0e0;
+      cursor: not-allowed;
+      pointer-events: auto; // keep pointer so title tooltip still shows on hover
+    }
+  }
+}
+
 // model selector segmented control
 .model-controls-label {
   margin-top: 1em !important;
   font-size: 0.95em;
-  color: #888;
+  color: $primary-color;
   font-weight: 500;
   text-align: center;
   letter-spacing: 0.01em;
@@ -315,25 +369,30 @@ body {
   label {
     margin: 0 1px;
     padding: 0;
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 0.95em;
+    padding: 4px 10px;
+    min-width: 60px;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      color 0.2s;
 
-    &.btn {
-      background: #f5f5f5;
-      color: #666;
-      border: 1px solid #e0e0e0;
-      border-radius: 0;
-      box-shadow: none;
-      font-size: 0.95em;
-      padding: 4px 10px;
-      min-width: 60px;
-      transition:
-        background 0.2s,
-        color 0.2s;
+    // hide the radio inputs but keep them accessible for screen readers and keyboard navigation
+    input[type="radio"] {
+      position: absolute;
+      clip: rect(0, 0, 0, 0);
+      pointer-events: none;
+    }
 
-      &:hover,
-      &:focus {
-        background: #e0e0e0;
-        color: #333;
-      }
+    &:hover,
+    &:focus {
+      background: #e0e0e0;
+      color: #333;
     }
 
     &.active {
@@ -342,63 +401,6 @@ body {
       font-weight: 600;
       border-bottom: 2px solid $primary-color;
       z-index: 2;
-    }
-  }
-}
-
-// choropleth control (radio buttons)
-#choropleth-control {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-radius: 5px;
-  display: flex;
-  gap: 10px;
-  z-index: 1000;
-
-  button {
-    background-color: $primary-color;
-    color: white;
-    font-size: 1.2em;
-    border: none;
-    border-radius: 5px;
-    box-shadow: $box-shadow;
-    cursor: pointer;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background-color: $hover-color;
-    }
-
-    &:disabled {
-      background-color: $disabled-color;
-      cursor: not-allowed;
-    }
-    // active
-    &.active {
-      background-color: $hover-color;
-    }
-  }
-
-  @media (max-width: 600px) {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: 1fr;
-    gap: 8px;
-    position: static;
-    left: unset;
-    transform: none;
-    margin: 0 auto 10px auto;
-    width: 98vw;
-    max-width: 400px;
-    justify-items: stretch;
-
-    button {
-      min-width: 0;
-      font-size: 1.2em;
-      padding: 10px 2px;
-      white-space: normal;
     }
   }
 }
@@ -524,6 +526,13 @@ body {
 .toggle-label.active {
   color: $primary-color;
   font-weight: bold;
+}
+// muted slider
+.switch-muted .slider {
+  background-color: #ddd;
+}
+.switch-muted input:checked + .slider {
+  background-color: $primary-color;
 }
 
 // metric definitions
@@ -651,56 +660,6 @@ body {
 .plot-caption p {
   margin: 0;
   color: #555;
-}
-
-// secondary controls (choropleth toggle, slider)
-#secondary-controls {
-  margin: 2em auto;
-  text-align: center;
-}
-.choropleth-muted {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
-  margin-bottom: 1em;
-
-  button {
-    background: #f5f5f5;
-    color: #666;
-    border: 1px solid #e0e0e0;
-    border-radius: 0;
-    padding: 5px 12px;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: 0.2s;
-
-    &:hover {
-      background: #e0e0e0;
-      color: #333;
-    }
-
-    &.active {
-      background: #e0e0e0;
-      color: #222;
-      font-weight: 600;
-      border-bottom: 2px solid $primary-color;
-    }
-
-    &:disabled {
-      background: #f0f0f0;
-      color: #bbb;
-      border-color: #e0e0e0;
-      cursor: not-allowed;
-      pointer-events: auto; // keep pointer so title tooltip still shows on hover
-    }
-  }
-}
-// muted slider
-.switch-muted .slider {
-  background-color: #ddd;
-}
-.switch-muted input:checked + .slider {
-  background-color: $primary-color;
 }
 
 // rankings table styles

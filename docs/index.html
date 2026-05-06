@@ -80,43 +80,47 @@
             role="application"
             aria-label="Map of Vermont."
           ></div>
-          <!-- Choropleth Buttons -->
-          <div
-            id="choropleth-control"
-            aria-label="Toggle different data layers"
+        </div>
+      </div>
+      <!-- Choropleth Metric Buttons (muted) -->
+      <div class="col-md-12 text-center">
+        <div class="choropleth-muted-label">Metric:</div>
+        <div
+          id="choropleth-control"
+          class="choropleth-muted"
+          aria-label="Toggle different data layers"
+        >
+          <button id="risk-button" data-overlay="Risk" aria-label="Show Risk">
+            Risk
+          </button>
+          <button
+            id="vulnerability-button"
+            data-overlay="Social Vulnerability"
+            aria-label="Show Social Vulnerability"
           >
-            <button id="risk-button" data-overlay="Risk" aria-label="Show Risk">
-              Risk
-            </button>
-            <button
-              id="vulnerability-button"
-              data-overlay="Social Vulnerability"
-              aria-label="Show Social Vulnerability"
-            >
-              Social Vulnerability
-            </button>
-            <button
-              id="need-button"
-              data-overlay="Need Index"
-              aria-label="Show Need Index"
-            >
-              Need Index
-            </button>
-            <button
-              id="funding-button"
-              data-overlay="Funding"
-              aria-label="Show Funding"
-            >
-              Funding
-            </button>
-            <button
-              id="gap-button"
-              data-overlay="Gap (Funding vs Need)"
-              aria-label="Show Gap (Funding vs Need)"
-            >
-              Gap (Funding vs Need)
-            </button>
-          </div>
+            Social Vulnerability
+          </button>
+          <button
+            id="need-button"
+            data-overlay="Need Index"
+            aria-label="Show Need Index"
+          >
+            Need Index
+          </button>
+          <button
+            id="funding-button"
+            data-overlay="Funding"
+            aria-label="Show Funding"
+          >
+            Funding
+          </button>
+          <button
+            id="gap-button"
+            data-overlay="Gap (Funding vs Need)"
+            aria-label="Show Gap (Funding vs Need)"
+          >
+            Gap (Funding vs Need)
+          </button>
         </div>
       </div>
       <!-- Special Overlay Buttons (Quadrants, Population) — visualization modes, not index metrics -->
@@ -342,7 +346,7 @@
         role="group"
         aria-label="Select model"
       >
-        <label class="btn btn-default active" aria-pressed="true">
+        <label class="active" aria-pressed="true">
           <input
             type="radio"
             name="model-selector-secondary"
@@ -352,7 +356,7 @@
           />
           EAL
         </label>
-        <label class="btn btn-default" aria-pressed="false">
+        <label class="" aria-pressed="false">
           <input
             type="radio"
             name="model-selector-secondary"
@@ -361,7 +365,7 @@
           />
           EAL per capita
         </label>
-        <label class="btn btn-default">
+        <label class="">
           <input
             type="radio"
             name="model-selector-secondary"
