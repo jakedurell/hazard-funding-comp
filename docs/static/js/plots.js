@@ -60,10 +60,10 @@ function showPlotCaption() {
 function buildScatterData(model) {
   const quadKey = `quadrant_${model}`;
 
-  return Object.entries(statsByTown)
-    .filter(([, d]) => d.town_name !== "State of Vermont")
-    .map(([town, d]) => ({
-      town_name: town,
+  return statsRaw
+    .filter((d) => d.town_name !== "State of Vermont")
+    .map((d) => ({
+      town_name: d.town_name,
       need: +d[`need_${model}`],
       funding: Math.log1p(+d.funding_total),
       quadrant: d[quadKey],

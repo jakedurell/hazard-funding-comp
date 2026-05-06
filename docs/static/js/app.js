@@ -2,6 +2,7 @@
 
 // globals for data
 let towns = {};
+let statsRaw = [];
 let statsByTown = {};
 let riverCorridors = {};
 
@@ -17,15 +18,15 @@ Promise.all([
 ]).then(([tb, ts, rc]) => {
   towns = tb;
   riverCorridors = rc;
-  statsByTown = ts;
+  statsRaw = ts;
 
   // convert town stats to a javascript object for easy lookup
-  statsByTown.forEach((row) => {
+  statsRaw.forEach((row) => {
     statsByTown[row.town_name] = row;
   });
 
   // initialize rankings data
-  initializeRankings(statsByTown);
+  initializeRankings(statsRaw);
 
   // create the map
   createMap();
