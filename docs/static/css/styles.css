@@ -652,6 +652,13 @@ body {
   font-weight: 600;
   border-bottom: 2px solid #0085a1;
 }
+.choropleth-muted button:disabled {
+  background: #f0f0f0;
+  color: #bbb;
+  border-color: #e0e0e0;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
 
 .switch-muted .slider {
   background-color: #ddd;

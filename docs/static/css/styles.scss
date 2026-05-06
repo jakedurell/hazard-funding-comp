@@ -685,6 +685,14 @@ body {
       font-weight: 600;
       border-bottom: 2px solid $primary-color;
     }
+
+    &:disabled {
+      background: #f0f0f0;
+      color: #bbb;
+      border-color: #e0e0e0;
+      cursor: not-allowed;
+      pointer-events: auto; // keep pointer so title tooltip still shows on hover
+    }
   }
 }
 // muted slider

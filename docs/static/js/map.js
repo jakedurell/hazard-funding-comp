@@ -318,7 +318,12 @@ function updateNriModelUI(isNri) {
   const vulnBtn = document.getElementById("vulnerability-button");
   const note = document.getElementById("nri-model-note");
 
-  [riskBtn, vulnBtn].forEach((btn) => {
+  // secondary controls use data-overlay attributes instead of IDs
+  const secondaryContainer = document.getElementById("choropleth-control-secondary");
+  const riskBtnSecondary = secondaryContainer?.querySelector('[data-overlay="Risk"]');
+  const vulnBtnSecondary = secondaryContainer?.querySelector('[data-overlay="Social Vulnerability"]');
+
+  [riskBtn, vulnBtn, riskBtnSecondary, vulnBtnSecondary].forEach((btn) => {
     if (!btn) return;
     btn.disabled = isNri;
     btn.title = isNri
