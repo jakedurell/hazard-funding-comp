@@ -4,15 +4,8 @@
 let rankingsData = [];
 let vtBaseline = {};
 
-// for rankings title
-reverseMetricMap = {
-  risk: "Risk",
-  vulnerability: "Social Vulnerability",
-  need: "Need Index",
-  funding: "Funding",
-  gap: "Gap (Funding vs Need)",
-  // total_listings: "Total Listings",
-};
+// base metric key → display label (sourced from config.js)
+const reverseMetricMap = baseToOverlay;
 
 // initialize rankings data and VT baseline
 function initializeRankings(data) {

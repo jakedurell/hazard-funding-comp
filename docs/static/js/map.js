@@ -297,7 +297,7 @@ function wireModelControls() {
       syncModelGroups(scheme);
 
       // update model in mapState and metricEngine, update choropleth and other components
-      mapState.model = resolveModel(scheme);
+      mapState.model = modelLabels[scheme] ?? "eal"; // default to EAL, modelLabels in config.js maps from label to key
       metricEngine.model = mapState.model;
       updateDashboard();
 
@@ -552,14 +552,6 @@ function applyZoomLabelVisibility() {
 // track and set active metric for updating dashboard components based on user interactions
 // with helper to format metric values for labels based on metric type (e.g., percentage, currency, ratio)
 
-// resolve model based on selected option
-function resolveModel(label) {
-  if (label === "EAL") return "eal";
-  if (label === "EAL per capita") return "eal_per_capita";
-  if (label === "NRI") return "nri";
-  return "eal"; // safe default
-}
-
 // render choropleth layer based on selected metric and model
 const metricEngine = {
   // default to gap metric and EAL model on load
@@ -567,14 +559,8 @@ const metricEngine = {
   model: "eal",
   isRelative: false,
 
-  // mapping from user-friendly overlay labels to metric keys
-  overlayToBase: {
-    Risk: "risk",
-    "Social Vulnerability": "vulnerability",
-    "Need Index": "need",
-    Funding: "funding",
-    "Gap (Funding vs Need)": "gap",
-  },
+  // mapping from user-friendly overlay labels to metric keys (sourced from config.js)
+  overlayToBase,
 
   // resolve metric key based on current base metric, model, and relative mode
   getMetricKey() {
