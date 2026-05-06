@@ -49,11 +49,10 @@ function createMap() {
   );
   mapState.riverCorridorsLayer.addTo(mapState.map);
 
-  // set initial choropleth metric and add layer to map
+  // set initial choropleth metric, add layer to map, update dashboard components
   metricEngine.baseMetric = "gap";
-  updateMetric();
   mapState.choroplethLayer.addTo(mapState.map);
-  renderStatsCard("top");
+  updateDashboard();
 
   // setup UI control event listeners
   initializeUIControls();
@@ -194,21 +193,9 @@ function wireTownsDropdown() {
   dropdown.addEventListener("change", (e) => {
     const selected = e.target.value;
 
-    // update selected town in mapState
+    // update selected town in mapState and dashboard components
     mapState.selectedTown = selected;
-
-    // update stats card with new town data
-    renderStatsCard(mapState.selectedTown);
-
-    // update plot
-    renderPlot(metricEngine.baseMetric, mapState.selectedTown);
-
-    // update rankings table
-    renderRankings(
-      mapState.choroplethMetric,
-      mapState.isRelative,
-      mapState.selectedTown,
-    );
+    updateDashboard();
 
     // change map view based on selected town
     if (selected === "top") {
@@ -263,7 +250,7 @@ function wireRelativeToggle() {
       // only update choropleth if it's active (i.e., not bubble)
       if (mapState.choroplethMetric !== null) {
         // update choropleth metric to trigger style and legend updates
-        updateMetric();
+        updateDashboard();
       }
 
       // sync both sliders
@@ -312,7 +299,7 @@ function wireModelControls() {
       // update model in mapState and metricEngine, update choropleth and other components
       mapState.model = resolveModel(scheme);
       metricEngine.model = mapState.model;
-      updateMetric();
+      updateDashboard();
 
       // disable Risk and Vulnerability buttons when NRI model is active (NRI score already embeds SOVI)
       updateNriModelUI(scheme === "NRI");
@@ -664,11 +651,11 @@ function handleOverlaySelection(selectedOverlay) {
     return;
   }
 
-  // update base metric to trigger style and legend updates
+  // update base metric, remove layers, and update dashboard
   metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
   removeBubbleLayerIfPresent();
   removeQuadrantLayerIfPresent();
-  updateMetric();
+  updateDashboard();
 }
 
 // utility function to remove bubble layer if it exists
@@ -717,7 +704,11 @@ function updateMetric() {
     updateChoroplethLegend();
   }
 
-  // always update dashboard components
+}
+
+// update all dashboard components after any state change
+function updateDashboard() {
+  updateMetric();
   renderPlot(metricEngine.baseMetric, mapState.selectedTown);
   renderStatsCard(mapState.selectedTown);
   renderRankings(
