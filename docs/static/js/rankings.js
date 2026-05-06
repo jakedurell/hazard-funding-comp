@@ -95,11 +95,13 @@ function renderRankings(metric, isRelative, selectedTown) {
   rowsMerge.classed("selected", (d) => d.town_name === selectedTown);
 
   // update rank, name, and value label for all rows
-  rowsMerge.select(".rank-col").text((d) => formatMetric(rankKey, +d[rankKey]));
+  rowsMerge
+    .select(".rank-col")
+    .text((d) => metricEngine.format(rankKey, +d[rankKey]));
   rowsMerge.select(".name-col").text((d) => d.town_name);
   rowsMerge
     .select(".value-label")
-    .text((d) => formatMetric(rawKey, +d[rawKey]));
+    .text((d) => metricEngine.format(rawKey, +d[rawKey]));
 
   // update bar widths and positions based on metric values and relative vs rank mode
   rowsMerge.each(function (d) {
@@ -195,7 +197,7 @@ function renderRankings(metric, isRelative, selectedTown) {
           .append("div")
           .attr("class", "vt-ref-label")
           .style("top", topPx - 10 + "px")
-          .text(`${vtLabel}: ${formatMetric(rawKey, vtValue)}`);
+          .text(`${vtLabel}: ${metricEngine.format(rawKey, vtValue)}`);
       }
     }
   }

@@ -80,7 +80,7 @@ function updateChoroplethLabels() {
     // if a metric is selected, get the value for this town and format it for the label
     if (metric) {
       const value = statsByTown[town]?.[metric];
-      const formatted = formatMetric(metric, value);
+      const formatted = metricEngine.format(metric, value);
       labelHTML = `<div>${formatted}</div>`;
     }
 
@@ -225,15 +225,15 @@ function createRangeLabels(metric, ...domain) {
   if (domain.length === 3) {
     // diverging: min, mid, max
     labelContainer.innerHTML = `
-      <div>${formatMetric(metric, domain[0])}</div>
-      <div style="text-align:center;">${formatMetric(metric, domain[1])}</div>
-      <div style="text-align:right;">${formatMetric(metric, domain[2])}</div>
+      <div>${metricEngine.format(metric, domain[0])}</div>
+      <div style="text-align:center;">${metricEngine.format(metric, domain[1])}</div>
+      <div style="text-align:right;">${metricEngine.format(metric, domain[2])}</div>
     `;
   } else {
     // sequential: min, max
     labelContainer.innerHTML = `
-      <div>${formatMetric(metric, domain[0])}</div>
-      <div style="text-align:right;">${formatMetric(metric, domain[1])}</div>
+      <div>${metricEngine.format(metric, domain[0])}</div>
+      <div style="text-align:right;">${metricEngine.format(metric, domain[1])}</div>
     `;
   }
 

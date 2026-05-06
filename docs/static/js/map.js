@@ -610,26 +610,17 @@ const metricEngine = {
 
     return `${baseMetric}_rank_${model}`;
   },
+
+  // format a metric value for display in labels, legends, and tables
+  format(metric, value) {
+    if (!metric || value == null || isNaN(value)) return "";
+    if (metric.includes("funding_total")) return `$${d3.format(",.0f")(value)}`;
+    if (metric.includes("_rel"))
+      return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
+    if (metric.includes("rank")) return `${Math.round(value * 100)}%`;
+    return d3.format(".2f")(value);
+  },
 };
-
-// helper function to format metric values for labels
-function formatMetric(metric, value) {
-  if (!metric || value == null || isNaN(value)) return "";
-
-  if (metric.includes("funding_total")) {
-    return `$${d3.format(",.0f")(value)}`;
-  }
-
-  if (metric.includes("_rel")) {
-    return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
-  }
-
-  if (metric.includes("rank")) {
-    return `${Math.round(value * 100)}%`;
-  }
-
-  return d3.format(".2f")(value);
-}
 
 /////////////////////////////////////////////////////////////
 
@@ -703,7 +694,6 @@ function updateMetric() {
     updateChoroplethLabels();
     updateChoroplethLegend();
   }
-
 }
 
 // update all dashboard components after any state change
