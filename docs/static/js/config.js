@@ -21,3 +21,6 @@ const modelLabels = {
   "EAL per capita": "eal_per_capita",
   NRI: "nri",
 };
+
+// default map view for Vermont
+const vtDefaultView = { center: [43.75, -72.7], zoom: 8 };

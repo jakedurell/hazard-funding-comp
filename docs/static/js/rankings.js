@@ -30,7 +30,7 @@ function renderRankings(metric, isRelative, selectedTown) {
     .replace(/_rank$/, ""); // strips a trailing "_rank" if present
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank
-  const towns = rankingsData
+  const townData = rankingsData
     .filter((d) => d.town_name !== "State of Vermont")
     .filter((d) => d.population > 0) // filter out towns with zero population to avoid skewing rankings
     .map((d) => ({
@@ -41,11 +41,11 @@ function renderRankings(metric, isRelative, selectedTown) {
 
   // sort by rank if available
   if (rankKey) {
-    towns.sort((a, b) => a.value - b.value); // sort by actual value, not rank
+    townData.sort((a, b) => a.value - b.value); // sort by actual value, not rank
   }
 
   // compute scale for bar widths based on min/max values in the current metric
-  const values = towns.map((d) => d.value);
+  const values = townData.map((d) => d.value);
   const max = d3.max(values);
   const min = d3.min(values);
 
@@ -55,7 +55,9 @@ function renderRankings(metric, isRelative, selectedTown) {
     : d3.scaleLinear().domain([0, max]).range([0, 100]);
 
   // bind data to rows by town name (unique identifier) for efficient re-rendering
-  const rows = container.selectAll(".rank-row").data(towns, (d) => d.town_name);
+  const rows = container
+    .selectAll(".rank-row")
+    .data(townData, (d) => d.town_name);
   // remove old rows that are no longer in the data
   rows.exit().remove();
 
@@ -147,7 +149,7 @@ function renderRankings(metric, isRelative, selectedTown) {
       // backend uses geometric mean of non-zero funding: expm1(mean(log1p(x)))
       // log-transform non-zero values to compute mean, then reverse-transform to get VT baseline value for funding
       if (metricKey === "funding_total") {
-        const nonZeroLogs = towns
+        const nonZeroLogs = townData
           .filter((d) => +d.funding_total > 0)
           .map((d) => Math.log1p(+d.funding_total));
         vtValue = nonZeroLogs.length > 0 ? Math.expm1(d3.mean(nonZeroLogs)) : 0;
@@ -158,7 +160,7 @@ function renderRankings(metric, isRelative, selectedTown) {
       }
 
       // sorted towns by raw metric value to compute VT's position in the rank list
-      const sortedValues = towns
+      const sortedValues = townData
         .map((d) => +d[rawKey])
         .filter((v) => !isNaN(v))
         .sort(d3.ascending);

@@ -1,5 +1,9 @@
 // Description: This file contains the functions to create the map and controls, and to handle user interactions
 
+// zoom thresholds for map layer visibility
+const ZOOM_LABELS = 9; // minimum zoom to show town labels
+const ZOOM_RIVER_DETAIL = 11; // minimum zoom to switch to tier 2 river corridors
+
 // globals for tracking map state and active layers
 const mapState = {
   map: null,
@@ -70,8 +74,8 @@ function initializeMap() {
     },
   );
   mapState.map = L.map("map-id", {
-    center: [43.75, -72.7], // center on Vermont
-    zoom: 8,
+    center: vtDefaultView.center,
+    zoom: vtDefaultView.zoom,
     layers: [baseLayer],
   });
 
@@ -425,7 +429,7 @@ function wireRiverCorridorsTier2() {
   mapState.map.on("zoomend moveend", () => {
     const zoom = mapState.map.getZoom();
 
-    if (zoom >= 11) {
+    if (zoom >= ZOOM_RIVER_DETAIL) {
       if (!tier2Features && !tier2Loading) {
         // first zoom-in: lazy-load once, then precompute bboxes
         tier2Loading = true;
@@ -539,7 +543,7 @@ function applyZoomLabelVisibility() {
 
   // show active labels only if zoomed in enough
   if (activeLabels) {
-    if (zoom >= 9) {
+    if (zoom >= ZOOM_LABELS) {
       activeLabels.addTo(mapState.map);
     } else {
       mapState.map.removeLayer(activeLabels);
@@ -789,7 +793,7 @@ function toggleButton(buttonId, enable = true) {
 // resets map view to all of VT, updates infoBox and plots
 function resetMapView() {
   // center map on State of Vermont and reset zoom
-  mapState.map.setView([43.75, -72.7], 8);
+  mapState.map.setView(vtDefaultView.center, vtDefaultView.zoom);
   // reset choropleth style (towns may remain uncovered otherwise)
   if (mapState.choroplethLayer) {
     mapState.choroplethLayer.resetStyle();
