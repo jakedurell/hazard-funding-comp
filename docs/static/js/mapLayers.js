@@ -346,7 +346,8 @@ function initializeFundingBubbleLayer() {
       opacity: 1,
       fillOpacity: 0.75,
     }).bindPopup(
-      `<b>${town}</b><br>Total Funding: $${Math.round(funding).toLocaleString()}`,
+      `<b>${town}</b>
+      <br><span class="popup-text-right popup-text-right-larger">Total Funding: $${Math.round(funding).toLocaleString()}</span>`,
       { className: "marker-popup" },
     );
 
@@ -387,7 +388,6 @@ function addBubbles(bubbleLayerGroup) {
   towns.features.forEach((feature) => {
     // get town stats for bubble size and popup content
     const town = feature.properties.town_name;
-    const avgPrice = +statsByTown[town]?.pct_below_poverty || 0;
     const population = +statsByTown[town]?.population || 0;
     const radius = Math.sqrt(population) * 0.15; // scale radius based on population
     const latlng = calculateCentroid(feature); // for placing markers
@@ -401,9 +401,8 @@ function addBubbles(bubbleLayerGroup) {
       opacity: 1,
       fillOpacity: 0.8,
     }).bindPopup(
-      `${town}<br>
-        <span class="popup-text-right">Poverty Rate: ${avgPrice.toFixed(2)}%</span>
-        <span class="popup-text-right popup-text-right-larger"><b>Town population: ${population.toLocaleString()}</b></span>`,
+      `<b>${town}</b><br>
+      <span class="popup-text-right popup-text-right-larger">Town population: ${population.toLocaleString()}</span>`,
       { className: "marker-popup" },
     );
 
