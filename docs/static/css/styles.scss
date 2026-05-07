@@ -461,6 +461,50 @@ body {
   }
 }
 
+// context layer buttons (Population, Funding, River Corridors)
+.context-controls-label {
+  font-size: 0.85em;
+  color: #999;
+  font-weight: 500;
+  margin-bottom: 0;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-transform: uppercase;
+}
+#context-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 1em auto;
+
+  button {
+    background-color: transparent;
+    color: #888;
+    font-size: 0.9em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+
+    &:hover {
+      background-color: #f0f0f0;
+      color: #555;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &.active {
+      background-color: #e8e8e8;
+      color: #444;
+      border-color: #aaa;
+    }
+  }
+}
+
 // slider styling
 .slider-label {
   font-size: 0.95em;

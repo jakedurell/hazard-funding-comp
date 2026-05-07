@@ -15,6 +15,9 @@ const mapState = {
   riverCorridorsTier2Layer: null,
 
   bubbleLayer: null,
+  fundingBubbleLayer: null,
+  bubbleLabels: null,
+  fundingBubbleLabels: null,
   quadrantLayer: null,
   quadrantLegend: null,
 
@@ -215,6 +218,7 @@ function wireChoroplethButtons() {
     document.getElementById("choropleth-control"),
     document.getElementById("choropleth-control-secondary"),
     document.getElementById("choropleth-control-special"),
+    document.getElementById("context-controls"),
   ].filter(Boolean);
 
   // set initial active button on load
@@ -474,7 +478,7 @@ function wireRiverCorridorsTier2() {
 // syncs active state of choropleth buttons for consistent UI feedback across multiple button groups
 function syncChoroplethButtons(selectedOverlay) {
   const allButtons = document.querySelectorAll(
-    "#choropleth-control button, #choropleth-control-secondary button, #choropleth-control-special button",
+    "#choropleth-control button, #choropleth-control-secondary button, #choropleth-control-special button, #context-controls button",
   );
 
   allButtons.forEach((btn) => {
@@ -500,31 +504,30 @@ function updateToggleLabels() {
 
 // toggle choropleth labels based on zoom level to avoid visual clutter
 function applyZoomLabelVisibility() {
-  // get current zoom level and active layers to determine which labels to show/hide
   const zoom = mapState.map.getZoom();
-  const bubbleActive =
-    mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
-  const quadrantActive =
-    mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
+  const popBubbleActive = mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+  const fundBubbleActive = mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer);
+  const quadrantActive = mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
 
   // quadrant layer has no text labels — suppress everything
   if (quadrantActive) {
-    if (mapState.choroplethLabels)
-      mapState.map.removeLayer(mapState.choroplethLabels);
+    if (mapState.choroplethLabels) mapState.map.removeLayer(mapState.choroplethLabels);
     if (mapState.bubbleLabels) mapState.map.removeLayer(mapState.bubbleLabels);
+    if (mapState.fundingBubbleLabels) mapState.map.removeLayer(mapState.fundingBubbleLabels);
     return;
   }
 
-  // determine which label layer is active; only show that one
-  const activeLabels = bubbleActive
+  // determine active label layer
+  const activeLabels = popBubbleActive
     ? mapState.bubbleLabels
-    : mapState.choroplethLabels;
-  const inactiveLabels = bubbleActive
-    ? mapState.choroplethLabels
-    : mapState.bubbleLabels;
+    : fundBubbleActive
+      ? mapState.fundingBubbleLabels
+      : mapState.choroplethLabels;
 
-  // always hide the inactive layer's labels
-  if (inactiveLabels) mapState.map.removeLayer(inactiveLabels);
+  // hide all other label layers
+  [mapState.bubbleLabels, mapState.fundingBubbleLabels, mapState.choroplethLabels].forEach((layer) => {
+    if (layer && layer !== activeLabels) mapState.map.removeLayer(layer);
+  });
 
   // show active labels only if zoomed in enough
   if (activeLabels) {
@@ -605,10 +608,17 @@ function handleOverlaySelection(selectedOverlay) {
   // add bubble or quadrant layer and exit if selected
   if (selectedOverlay === "Population") {
     removeQuadrantLayerIfPresent();
+    removeFundingBubbleLayerIfPresent();
     toggleBubbleLayer();
+    return;
+  } else if (selectedOverlay === "Funding Bubble") {
+    removeQuadrantLayerIfPresent();
+    removeBubbleLayerIfPresent();
+    toggleFundingBubbleLayer();
     return;
   } else if (selectedOverlay === "Quadrants") {
     removeBubbleLayerIfPresent();
+    removeFundingBubbleLayerIfPresent();
     toggleQuadrantLayer();
     return;
   }
@@ -616,6 +626,7 @@ function handleOverlaySelection(selectedOverlay) {
   // update base metric, remove layers, and update dashboard
   metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
   removeBubbleLayerIfPresent();
+  removeFundingBubbleLayerIfPresent();
   removeQuadrantLayerIfPresent();
   updateDashboard();
 }
@@ -624,6 +635,13 @@ function handleOverlaySelection(selectedOverlay) {
 function removeBubbleLayerIfPresent() {
   if (mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer)) {
     mapState.map.removeLayer(mapState.bubbleLayer);
+  }
+}
+
+// utility function to remove funding bubble layer if it exists
+function removeFundingBubbleLayerIfPresent() {
+  if (mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer)) {
+    mapState.map.removeLayer(mapState.fundingBubbleLayer);
   }
 }
 
@@ -640,6 +658,8 @@ function updateMetric() {
     mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
   const bubbleActive =
     mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+  const fundingBubbleActive =
+    mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer);
 
   if (quadrantActive) {
     // quadrant layer is visible: update its colors for the new model and keep its legend
@@ -654,7 +674,7 @@ function updateMetric() {
       };
     });
     updateQuadrantLegend();
-  } else if (bubbleActive) {
+  } else if (bubbleActive || fundingBubbleActive) {
     // bubble layer is visible: model changed, but don't touch the choropleth or its legend
   } else {
     // choropleth is active: update metric, style, labels, and legend
@@ -708,6 +728,29 @@ function toggleBubbleLayer() {
   }
 
   // set choropleth to null (default borders, no fill), update legend, hide choropleth labels
+  mapState.choroplethMetric = null;
+  mapState.choroplethLayer.setStyle(() => ({
+    color: defaultColors.defaultGray,
+    weight: 1,
+    fillOpacity: 0,
+  }));
+  updateChoroplethLegend();
+  if (mapState.choroplethLabels) {
+    mapState.map.removeLayer(mapState.choroplethLabels);
+  }
+}
+
+// toggle funding bubble layer on/off
+function toggleFundingBubbleLayer() {
+  if (!mapState.fundingBubbleLayer) {
+    mapState.fundingBubbleLayer = initializeFundingBubbleLayer();
+  }
+
+  if (!mapState.map.hasLayer(mapState.fundingBubbleLayer)) {
+    mapState.map.addLayer(mapState.fundingBubbleLayer);
+    applyZoomLabelVisibility();
+  }
+
   mapState.choroplethMetric = null;
   mapState.choroplethLayer.setStyle(() => ({
     color: defaultColors.defaultGray,
@@ -779,16 +822,10 @@ function resetMapView() {
   if (mapState.choroplethLayer) {
     mapState.choroplethLayer.resetStyle();
   }
-
-  // toggle button
-  toggleButton("population-button", true);
 }
 
 // zooms map for town view, updates infoBox and plots
 function zoomIn() {
-  // toggle button
-  toggleButton("population-button", false);
-
   // reset choropleth boundaries (or they will remain uncovered)
   if (mapState.choroplethLayer) {
     mapState.choroplethLayer.resetStyle();

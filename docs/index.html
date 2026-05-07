@@ -123,7 +123,7 @@
           </button>
         </div>
       </div>
-      <!-- Special Overlay Buttons (Quadrants, Population) — visualization modes, not index metrics -->
+      <!-- Special Overlay Buttons (Quadrants) — primary dashboard view -->
       <div class="col-md-12 text-center">
         <div class="special-overlay-label">Views:</div>
         <div
@@ -137,12 +137,36 @@
           >
             Quadrant Analysis
           </button>
+        </div>
+      </div>
+      <!-- Context Layer Buttons (Population, Funding, River Corridors) -->
+      <div class="col-md-12 text-center">
+        <div class="context-controls-label">Context Layers:</div>
+        <div
+          id="context-controls"
+          aria-label="Toggle context map layers"
+        >
           <button
             id="population-button"
             data-overlay="Population"
             aria-label="Show Population"
           >
-            Population (Context)
+            Population
+          </button>
+          <button
+            id="funding-bubble-button"
+            data-overlay="Funding Bubble"
+            aria-label="Show Total Funding"
+          >
+            Total Funding
+          </button>
+          <button
+            id="river-corridors-button"
+            data-overlay="River Corridors"
+            aria-label="Show River Corridors"
+            disabled
+          >
+            River Corridors
           </button>
         </div>
       </div>

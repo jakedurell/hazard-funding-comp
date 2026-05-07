@@ -317,6 +317,53 @@ function initializeBubbleChartLayer() {
   return bubbleLayerGroup;
 }
 
+// create bubble chart layer for total funding
+function initializeFundingBubbleLayer() {
+  const bubbleLayerGroup = L.layerGroup();
+  mapState.fundingBubbleLabels = L.layerGroup();
+  initializeTownOutlines(bubbleLayerGroup);
+
+  const maxFunding = d3.max(Object.values(statsByTown), (d) => +d.funding_total || 0);
+  const radiusScale = d3.scaleSqrt().domain([0, maxFunding]).range([0, 60]);
+
+  towns.features.forEach((feature) => {
+    const town = feature.properties.town_name;
+    const funding = +statsByTown[town]?.funding_total || 0;
+    const radius = radiusScale(funding);
+    const latlng = calculateCentroid(feature);
+
+    if (funding === 0) return; // skip unfunded towns
+
+    const circleMarker = L.circleMarker(latlng, {
+      radius,
+      fillColor: "#2166ac",
+      color: "#fff",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.75,
+    }).bindPopup(
+      `<b>${town}</b><br>Total Funding: $${Math.round(funding).toLocaleString()}`,
+      { className: "marker-popup" },
+    );
+
+    const textMarker = L.marker(latlng, {
+      icon: L.divIcon({
+        className: "bubble-text",
+        html: `<div>$${d3.format(".2s")(funding)}</div>`,
+        iconSize: [radius * 2, radius * 2],
+        iconAnchor: [radius, radius],
+      }),
+      interactive: false,
+    });
+
+    popupMouseEvents(circleMarker);
+    bubbleLayerGroup.addLayer(circleMarker);
+    mapState.fundingBubbleLabels.addLayer(textMarker);
+  });
+
+  return bubbleLayerGroup;
+}
+
 // create town outlines layer
 function initializeTownOutlines(bubbleLayerGroup) {
   const townsOutlineLayer = L.geoJSON(towns, {
