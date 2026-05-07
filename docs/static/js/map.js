@@ -13,6 +13,7 @@ const mapState = {
 
   riverCorridorsLayer: null,
   riverCorridorsTier2Layer: null,
+  riverCorridorsFocused: false,
 
   bubbleLayer: null,
   fundingBubbleLayer: null,
@@ -509,8 +510,8 @@ function applyZoomLabelVisibility() {
   const fundBubbleActive = mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer);
   const quadrantActive = mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
 
-  // quadrant layer has no text labels — suppress everything
-  if (quadrantActive) {
+  // these views have no text labels — suppress everything
+  if (quadrantActive || mapState.riverCorridorsFocused) {
     if (mapState.choroplethLabels) mapState.map.removeLayer(mapState.choroplethLabels);
     if (mapState.bubbleLabels) mapState.map.removeLayer(mapState.bubbleLabels);
     if (mapState.fundingBubbleLabels) mapState.map.removeLayer(mapState.fundingBubbleLabels);
@@ -605,21 +606,30 @@ function handleOverlaySelection(selectedOverlay) {
   // early exit if no overlay selected
   if (!selectedOverlay) return;
 
-  // add bubble or quadrant layer and exit if selected
+  // add special layers and exit if selected (bubbles, quadrants, river corridors)
   if (selectedOverlay === "Population") {
     removeQuadrantLayerIfPresent();
     removeFundingBubbleLayerIfPresent();
+    restoreRiverCorridorsDefaultStyle();
     toggleBubbleLayer();
     return;
   } else if (selectedOverlay === "Funding Bubble") {
     removeQuadrantLayerIfPresent();
     removeBubbleLayerIfPresent();
+    restoreRiverCorridorsDefaultStyle();
     toggleFundingBubbleLayer();
     return;
   } else if (selectedOverlay === "Quadrants") {
     removeBubbleLayerIfPresent();
     removeFundingBubbleLayerIfPresent();
+    restoreRiverCorridorsDefaultStyle();
     toggleQuadrantLayer();
+    return;
+  } else if (selectedOverlay === "River Corridors") {
+    removeBubbleLayerIfPresent();
+    removeFundingBubbleLayerIfPresent();
+    removeQuadrantLayerIfPresent();
+    toggleRiverCorridorsFocusView();
     return;
   }
 
@@ -628,6 +638,7 @@ function handleOverlaySelection(selectedOverlay) {
   removeBubbleLayerIfPresent();
   removeFundingBubbleLayerIfPresent();
   removeQuadrantLayerIfPresent();
+  restoreRiverCorridorsDefaultStyle();
   updateDashboard();
 }
 
@@ -737,6 +748,60 @@ function toggleBubbleLayer() {
   updateChoroplethLegend();
   if (mapState.choroplethLabels) {
     mapState.map.removeLayer(mapState.choroplethLabels);
+  }
+}
+
+// focus/unfocus the river corridors view — brightens corridors, clears choropleth fill
+function toggleRiverCorridorsFocusView() {
+  mapState.riverCorridorsFocused = !mapState.riverCorridorsFocused;
+
+  if (mapState.riverCorridorsFocused) {
+    // clear choropleth fill, suppress labels, set thin town outlines
+    mapState.choroplethMetric = null;
+    mapState.choroplethLayer.setStyle(() => ({
+      color: defaultColors.defaultGray,
+      weight: 0.25,
+      fillOpacity: 0,
+    }));
+    updateChoroplethLegend();
+    applyZoomLabelVisibility();
+
+    // raise river corridors pane above town choropleth (overlayPane = 400)
+    mapState.map.getPane("riverCorridorsPane").style.zIndex = 410;
+
+    // boost river corridors tier 1 opacity
+    if (mapState.riverCorridorsLayer) {
+      mapState.riverCorridorsLayer.setStyle({
+        color: defaultColors.riverColor,
+        weight: 1.5,
+        opacity: 0.9,
+        fillColor: defaultColors.riverColor,
+        fillOpacity: 0.55,
+      });
+    }
+  } else {
+    restoreRiverCorridorsDefaultStyle();
+  }
+}
+
+// restore river corridors to default style
+function restoreRiverCorridorsDefaultStyle() {
+  // safety check, then set river corridors boolean to false 
+  if (!mapState.riverCorridorsFocused) return;
+  mapState.riverCorridorsFocused = false;
+
+  // restore pane below towns
+  mapState.map.getPane("riverCorridorsPane").style.zIndex = 350;
+
+  // restore river corridors tier 1 style
+  if (mapState.riverCorridorsLayer) {
+    mapState.riverCorridorsLayer.setStyle({
+      color: defaultColors.riverColor,
+      weight: 1,
+      opacity: 0.7,
+      fillColor: defaultColors.riverColor,
+      fillOpacity: 0.2,
+    });
   }
 }
 

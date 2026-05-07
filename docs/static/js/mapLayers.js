@@ -324,7 +324,10 @@ function initializeFundingBubbleLayer() {
   mapState.fundingBubbleLabels = L.layerGroup();
   initializeTownOutlines(bubbleLayerGroup);
 
-  const maxFunding = d3.max(Object.values(statsByTown), (d) => +d.funding_total || 0);
+  const maxFunding = d3.max(
+    Object.values(statsByTown),
+    (d) => +d.funding_total || 0,
+  );
   const radiusScale = d3.scaleSqrt().domain([0, maxFunding]).range([0, 60]);
 
   towns.features.forEach((feature) => {
