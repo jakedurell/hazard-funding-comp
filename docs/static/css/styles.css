@@ -373,7 +373,7 @@ body {
 
 .special-overlay-label {
   font-size: 1.05em;
-  color: #405d8c;
+  color: #0085a1;
   font-weight: 500;
   margin-bottom: 0;
   letter-spacing: 0.01em;
@@ -389,7 +389,7 @@ body {
   margin: 0 auto 1em auto;
 }
 #choropleth-control-special button {
-  background-color: #405d8c;
+  background-color: #0085a1;
   color: white;
   font-size: 1.2em;
   border: none;
@@ -399,14 +399,14 @@ body {
   transition: background-color 0.3s;
 }
 #choropleth-control-special button:hover {
-  background-color: #304669;
+  background-color: #00a8cc;
 }
 #choropleth-control-special button:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
 }
 #choropleth-control-special button.active {
-  background-color: #304669;
+  background-color: #00a8cc;
 }
 @media (max-width: 600px) {
   #choropleth-control-special {

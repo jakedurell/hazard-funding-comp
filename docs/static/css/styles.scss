@@ -408,7 +408,7 @@ body {
 // special overlay buttons (Quadrants, Population)
 .special-overlay-label {
   font-size: 1.05em;
-  color: $secondary-color;
+  color: $primary-color;
   font-weight: 500;
   margin-bottom: 0;
   letter-spacing: 0.01em;
@@ -423,7 +423,7 @@ body {
   margin: 0 auto 1em auto;
 
   button {
-    background-color: $secondary-color;
+    background-color: $primary-color;
     color: white;
     font-size: 1.2em;
     border: none;
@@ -433,7 +433,7 @@ body {
     transition: background-color 0.3s;
 
     &:hover {
-      background-color: darken($secondary-color, 10%);
+      background-color: $hover-color;
     }
 
     &:disabled {
@@ -442,7 +442,7 @@ body {
     }
 
     &.active {
-      background-color: darken($secondary-color, 10%);
+      background-color: $hover-color;
     }
   }
 
