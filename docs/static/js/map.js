@@ -506,15 +506,21 @@ function updateToggleLabels() {
 // toggle choropleth labels based on zoom level to avoid visual clutter
 function applyZoomLabelVisibility() {
   const zoom = mapState.map.getZoom();
-  const popBubbleActive = mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
-  const fundBubbleActive = mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer);
-  const quadrantActive = mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
+  const popBubbleActive =
+    mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+  const fundBubbleActive =
+    mapState.fundingBubbleLayer &&
+    mapState.map.hasLayer(mapState.fundingBubbleLayer);
+  const quadrantActive =
+    mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
 
   // these views have no text labels — suppress everything
   if (quadrantActive || mapState.riverCorridorsFocused) {
-    if (mapState.choroplethLabels) mapState.map.removeLayer(mapState.choroplethLabels);
+    if (mapState.choroplethLabels)
+      mapState.map.removeLayer(mapState.choroplethLabels);
     if (mapState.bubbleLabels) mapState.map.removeLayer(mapState.bubbleLabels);
-    if (mapState.fundingBubbleLabels) mapState.map.removeLayer(mapState.fundingBubbleLabels);
+    if (mapState.fundingBubbleLabels)
+      mapState.map.removeLayer(mapState.fundingBubbleLabels);
     return;
   }
 
@@ -526,7 +532,11 @@ function applyZoomLabelVisibility() {
       : mapState.choroplethLabels;
 
   // hide all other label layers
-  [mapState.bubbleLabels, mapState.fundingBubbleLabels, mapState.choroplethLabels].forEach((layer) => {
+  [
+    mapState.bubbleLabels,
+    mapState.fundingBubbleLabels,
+    mapState.choroplethLabels,
+  ].forEach((layer) => {
     if (layer && layer !== activeLabels) mapState.map.removeLayer(layer);
   });
 
@@ -642,6 +652,19 @@ function handleOverlaySelection(selectedOverlay) {
   updateDashboard();
 }
 
+// clear choropleth fill, legend, and labels — called before activating any special overlay
+function clearChoroplethFill(weight = 1) {
+  mapState.choroplethMetric = null;
+  mapState.choroplethLayer.setStyle(() => ({
+    color: defaultColors.defaultGray,
+    weight,
+    fillOpacity: 0,
+  }));
+  updateChoroplethLegend();
+  if (mapState.choroplethLabels)
+    mapState.map.removeLayer(mapState.choroplethLabels);
+}
+
 // utility function to remove bubble layer if it exists
 function removeBubbleLayerIfPresent() {
   if (mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer)) {
@@ -651,7 +674,10 @@ function removeBubbleLayerIfPresent() {
 
 // utility function to remove funding bubble layer if it exists
 function removeFundingBubbleLayerIfPresent() {
-  if (mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer)) {
+  if (
+    mapState.fundingBubbleLayer &&
+    mapState.map.hasLayer(mapState.fundingBubbleLayer)
+  ) {
     mapState.map.removeLayer(mapState.fundingBubbleLayer);
   }
 }
@@ -670,7 +696,8 @@ function updateMetric() {
   const bubbleActive =
     mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
   const fundingBubbleActive =
-    mapState.fundingBubbleLayer && mapState.map.hasLayer(mapState.fundingBubbleLayer);
+    mapState.fundingBubbleLayer &&
+    mapState.map.hasLayer(mapState.fundingBubbleLayer);
 
   if (quadrantActive) {
     // quadrant layer is visible: update its colors for the new model and keep its legend
@@ -685,7 +712,11 @@ function updateMetric() {
       };
     });
     updateQuadrantLegend();
-  } else if (bubbleActive || fundingBubbleActive || mapState.riverCorridorsFocused) {
+  } else if (
+    bubbleActive ||
+    fundingBubbleActive ||
+    mapState.riverCorridorsFocused
+  ) {
     // bubble / river layer is visible: model changed, but don't touch the choropleth or its legend
   } else {
     // choropleth is active: update metric, style, labels, and legend
@@ -739,16 +770,7 @@ function toggleBubbleLayer() {
   }
 
   // set choropleth to null (default borders, no fill), update legend, hide choropleth labels
-  mapState.choroplethMetric = null;
-  mapState.choroplethLayer.setStyle(() => ({
-    color: defaultColors.defaultGray,
-    weight: 1,
-    fillOpacity: 0,
-  }));
-  updateChoroplethLegend();
-  if (mapState.choroplethLabels) {
-    mapState.map.removeLayer(mapState.choroplethLabels);
-  }
+  clearChoroplethFill();
 }
 
 // focus/unfocus the river corridors view — brightens corridors, clears choropleth fill
@@ -757,14 +779,8 @@ function toggleRiverCorridorsFocusView() {
 
   if (mapState.riverCorridorsFocused) {
     // clear choropleth fill, suppress labels, set thin town outlines
-    mapState.choroplethMetric = null;
-    mapState.choroplethLayer.setStyle(() => ({
-      color: defaultColors.defaultGray,
-      weight: 0.25,
-      fillOpacity: 0,
-    }));
-    updateChoroplethLegend();
-    applyZoomLabelVisibility();
+    clearChoroplethFill(0.25);
+    applyZoomLabelVisibility(); // hide labels
 
     // raise river corridors pane above town choropleth (overlayPane = 400)
     mapState.map.getPane("riverCorridorsPane").style.zIndex = 410;
@@ -786,7 +802,7 @@ function toggleRiverCorridorsFocusView() {
 
 // restore river corridors to default style
 function restoreRiverCorridorsDefaultStyle() {
-  // safety check, then set river corridors boolean to false 
+  // safety check, then set river corridors boolean to false
   if (!mapState.riverCorridorsFocused) return;
   mapState.riverCorridorsFocused = false;
 
@@ -816,16 +832,8 @@ function toggleFundingBubbleLayer() {
     applyZoomLabelVisibility();
   }
 
-  mapState.choroplethMetric = null;
-  mapState.choroplethLayer.setStyle(() => ({
-    color: defaultColors.defaultGray,
-    weight: 1,
-    fillOpacity: 0,
-  }));
-  updateChoroplethLegend();
-  if (mapState.choroplethLabels) {
-    mapState.map.removeLayer(mapState.choroplethLabels);
-  }
+  // clear choropleth
+  clearChoroplethFill();
 }
 
 // toggle quadrant layer on/off
@@ -835,15 +843,8 @@ function toggleQuadrantLayer() {
     mapState.quadrantLayer = initializeQuadrantLayer();
   }
 
-  // remove other layers
-  removeBubbleLayerIfPresent();
-  // clear choropleth fill
-  mapState.choroplethMetric = null;
-  mapState.choroplethLayer.setStyle(() => ({
-    color: defaultColors.defaultGray,
-    weight: 1,
-    fillOpacity: 0,
-  }));
+  // clear choropleth
+  clearChoroplethFill();
 
   // add quadrant layer
   if (!mapState.map.hasLayer(mapState.quadrantLayer)) {
