@@ -685,8 +685,8 @@ function updateMetric() {
       };
     });
     updateQuadrantLegend();
-  } else if (bubbleActive || fundingBubbleActive) {
-    // bubble layer is visible: model changed, but don't touch the choropleth or its legend
+  } else if (bubbleActive || fundingBubbleActive || mapState.riverCorridorsFocused) {
+    // bubble / river layer is visible: model changed, but don't touch the choropleth or its legend
   } else {
     // choropleth is active: update metric, style, labels, and legend
     const metricKey = metricEngine.getMetricKey();
