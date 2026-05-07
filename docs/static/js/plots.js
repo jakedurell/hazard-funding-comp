@@ -65,7 +65,7 @@ function buildScatterData(model) {
     .map((d) => ({
       town_name: d.town_name,
       need: +d[`need_${model}`],
-      funding: Math.log1p(+d.funding_total),
+      funding: Math.log1p(+d.funding_per_capita),
       quadrant: d[quadKey],
       population: +d.population || 0,
     }))
@@ -100,7 +100,12 @@ function renderQuadrantScatter(selectedTown) {
 
   const y = d3
     .scaleLinear()
-    .domain(d3.extent(data, (d) => d.funding))
+    .domain(
+      d3.extent(
+        data.filter((d) => d.funding > 0),
+        (d) => d.funding,
+      ),
+    )
     .nice()
     .range([height - margin.bottom, margin.top]);
 
@@ -123,8 +128,19 @@ function renderQuadrantScatter(selectedTown) {
     .call(
       d3
         .axisLeft(y)
-        .tickFormat((v) => (v === 0 ? "$0" : d3.format("$.1s")(Math.expm1(v)))),
+        .tickFormat((v) => (v === 0 ? "$0" : d3.format("$.2s")(Math.expm1(v)) + "/cap")),
     );
+
+  // y-axis label
+  svg
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -(margin.top + (height - margin.top - margin.bottom) / 2))
+    .attr("y", 12)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "11px")
+    .attr("fill", "#555")
+    .text("Funding per capita (adj.)");
 
   // median lines
   svg
@@ -179,7 +195,8 @@ function renderQuadrantScatter(selectedTown) {
         d.need.toFixed(2) +
         "\n" +
         "Funding: $" +
-        Math.round(Math.expm1(d.funding)).toLocaleString(),
+        Math.round(Math.expm1(d.funding)).toLocaleString() +
+        "/capita",
     );
 
   // add quadrant annotations
@@ -193,7 +210,7 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
   // position lables based on median lines
   const labels = [
     {
-      text: "Overfunded",
+      text: "Aligned",
       x: xMed + 0.75 * (xMax - xMed),
       y: yMed + 0.95 * (yMax - yMed),
     },
@@ -203,12 +220,12 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
       y: yMed - 0.5 * (yMed - yMin),
     },
     {
-      text: "Low Priority",
+      text: "Overfunded",
       x: xMed - 0.75 * (xMed - xMin),
       y: yMed + 0.95 * (yMax - yMed),
     },
     {
-      text: "Aligned",
+      text: "Low Priority",
       x: xMed - 0.75 * (xMed - xMin),
       y: yMed - 0.5 * (yMed - yMin),
     },
