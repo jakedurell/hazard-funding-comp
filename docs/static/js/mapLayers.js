@@ -291,6 +291,8 @@ function popupMouseEvents(layer) {
 
 // highlight marker on hover
 function highlightMarker(layer) {
+  layer._originalRadius = layer.options.radius;
+  layer._originalColor = layer.options.color;
   layer.setStyle({
     radius: layer.options.radius * 2,
     color: "#ffffff",
@@ -298,11 +300,10 @@ function highlightMarker(layer) {
 }
 
 // reset marker style on mouseout
-// !!! hardcoded !!! to match createMarkers
 function resetMarkerStyle(layer) {
   layer.setStyle({
-    radius: 2,
-    color: "black",
+    radius: layer._originalRadius ?? layer.options.radius,
+    color: layer._originalColor ?? "black",
   });
 }
 
