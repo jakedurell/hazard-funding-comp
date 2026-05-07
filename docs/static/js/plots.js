@@ -65,7 +65,8 @@ function buildScatterData(model) {
     .map((d) => ({
       town_name: d.town_name,
       need: +d[`need_${model}`],
-      funding: Math.log1p(+d.funding_per_capita),
+      funding: +d.funding_rank,
+      funding_pc: +d.funding_per_capita,
       quadrant: d[quadKey],
       population: +d.population || 0,
     }))
@@ -125,11 +126,7 @@ function renderQuadrantScatter(selectedTown) {
   svg
     .append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(
-      d3
-        .axisLeft(y)
-        .tickFormat((v) => (v === 0 ? "$0" : d3.format("$.2s")(Math.expm1(v)) + "/cap")),
-    );
+    .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
 
   // y-axis label
   svg
@@ -140,7 +137,7 @@ function renderQuadrantScatter(selectedTown) {
     .attr("text-anchor", "middle")
     .attr("font-size", "11px")
     .attr("fill", "#555")
-    .text("Funding per capita (adj.)");
+    .text("Funding per capita (percentile rank)");
 
   // median lines
   svg
@@ -168,7 +165,7 @@ function renderQuadrantScatter(selectedTown) {
     .data(data)
     .join("circle")
     .attr("cx", (d) => x(d.need))
-    .attr("cy", (d) => y(d.funding))
+    .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(y.domain()[0])))
     // .attr("r", (d) => (d.town_name === selectedTown ? 6 : 3)) // highlight selected town with larger radius
     .attr("r", (d) =>
       d.town_name === selectedTown ? 7 : Math.sqrt(d.population) * 0.05,
@@ -194,9 +191,11 @@ function renderQuadrantScatter(selectedTown) {
         "Need: " +
         d.need.toFixed(2) +
         "\n" +
-        "Funding: $" +
-        Math.round(Math.expm1(d.funding)).toLocaleString() +
-        "/capita",
+        "Funding rank: " +
+        d3.format(".0%")(d.funding) +
+        (d.funding_pc > 0
+          ? " ($" + Math.round(d.funding_pc).toLocaleString() + "/cap)"
+          : ""),
     );
 
   // add quadrant annotations

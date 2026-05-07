@@ -25,8 +25,8 @@ const choroplethConfig = {
     scale: d3.scaleDiverging(d3.interpolatePuOr).domain([-1, 0, 1]),
     label: "Gap (Funding vs Need) vs VT Avg",
   },
-  funding_total: {
-    scale: d3.scaleSequential(d3.interpolatePurples).domain([0, 3e6]),
+  funding_rank: {
+    scale: d3.scaleSequential(d3.interpolatePurples).domain([0, 1]),
     label: "Funding",
   },
   funding_rel: {

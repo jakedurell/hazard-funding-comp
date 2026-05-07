@@ -27,7 +27,8 @@ function renderRankings(metric, isRelative, selectedTown) {
   const rankKey = metricEngine.getRankKey();
   const rawKey = metricKey
     .replace(/^(\w+)_rank_(.+)$/, "$1_$2") // swaps a middle "_rank_" with "_" if present
-    .replace(/_rank$/, ""); // strips a trailing "_rank" if present
+    .replace(/_rank$/, "") // strips a trailing "_rank" if present
+    .replace(/^funding$/, "funding_per_capita"); // funding_rank → funding_per_capita for display
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank
   const townData = rankingsData
@@ -146,14 +147,11 @@ function renderRankings(metric, isRelative, selectedTown) {
     if (!isRelative && vtBaseline) {
       let vtValue;
       let vtLabel = "VT";
-      // backend uses geometric mean of non-zero funding: expm1(mean(log1p(x)))
-      // log-transform non-zero values to compute mean, then reverse-transform to get VT baseline value for funding
-      if (metricKey === "funding_total") {
-        const nonZeroLogs = townData
-          .filter((d) => +d.funding_total > 0)
-          .map((d) => Math.log1p(+d.funding_total));
-        vtValue = nonZeroLogs.length > 0 ? Math.expm1(d3.mean(nonZeroLogs)) : 0;
-        vtLabel = "VT (geometric mean)";
+      // use funding_rank to identify non-zero funded towns; take median of their funding_total as VT reference
+      if (metricKey === "funding_rank") {
+        const nonZero = townData.filter((d) => +d.funding_rank > 0);
+        vtValue = d3.median(nonZero, (d) => +d.funding_per_capita);
+        vtLabel = "VT (median)";
         // otherwise just take the value
       } else {
         vtValue = vtBaseline[rawKey];

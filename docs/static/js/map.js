@@ -558,13 +558,9 @@ const metricEngine = {
     // safety check
     if (!baseMetric) return null;
 
-    // non-model metrics
-    if (baseMetric === "funding") {
-      return isRelative ? "funding_rel" : "funding_total";
-    }
-
-    if (baseMetric === "vulnerability") {
-      return isRelative ? "vulnerability_rel" : "vulnerability_rank";
+    // non-model metrics share the same _rel / _rank pattern
+    if (baseMetric === "funding" || baseMetric === "vulnerability") {
+      return isRelative ? `${baseMetric}_rel` : `${baseMetric}_rank`;
     }
 
     // model-based
