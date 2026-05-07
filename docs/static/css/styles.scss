@@ -196,6 +196,11 @@ body {
   margin-bottom: 1em;
 }
 
+// smooth transitions for choropleth fill colors
+.leaflet-overlay-pane svg path {
+  transition: fill 0.3s ease, fill-opacity 0.3s ease;
+}
+
 // choropleth markers
 .choropleth-label {
   @include flex-center();

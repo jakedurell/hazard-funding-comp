@@ -10,7 +10,6 @@ const modelDisplayNames = {
 // render plot based on selected metric and town
 function renderPlot(metric, selectedTown) {
   showMetricDefinition(metric);
-  clearPlotContainer();
   renderQuadrantScatter(selectedTown);
   showPlotHeader(true);
   showPlotCaption();
@@ -22,12 +21,6 @@ function showMetricDefinition(metricKey) {
   all.forEach((el) => (el.style.display = "none"));
   const sel = document.getElementById("def-" + metricKey);
   if (sel) sel.style.display = "block";
-}
-
-// utility to clear plot container before rendering a new plot
-function clearPlotContainer() {
-  const container = document.getElementById("plot-container");
-  container.innerHTML = "";
 }
 
 // show/hide plot title and model subtitle
@@ -75,22 +68,22 @@ function buildScatterData(model) {
 
 // render quadrant scatter plot with median lines and interactive labels based on current model, highlighting selected town
 function renderQuadrantScatter(selectedTown) {
-  // build data for current model
   const data = buildScatterData(metricEngine.model);
-
-  // set up SVG canvas dimensions and margins
   const container = document.getElementById("plot-container");
-  container.innerHTML = ""; // clear
   const width = container.clientWidth;
   const height = 420;
   const margin = { top: 40, right: 20, bottom: 50, left: 60 };
 
-  // create SVG element for D3 plotting
-  const svg = d3
-    .select(container)
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  // select or create persistent SVG — preserves circles between renders for transitions
+  let svg = d3.select(container).select("svg.scatter-svg");
+  if (svg.empty()) {
+    svg = d3
+      .select(container)
+      .append("svg")
+      .attr("class", "scatter-svg")
+      .attr("width", width)
+      .attr("height", height);
+  }
 
   // scales
   const x = d3
@@ -117,20 +110,26 @@ function renderQuadrantScatter(selectedTown) {
     (d) => d.funding,
   );
 
-  // axes
+  // snap-update all static elements (axes, lines, labels)
+  svg
+    .selectAll(".x-axis, .y-axis, .y-label, .median-line, .quadrant-labels")
+    .remove();
+
   svg
     .append("g")
+    .attr("class", "x-axis")
     .attr("transform", `translate(0,${height - margin.bottom})`)
     .call(d3.axisBottom(x));
 
   svg
     .append("g")
+    .attr("class", "y-axis")
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
 
-  // y-axis label
   svg
     .append("text")
+    .attr("class", "y-label")
     .attr("transform", "rotate(-90)")
     .attr("x", -(margin.top + (height - margin.top - margin.bottom) / 2))
     .attr("y", 12)
@@ -139,9 +138,9 @@ function renderQuadrantScatter(selectedTown) {
     .attr("fill", "#555")
     .text("Funding per capita (percentile rank)");
 
-  // median lines
   svg
     .append("line")
+    .attr("class", "median-line")
     .attr("x1", x(xMed))
     .attr("x2", x(xMed))
     .attr("y1", margin.top)
@@ -151,6 +150,7 @@ function renderQuadrantScatter(selectedTown) {
 
   svg
     .append("line")
+    .attr("class", "median-line")
     .attr("y1", y(yMed))
     .attr("y2", y(yMed))
     .attr("x1", margin.left)
@@ -158,32 +158,77 @@ function renderQuadrantScatter(selectedTown) {
     .attr("stroke", "#999")
     .attr("stroke-dasharray", "4");
 
-  // points
-  svg
-    .append("g")
+  // persistent dots group — create once, raise above median lines after each static redraw
+  let dotsGroup = svg.select("g.dots");
+  if (dotsGroup.empty()) {
+    dotsGroup = svg.append("g").attr("class", "dots");
+  }
+  dotsGroup.raise(); // the SVG equivalent of z-index: ensure dots are above static elements for better interactivity
+
+  // keyed join by town_name so D3 can match circles across renders and transition them
+  dotsGroup
     .selectAll("circle")
-    .data(data)
-    .join("circle")
-    .attr("cx", (d) => x(d.need))
-    .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(y.domain()[0])))
-    // .attr("r", (d) => (d.town_name === selectedTown ? 6 : 3)) // highlight selected town with larger radius
-    .attr("r", (d) =>
-      d.town_name === selectedTown ? 7 : Math.sqrt(d.population) * 0.05,
-    ) // scale radius by population
-    .attr("fill", (d) => quadrantColors[d.quadrant] ?? "#888")
-    .attr("stroke", (d) => (d.town_name === selectedTown ? "#000" : "none"))
-    .attr("stroke-width", (d) => (d.town_name === selectedTown ? 2 : 0))
-    .attr("opacity", (d) =>
-      selectedTown === "top" || d.town_name === selectedTown ? 0.9 : 0.3,
+    .data(data, (d) => d.town_name)
+    .join(
+      // first render: fade in circles from zero with transition
+      (enter) =>
+        enter
+          .append("circle")
+          .call((c) => c.append("title")) // add tooltip slot on enter
+          .attr("cx", (d) => x(d.need))
+          .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(y.domain()[0])))
+          .attr("fill", (d) => quadrantColors[d.quadrant] ?? "#888")
+          .attr("stroke", (d) =>
+            d.town_name === selectedTown ? "#000" : "none",
+          )
+          .attr("stroke-width", (d) => (d.town_name === selectedTown ? 2 : 0))
+          .attr("r", 0)
+          .attr("opacity", 0)
+          .call((enter) =>
+            enter
+              .transition()
+              .duration(400)
+              .attr("r", (d) =>
+                d.town_name === selectedTown
+                  ? 7
+                  : Math.sqrt(d.population) * 0.05,
+              )
+              .attr("opacity", (d) =>
+                selectedTown === "top" || d.town_name === selectedTown
+                  ? 0.9
+                  : 0.3,
+              ),
+          ),
+      // subsequent renders: transition existing circles to new positions and styles based on updated model values
+      (update) =>
+        update
+          .transition()
+          .duration(400)
+          .attr("cx", (d) => x(d.need))
+          .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(y.domain()[0])))
+          .attr("r", (d) =>
+            d.town_name === selectedTown ? 7 : Math.sqrt(d.population) * 0.05,
+          )
+          .attr("fill", (d) => quadrantColors[d.quadrant] ?? "#888")
+          .attr("stroke", (d) =>
+            d.town_name === selectedTown ? "#000" : "none",
+          )
+          .attr("stroke-width", (d) => (d.town_name === selectedTown ? 2 : 0))
+          .attr("opacity", (d) =>
+            selectedTown === "top" || d.town_name === selectedTown ? 0.9 : 0.3,
+          ),
     )
-    // on click, set dropdown to selected town and trigger change event to update map and stats card
+    // add click handler to update selected town on click
     .on("click", (_, d) => {
       const dropdown = document.getElementById("towns-dropdown");
       dropdown.value = d.town_name;
       dropdown.dispatchEvent(new Event("change"));
-    })
-    // hover tooltip
-    .append("title")
+    });
+
+  // update tooltip text on all circles after join
+  dotsGroup
+    .selectAll("circle")
+    .select("title")
     .text(
       (d) =>
         d.town_name +
@@ -198,7 +243,7 @@ function renderQuadrantScatter(selectedTown) {
           : ""),
     );
 
-  // add quadrant annotations
+  // quadrant labels — appended after dotsGroup.raise() so they sit on top
   addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin);
 }
 
@@ -238,6 +283,7 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
   // add labels to plot with styling and positioning
   svg
     .append("g")
+    .attr("class", "quadrant-labels")
     .selectAll("text")
     .data(labels)
     .join("text")
