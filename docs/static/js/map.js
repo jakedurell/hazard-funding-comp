@@ -613,43 +613,39 @@ const metricEngine = {
 
 // change map overlay based on selected option
 function handleOverlaySelection(selectedOverlay) {
-  // early exit if no overlay selected
   if (!selectedOverlay) return;
 
-  // add special layers and exit if selected (bubbles, quadrants, river corridors)
+  // special overlays: reset all state, then activate the chosen one
   if (selectedOverlay === "Population") {
-    removeQuadrantLayerIfPresent();
-    removeFundingBubbleLayerIfPresent();
-    restoreRiverCorridorsDefaultStyle();
+    resetOverlayState();
     toggleBubbleLayer();
     return;
   } else if (selectedOverlay === "Funding Bubble") {
-    removeQuadrantLayerIfPresent();
-    removeBubbleLayerIfPresent();
-    restoreRiverCorridorsDefaultStyle();
+    resetOverlayState();
     toggleFundingBubbleLayer();
     return;
   } else if (selectedOverlay === "Quadrants") {
-    removeBubbleLayerIfPresent();
-    removeFundingBubbleLayerIfPresent();
-    restoreRiverCorridorsDefaultStyle();
+    resetOverlayState();
     toggleQuadrantLayer();
     return;
   } else if (selectedOverlay === "River Corridors") {
-    removeBubbleLayerIfPresent();
-    removeFundingBubbleLayerIfPresent();
-    removeQuadrantLayerIfPresent();
+    resetOverlayState();
     toggleRiverCorridorsFocusView();
     return;
   }
 
-  // update base metric, remove layers, and update dashboard
+  // choropleth metric overlay
+  resetOverlayState();
   metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
-  removeBubbleLayerIfPresent();
-  removeFundingBubbleLayerIfPresent();
-  removeQuadrantLayerIfPresent();
-  restoreRiverCorridorsDefaultStyle();
   updateDashboard();
+}
+
+// tear down all special overlays before activating a new one
+function resetOverlayState() {
+  hideLayer(mapState.bubbleLayer);
+  hideLayer(mapState.fundingBubbleLayer);
+  hideLayer(mapState.quadrantLayer);
+  restoreRiverCorridorsDefaultStyle();
 }
 
 // clear choropleth fill, legend, and labels — called before activating any special overlay
@@ -665,28 +661,24 @@ function clearChoroplethFill(weight = 1) {
     mapState.map.removeLayer(mapState.choroplethLabels);
 }
 
-// utility function to remove bubble layer if it exists
-function removeBubbleLayerIfPresent() {
-  if (mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer)) {
-    mapState.map.removeLayer(mapState.bubbleLayer);
-  }
+// layer visibility helpers
+function showLayer(layer) {
+  if (layer && !mapState.map.hasLayer(layer)) mapState.map.addLayer(layer);
+}
+function hideLayer(layer) {
+  if (layer && mapState.map.hasLayer(layer)) mapState.map.removeLayer(layer);
 }
 
-// utility function to remove funding bubble layer if it exists
-function removeFundingBubbleLayerIfPresent() {
-  if (
-    mapState.fundingBubbleLayer &&
-    mapState.map.hasLayer(mapState.fundingBubbleLayer)
-  ) {
-    mapState.map.removeLayer(mapState.fundingBubbleLayer);
-  }
-}
-
-// utility function to remove quadrant layer if it exists
-function removeQuadrantLayerIfPresent() {
-  if (mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer)) {
-    mapState.map.removeLayer(mapState.quadrantLayer);
-  }
+// update all dashboard components after any state change
+function updateDashboard() {
+  updateMetric();
+  renderPlot(metricEngine.baseMetric, mapState.selectedTown);
+  renderStatsCard(mapState.selectedTown);
+  renderRankings(
+    metricEngine.baseMetric,
+    metricEngine.isRelative,
+    mapState.selectedTown,
+  );
 }
 
 // render choropleth based on selected metric and town
@@ -729,18 +721,6 @@ function updateMetric() {
   }
 }
 
-// update all dashboard components after any state change
-function updateDashboard() {
-  updateMetric();
-  renderPlot(metricEngine.baseMetric, mapState.selectedTown);
-  renderStatsCard(mapState.selectedTown);
-  renderRankings(
-    metricEngine.baseMetric,
-    metricEngine.isRelative,
-    mapState.selectedTown,
-  );
-}
-
 // update choropleth legend based on current metric
 function updateChoroplethLegend() {
   // remove any existing choropleth legend
@@ -764,13 +744,52 @@ function toggleBubbleLayer() {
   }
 
   // show bubble layer if not present
-  if (!mapState.map.hasLayer(mapState.bubbleLayer)) {
-    mapState.map.addLayer(mapState.bubbleLayer);
-    applyZoomLabelVisibility(); // apply zoom gating to bubble labels
-  }
+  showLayer(mapState.bubbleLayer);
+  applyZoomLabelVisibility(); // apply zoom-gating to labels
 
   // set choropleth to null (default borders, no fill), update legend, hide choropleth labels
   clearChoroplethFill();
+}
+
+// toggle funding bubble layer on/off
+function toggleFundingBubbleLayer() {
+  if (!mapState.fundingBubbleLayer) {
+    mapState.fundingBubbleLayer = initializeFundingBubbleLayer();
+  }
+
+  // show funding bubble layer if not present
+  showLayer(mapState.fundingBubbleLayer);
+  applyZoomLabelVisibility(); // apply zoom-gating to labels
+
+  // clear choropleth
+  clearChoroplethFill();
+}
+
+// toggle quadrant layer on/off
+function toggleQuadrantLayer() {
+  // initialize quadrant layer if it doesn't exist yet (first time toggling on)
+  if (!mapState.quadrantLayer) {
+    mapState.quadrantLayer = initializeQuadrantLayer();
+  }
+
+  // clear choropleth and add quadrant layer
+  clearChoroplethFill();
+  showLayer(mapState.quadrantLayer);
+
+  // suppress any visible labels (quadrant has no text labels)
+  applyZoomLabelVisibility();
+  // update legend to quadrant legend
+  updateQuadrantLegend();
+}
+
+// update quadrant legend
+function updateQuadrantLegend() {
+  // remove existing choropleth legend if present
+  if (mapState.choroplethLegend) {
+    mapState.map.removeControl(mapState.choroplethLegend);
+  }
+
+  mapState.choroplethLegend = addLegend("quadrant").addTo(mapState.map);
 }
 
 // focus/unfocus the river corridors view — brightens corridors, clears choropleth fill
@@ -819,52 +838,6 @@ function restoreRiverCorridorsDefaultStyle() {
       fillOpacity: 0.2,
     });
   }
-}
-
-// toggle funding bubble layer on/off
-function toggleFundingBubbleLayer() {
-  if (!mapState.fundingBubbleLayer) {
-    mapState.fundingBubbleLayer = initializeFundingBubbleLayer();
-  }
-
-  if (!mapState.map.hasLayer(mapState.fundingBubbleLayer)) {
-    mapState.map.addLayer(mapState.fundingBubbleLayer);
-    applyZoomLabelVisibility();
-  }
-
-  // clear choropleth
-  clearChoroplethFill();
-}
-
-// toggle quadrant layer on/off
-function toggleQuadrantLayer() {
-  // initialize quadrant layer if it doesn't exist yet (first time toggling on)
-  if (!mapState.quadrantLayer) {
-    mapState.quadrantLayer = initializeQuadrantLayer();
-  }
-
-  // clear choropleth
-  clearChoroplethFill();
-
-  // add quadrant layer
-  if (!mapState.map.hasLayer(mapState.quadrantLayer)) {
-    mapState.map.addLayer(mapState.quadrantLayer);
-  }
-
-  // suppress any visible labels (quadrant has no text labels)
-  applyZoomLabelVisibility();
-  // update legend to quadrant legend
-  updateQuadrantLegend();
-}
-
-// update quadrant legend
-function updateQuadrantLegend() {
-  // remove existing choropleth legend if present
-  if (mapState.choroplethLegend) {
-    mapState.map.removeControl(mapState.choroplethLegend);
-  }
-
-  mapState.choroplethLegend = addLegend("quadrant").addTo(mapState.map);
 }
 
 //////////////////////////////////////////////////////////
