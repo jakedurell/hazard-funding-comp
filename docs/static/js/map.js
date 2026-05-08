@@ -806,13 +806,7 @@ function toggleRiverCorridorsFocusView() {
 
     // boost river corridors tier 1 opacity
     if (mapState.riverCorridorsLayer) {
-      mapState.riverCorridorsLayer.setStyle({
-        color: defaultColors.riverColor,
-        weight: 1.5,
-        opacity: 0.9,
-        fillColor: defaultColors.riverColor,
-        fillOpacity: 0.55,
-      });
+      mapState.riverCorridorsLayer.setStyle(RIVER_STYLE_FOCUSED);
     }
   } else {
     restoreRiverCorridorsDefaultStyle();
@@ -830,13 +824,7 @@ function restoreRiverCorridorsDefaultStyle() {
 
   // restore river corridors tier 1 style
   if (mapState.riverCorridorsLayer) {
-    mapState.riverCorridorsLayer.setStyle({
-      color: defaultColors.riverColor,
-      weight: 1,
-      opacity: 0.7,
-      fillColor: defaultColors.riverColor,
-      fillOpacity: 0.2,
-    });
+    mapState.riverCorridorsLayer.setStyle(RIVER_STYLE_DEFAULT);
   }
 }
 

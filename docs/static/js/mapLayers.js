@@ -3,6 +3,31 @@
 // global for popups
 let lockedPopupLayer = null;
 
+// river corridor style constants
+// default style for river corridors layer at state-level zoom
+const RIVER_STYLE_DEFAULT = {
+  color: defaultColors.riverColor,
+  weight: 1,
+  opacity: 0.7,
+  fillColor: defaultColors.riverColor,
+  fillOpacity: 0.2,
+};
+// bolder style for the river corridors layer when focused
+const RIVER_STYLE_FOCUSED = {
+  color: defaultColors.riverColor,
+  weight: 1.5,
+  opacity: 0.9,
+  fillColor: defaultColors.riverColor,
+  fillOpacity: 0.55,
+};
+// zoomed-in style for the river corridors
+// tier 2 style: no stroke — adjacent detailed polygons create visible seams with a stroke
+const RIVER_STYLE_TIER2 = {
+  stroke: false,
+  fillColor: defaultColors.riverColor,
+  fillOpacity: 0.3,
+};
+
 // get color for choropleth based on metric and value
 function getColorForMetric(metric, value) {
   // Remove model suffix (order matters - check eal_per_capita before eal)
@@ -476,20 +501,7 @@ function initializeRiverCorridorsLayer(
 ) {
   // tier 1: stroked outlines help sparse simplified polygons stand out at state zoom
   // tier 2: no stroke — adjacent detailed polygons create visible seams with a stroke
-  const style =
-    tier === 1
-      ? {
-          color: defaultColors.riverColor,
-          weight: 1,
-          opacity: 0.7,
-          fillColor: defaultColors.riverColor,
-          fillOpacity: 0.2,
-        }
-      : {
-          stroke: false,
-          fillColor: defaultColors.riverColor,
-          fillOpacity: 0.3,
-        };
+  const style = tier === 1 ? RIVER_STYLE_DEFAULT : RIVER_STYLE_TIER2;
 
   return L.geoJSON(data, { style, pane, interactive: false });
 }
