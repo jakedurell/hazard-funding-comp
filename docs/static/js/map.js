@@ -11,9 +11,9 @@ const mapState = {
   riverCorridorsTier2Layer: null,
   riverCorridorsFocused: false,
 
-  bubbleLayer: null,
+  popBubbleLayer: null,
+  popBubbleLabels: null,
   fundingBubbleLayer: null,
-  bubbleLabels: null,
   fundingBubbleLabels: null,
   quadrantLayer: null,
   quadrantLegend: null,
@@ -522,7 +522,7 @@ function updateToggleLabels() {
 function applyZoomLabelVisibility() {
   const zoom = mapState.map.getZoom();
   const popBubbleActive =
-    mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+    mapState.popBubbleLayer && mapState.map.hasLayer(mapState.popBubbleLayer);
   const fundBubbleActive =
     mapState.fundingBubbleLayer &&
     mapState.map.hasLayer(mapState.fundingBubbleLayer);
@@ -533,7 +533,8 @@ function applyZoomLabelVisibility() {
   if (quadrantActive || mapState.riverCorridorsFocused) {
     if (mapState.choroplethLabels)
       mapState.map.removeLayer(mapState.choroplethLabels);
-    if (mapState.bubbleLabels) mapState.map.removeLayer(mapState.bubbleLabels);
+    if (mapState.popBubbleLabels)
+      mapState.map.removeLayer(mapState.popBubbleLabels);
     if (mapState.fundingBubbleLabels)
       mapState.map.removeLayer(mapState.fundingBubbleLabels);
     return;
@@ -541,14 +542,14 @@ function applyZoomLabelVisibility() {
 
   // determine active label layer
   const activeLabels = popBubbleActive
-    ? mapState.bubbleLabels
+    ? mapState.popBubbleLabels
     : fundBubbleActive
       ? mapState.fundingBubbleLabels
       : mapState.choroplethLabels;
 
   // hide all other label layers
   [
-    mapState.bubbleLabels,
+    mapState.popBubbleLabels,
     mapState.fundingBubbleLabels,
     mapState.choroplethLabels,
   ].forEach((layer) => {
@@ -633,7 +634,7 @@ function handleOverlaySelection(selectedOverlay) {
   // special overlays: reset all state, then activate the chosen one
   if (selectedOverlay === "Population") {
     resetOverlayState();
-    toggleBubbleLayer();
+    togglePopBubbleLayer();
     return;
   } else if (selectedOverlay === "Funding Bubble") {
     resetOverlayState();
@@ -657,7 +658,7 @@ function handleOverlaySelection(selectedOverlay) {
 
 // tear down all special overlays before activating a new one
 function resetOverlayState() {
-  hideLayer(mapState.bubbleLayer);
+  hideLayer(mapState.popBubbleLayer);
   hideLayer(mapState.fundingBubbleLayer);
   hideLayer(mapState.quadrantLayer);
   restoreRiverCorridorsDefaultStyle();
@@ -701,7 +702,7 @@ function updateMetric() {
   const quadrantActive =
     mapState.quadrantLayer && mapState.map.hasLayer(mapState.quadrantLayer);
   const bubbleActive =
-    mapState.bubbleLayer && mapState.map.hasLayer(mapState.bubbleLayer);
+    mapState.popBubbleLayer && mapState.map.hasLayer(mapState.popBubbleLayer);
   const fundingBubbleActive =
     mapState.fundingBubbleLayer &&
     mapState.map.hasLayer(mapState.fundingBubbleLayer);
@@ -751,15 +752,15 @@ function updateChoroplethLegend() {
   mapState.choroplethLegend = addLegend("choropleth").addTo(mapState.map);
 }
 
-// toggle bubble layer on/off
-function toggleBubbleLayer() {
+// toggle population bubble layer on/off
+function togglePopBubbleLayer() {
   // initialize bubble layer if it doesn't exist yet (first time toggling on)
-  if (!mapState.bubbleLayer) {
-    mapState.bubbleLayer = initializeBubbleChartLayer();
+  if (!mapState.popBubbleLayer) {
+    mapState.popBubbleLayer = initializePopBubbleChartLayer();
   }
 
   // show bubble layer if not present
-  showLayer(mapState.bubbleLayer);
+  showLayer(mapState.popBubbleLayer);
   applyZoomLabelVisibility(); // apply zoom-gating to labels
 
   // set choropleth to null (default borders, no fill), update legend, hide choropleth labels

@@ -325,66 +325,6 @@ function resetMarkerStyle(layer) {
 
 //////////////////////////////////////////////////////////
 
-// create bubble chart layer, - neighoborhood outlines and bubbles of population
-function initializeBubbleChartLayer() {
-  const bubbleLayerGroup = L.layerGroup(); // create layer group for circle markers
-  mapState.bubbleLabels = L.layerGroup(); // separate layer for zoom-gated text labels
-  initializeTownOutlines(bubbleLayerGroup, towns);
-  addBubbles(bubbleLayerGroup, towns, statsByTown);
-  return bubbleLayerGroup;
-}
-
-// create bubble chart layer for total funding
-function initializeFundingBubbleLayer() {
-  const bubbleLayerGroup = L.layerGroup();
-  mapState.fundingBubbleLabels = L.layerGroup();
-  initializeTownOutlines(bubbleLayerGroup);
-
-  const maxFunding = d3.max(
-    Object.values(statsByTown),
-    (d) => +d.funding_total || 0,
-  );
-  const radiusScale = d3.scaleSqrt().domain([0, maxFunding]).range([0, 60]);
-
-  towns.features.forEach((feature) => {
-    const town = feature.properties.town_name;
-    const funding = +statsByTown[town]?.funding_total || 0;
-    const radius = radiusScale(funding);
-    const latlng = calculateCentroid(feature);
-
-    if (funding === 0) return; // skip unfunded towns
-
-    const circleMarker = L.circleMarker(latlng, {
-      radius,
-      fillColor: "#2166ac",
-      color: "#fff",
-      weight: 1,
-      opacity: 1,
-      fillOpacity: 0.75,
-    }).bindPopup(
-      `<b>${town}</b>
-      <br><span class="popup-text-right popup-text-right-larger">Total Funding: $${Math.round(funding).toLocaleString()}</span>`,
-      { className: "marker-popup" },
-    );
-
-    const textMarker = L.marker(latlng, {
-      icon: L.divIcon({
-        className: "bubble-text",
-        html: `<div>$${d3.format(".2s")(funding)}</div>`,
-        iconSize: [radius * 2, radius * 2],
-        iconAnchor: [radius, radius],
-      }),
-      interactive: false,
-    });
-
-    popupMouseEvents(circleMarker);
-    bubbleLayerGroup.addLayer(circleMarker);
-    mapState.fundingBubbleLabels.addLayer(textMarker);
-  });
-
-  return bubbleLayerGroup;
-}
-
 // create town outlines layer
 function initializeTownOutlines(bubbleLayerGroup) {
   const townsOutlineLayer = L.geoJSON(towns, {
@@ -398,8 +338,12 @@ function initializeTownOutlines(bubbleLayerGroup) {
   bubbleLayerGroup.addLayer(townsOutlineLayer);
 }
 
-// create bubbles, text markers, and popups for each town
-function addBubbles(bubbleLayerGroup) {
+// create bubble chart layer for population
+function initializePopBubbleChartLayer() {
+  const bubbleLayerGroup = L.layerGroup(); // create layer group for circle markers
+  mapState.popBubbleLabels = L.layerGroup(); // separate layer for zoom-gated text labels
+  initializeTownOutlines(bubbleLayerGroup); // add town outlines to bubble layer for context
+
   // loop through towns and create bubbles
   towns.features.forEach((feature) => {
     // get town stats for bubble size and popup content
@@ -438,8 +382,67 @@ function addBubbles(bubbleLayerGroup) {
 
     // add circle to main layer, text to separate label layer
     bubbleLayerGroup.addLayer(circleMarker);
-    mapState.bubbleLabels.addLayer(textMarker);
+    mapState.popBubbleLabels.addLayer(textMarker);
   });
+
+  return bubbleLayerGroup;
+}
+
+// create bubble chart layer for total funding
+function initializeFundingBubbleLayer() {
+  const bubbleLayerGroup = L.layerGroup(); // create layer group for circle markers
+  mapState.fundingBubbleLabels = L.layerGroup(); // separate layer for zoom-gated text labels
+  initializeTownOutlines(bubbleLayerGroup); // add town outlines to bubble layer for context
+
+  // get max funding value to create a scale for bubble sizes
+  const maxFunding = d3.max(
+    Object.values(statsByTown),
+    (d) => +d.funding_total || 0,
+  );
+  const radiusScale = d3.scaleSqrt().domain([0, maxFunding]).range([0, 60]);
+
+  // loop through towns and create bubbles
+  towns.features.forEach((feature) => {
+    const town = feature.properties.town_name;
+    const funding = +statsByTown[town]?.funding_total || 0;
+    const radius = radiusScale(funding);
+    const latlng = calculateCentroid(feature);
+
+    if (funding === 0) return; // skip unfunded towns
+
+    const circleMarker = L.circleMarker(latlng, {
+      radius,
+      fillColor: "#2166ac",
+      color: "#fff",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.75,
+    }).bindPopup(
+      `<b>${town}</b>
+      <br><span class="popup-text-right popup-text-right-larger">Total Funding: $${Math.round(funding).toLocaleString()}</span>`,
+      { className: "marker-popup" },
+    );
+
+    // create marker with text inside and add to layer
+    const textMarker = L.marker(latlng, {
+      icon: L.divIcon({
+        className: "bubble-text",
+        html: `<div>$${d3.format(".2s")(funding)}</div>`,
+        iconSize: [radius * 2, radius * 2],
+        iconAnchor: [radius, radius],
+      }),
+      interactive: false,
+    });
+
+    // open || close popup
+    popupMouseEvents(circleMarker);
+
+    // add circle to main layer, text to separate label layer
+    bubbleLayerGroup.addLayer(circleMarker);
+    mapState.fundingBubbleLabels.addLayer(textMarker);
+  });
+
+  return bubbleLayerGroup;
 }
 
 ////////////////////////////////////////////////////////////
