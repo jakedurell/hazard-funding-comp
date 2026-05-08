@@ -15,21 +15,22 @@ const quadrantColors = {
   low_priority: "#ff7f00",
 };
 
-
 // choropleth colors
 const choroplethConfig = {
   gap_rank: {
     // scale: d3.scaleSequential(d3.interpolateRdBu).domain([0, 1]),
-    scale: d3.scaleDiverging(t => d3.interpolateYlOrRd(1 - t)).domain([-1, 0, 1]),
-    label: "Gap (Funding vs Need)",
+    scale: d3
+      .scaleDiverging((t) => d3.interpolateYlOrRd(1 - t))
+      .domain([-1, 0, 1]),
+    label: "Funding Gap",
   },
   gap_rel: {
     scale: d3.scaleDiverging(d3.interpolateRdYlBu).domain([-1, 0, 1]),
-    label: "Gap (Funding vs Need) vs VT Avg",
+    label: "Funding Gap vs VT Avg",
   },
   funding_rank: {
     scale: d3.scaleSequential(d3.interpolateBlues).domain([0, 1]),
-    label: "Funding",
+    label: "Mitigation Funding",
   },
   funding_rel: {
     scale: d3.scaleDiverging(d3.interpolateRdYlBu).domain([-1, 0, 1]),
@@ -37,34 +38,48 @@ const choroplethConfig = {
   },
   need_rank: {
     scale: d3.scaleSequential(d3.interpolateGnBu).domain([0, 1]),
-    label: "Need Index",
+    label: "Combined Need",
   },
   need_rel: {
-    scale: d3.scaleDiverging(t => d3.interpolateRdYlBu(1 - t)).domain([-1, 0, 1]),
-    label: "Need Index vs VT Avg",
+    scale: d3
+      .scaleDiverging((t) => d3.interpolateRdYlBu(1 - t))
+      .domain([-1, 0, 1]),
+    label: "Need vs VT Avg",
   },
   risk_rank: {
     scale: d3.scaleSequential(d3.interpolateReds).domain([0, 1]),
-    label: "Risk",
+    label: "Flood Risk",
   },
   risk_rel: {
-    scale: d3.scaleDiverging(t => d3.interpolateRdYlBu(1 - t)).domain([-1, 0, 1]),
+    scale: d3
+      .scaleDiverging((t) => d3.interpolateRdYlBu(1 - t))
+      .domain([-1, 0, 1]),
     label: "Risk vs VT Avg",
   },
   vulnerability_rank: {
-    scale: d3.scaleSequential(t => d3.interpolateOranges(1 - t)).domain([0, 1]),
+    scale: d3
+      .scaleSequential((t) => d3.interpolateOranges(1 - t))
+      .domain([0, 1]),
     label: "Vulnerability",
   },
   vulnerability_rel: {
-    scale: d3.scaleDiverging(t => d3.interpolateRdYlBu(1 - t)).domain([-1, 0, 1]),
+    scale: d3
+      .scaleDiverging((t) => d3.interpolateRdYlBu(1 - t))
+      .domain([-1, 0, 1]),
     label: "Vulnerability vs VT Avg",
   },
-  // total_listings: {
-  //   scale: d3.scaleSequential(d3.interpolateReds).domain([0, 700]),
-  //   label: "Total Listings",
-  // },
-  // total_listings_rel: {
-  //   scale: d3.scaleDiverging(d3.interpolateRdBu).domain([-1, 0, 1]),
-  //   label: "Total Listings vs VT Avg",
-  // },
+};
+
+// semantic left/right labels for choropleth legend gradient bar
+const legendLabels = {
+  gap_rank: { low: "Funded below need", high: "Funded above need" },
+  gap_rel: { low: "Further below average", high: "Further above average" },
+  funding_rank: { low: "Less funding", high: "More funding" },
+  funding_rel: { low: "Below VT average", high: "Above VT average" },
+  need_rank: { low: "Lower need", high: "Higher need" },
+  need_rel: { low: "Below VT average", high: "Above VT average" },
+  risk_rank: { low: "Lower risk", high: "Higher risk" },
+  risk_rel: { low: "Below VT average", high: "Above VT average" },
+  vulnerability_rank: { low: "Less vulnerable", high: "More vulnerable" },
+  vulnerability_rel: { low: "Below VT average", high: "Above VT average" },
 };

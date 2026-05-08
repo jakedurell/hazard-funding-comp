@@ -237,29 +237,24 @@ function createGradientBar(scale) {
   return gradientBar;
 }
 
-// create labels for choropleth legend price range
+// create labels for choropleth legend range
 function createRangeLabels(metric, ...domain) {
-  // create container for labels
+  // container for min/max labels
   const labelContainer = document.createElement("div");
-  labelContainer.style.display = "flex";
-  labelContainer.style.justifyContent = "space-between";
-  labelContainer.style.alignItems = "center";
+  labelContainer.className = "legend-range-labels";
 
-  // conditional formatting based on scale type
-  if (domain.length === 3) {
-    // diverging: min, mid, max
-    labelContainer.innerHTML = `
-      <div>${metricEngine.format(metric, domain[0])}</div>
-      <div style="text-align:center;">${metricEngine.format(metric, domain[1])}</div>
-      <div style="text-align:right;">${metricEngine.format(metric, domain[2])}</div>
-    `;
-  } else {
-    // sequential: min, max
-    labelContainer.innerHTML = `
-      <div>${metricEngine.format(metric, domain[0])}</div>
-      <div style="text-align:right;">${metricEngine.format(metric, domain[1])}</div>
-    `;
-  }
+  // get semantic labels for left/right from colors config, otherwise format the raw values
+  const labels = legendLabels[metric];
+  const low = labels ? labels.low : metricEngine.format(metric, domain[0]);
+  const high = labels
+    ? labels.high
+    : metricEngine.format(metric, domain[domain.length - 1]);
+
+  // set label content
+  labelContainer.innerHTML = `
+    <span>${low}</span>
+    <span>${high}</span>
+  `;
 
   return labelContainer;
 }

@@ -247,6 +247,20 @@ body {
   border-radius: 2px;
 }
 
+.legend-range-labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 3px;
+  font-size: 9px;
+  font-style: italic;
+  color: #777;
+  line-height: 1.3;
+}
+.legend-range-labels span:last-child {
+  text-align: right;
+}
+
 .reset-map-button {
   background-color: white;
   color: black;
