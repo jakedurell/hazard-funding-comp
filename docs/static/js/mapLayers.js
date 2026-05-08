@@ -1,8 +1,5 @@
 // Description: Functions to create and initialize map layers - towns, choropleth, and bubble chart
 
-// global for popups
-let lockedPopupLayer = null;
-
 // river corridor style constants
 // default style for river corridors layer at state-level zoom
 const RIVER_STYLE_DEFAULT = {
@@ -27,6 +24,8 @@ const RIVER_STYLE_TIER2 = {
   fillColor: defaultColors.riverColor,
   fillOpacity: 0.3,
 };
+
+///////////////////////////////////////////////////////
 
 // get color for choropleth based on metric and value
 function getColorForMetric(metric, value) {
@@ -303,14 +302,6 @@ function popupMouseEvents(layer) {
       lockedPopupLayer = this;
       this.openPopup();
     },
-  });
-
-  // close any open popups when clicking on the map
-  mapState.map.on("click", () => {
-    if (lockedPopupLayer) {
-      lockedPopupLayer.closePopup();
-      lockedPopupLayer = null;
-    }
   });
 }
 

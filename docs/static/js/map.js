@@ -1,9 +1,5 @@
 // Description: This file contains the functions to create the map and controls, and to handle user interactions
 
-// zoom thresholds for map layer visibility
-const ZOOM_LABELS = 9; // minimum zoom to show town labels
-const ZOOM_RIVER_DETAIL = 11; // minimum zoom to switch to tier 2 river corridors
-
 // globals for tracking map state and active layers
 const mapState = {
   map: null,
@@ -27,6 +23,13 @@ const mapState = {
   choroplethMetric: null,
   choroplethLegend: null,
 };
+
+// zoom thresholds for map layer visibility
+const ZOOM_LABELS = 9; // minimum zoom to show town labels
+const ZOOM_RIVER_DETAIL = 11; // minimum zoom to switch to tier 2 river corridors
+
+// global for popups
+let lockedPopupLayer = null;
 
 //////////////////////////////////////////////////////////
 
@@ -87,7 +90,9 @@ function initializeMap() {
   mapState.map.createPane("riverCorridorsPane");
   mapState.map.getPane("riverCorridorsPane").style.zIndex = 350;
 
+  // add reset button and click handler for dismissing locked popups
   addResetButton();
+  wireLockedPopupDismiss();
   return mapState.map;
 }
 
@@ -117,6 +122,16 @@ function addResetButton() {
   };
 
   resetControl.addTo(mapState.map);
+}
+
+// close any locked popup when clicking bare map (wired once — not per popup)
+function wireLockedPopupDismiss() {
+  mapState.map.on("click", () => {
+    if (lockedPopupLayer) {
+      lockedPopupLayer.closePopup();
+      lockedPopupLayer = null;
+    }
+  });
 }
 
 // add the base layers and control
