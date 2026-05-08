@@ -465,12 +465,18 @@ function wireRiverCorridorsTier2() {
         activateTier2();
       }
     } else {
-      // zoomed back out: remove tier 2, restore tier 1
+      // zoomed back out: remove tier 2, restore tier 1 (only if no bubble view is active, to avoid visual clutter)
       if (mapState.riverCorridorsTier2Layer) {
         mapState.map.removeLayer(mapState.riverCorridorsTier2Layer);
         mapState.riverCorridorsTier2Layer = null;
       }
+      const bubbleActive =
+        (mapState.popBubbleLayer &&
+          mapState.map.hasLayer(mapState.popBubbleLayer)) ||
+        (mapState.fundingBubbleLayer &&
+          mapState.map.hasLayer(mapState.fundingBubbleLayer));
       if (
+        !bubbleActive &&
         mapState.riverCorridorsLayer &&
         !mapState.map.hasLayer(mapState.riverCorridorsLayer)
       ) {
@@ -655,6 +661,10 @@ function resetOverlayState() {
   hideLayer(mapState.fundingBubbleLayer);
   hideLayer(mapState.quadrantLayer);
   restoreRiverCorridorsDefaultStyle();
+  // restore tier 1 river corridors unless tier 2 is currently displayed
+  if (!mapState.riverCorridorsTier2Layer) {
+    showLayer(mapState.riverCorridorsLayer);
+  }
 }
 
 // clear choropleth fill, legend, and labels — called before activating any special overlay
@@ -752,6 +762,9 @@ function togglePopBubbleLayer() {
     mapState.popBubbleLayer = initializePopBubbleChartLayer();
   }
 
+  // hide river corridors — bubbles are cleaner without them
+  hideLayer(mapState.riverCorridorsLayer);
+
   // show bubble layer if not present
   showLayer(mapState.popBubbleLayer);
   applyZoomLabelVisibility(); // apply zoom-gating to labels
@@ -765,6 +778,9 @@ function toggleFundingBubbleLayer() {
   if (!mapState.fundingBubbleLayer) {
     mapState.fundingBubbleLayer = initializeFundingBubbleLayer();
   }
+
+  // hide river corridors — bubbles are cleaner without them
+  hideLayer(mapState.riverCorridorsLayer);
 
   // show funding bubble layer if not present
   showLayer(mapState.fundingBubbleLayer);
