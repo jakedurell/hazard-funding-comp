@@ -20,8 +20,8 @@ const choroplethConfig = {
   gap_rank: {
     // scale: d3.scaleSequential(d3.interpolateRdBu).domain([0, 1]),
     scale: d3
-      .scaleDiverging((t) => d3.interpolateYlOrRd(1 - t))
-      .domain([-1, 0, 1]),
+      .scaleSequential((t) => d3.interpolateYlOrRd(1 - t))
+      .domain([0, 1]),
     label: "Funding Gap",
   },
   gap_rel: {
