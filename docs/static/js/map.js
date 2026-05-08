@@ -4,7 +4,7 @@
 const mapState = {
   map: null,
   selectedTown: "top",
-  model: "eal",
+  model: "eal_per_capita",
   isRelative: false,
 
   riverCorridorsLayer: null,
@@ -62,7 +62,7 @@ function createMap() {
   mapState.map.invalidateSize();
 
   // set model scheme to none initially
-  mapState.model = "eal";
+  mapState.model = "eal_per_capita";
 
   // add river corridors tier 1 before choropleth so it renders beneath it
   mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
@@ -73,8 +73,12 @@ function createMap() {
 
   // set initial choropleth metric, add layer to map, update dashboard components
   metricEngine.baseMetric = "gap";
+  metricEngine.model = "eal_per_capita";
   mapState.choroplethLayer.addTo(mapState.map);
   updateDashboard();
+
+  // activate quadrant view as the default overlay
+  toggleQuadrantLayer();
 
   // setup UI control event listeners
   initializeUIControls();
@@ -231,7 +235,7 @@ function wireChoroplethButtons() {
   ].filter(Boolean);
 
   // set initial active button on load
-  syncChoroplethButtons("Gap (Funding vs Need)");
+  syncChoroplethButtons("Quadrants");
 
   // event listener for choropleth changes
   containers.forEach((container) => {
@@ -285,7 +289,7 @@ function wireModelControls() {
     document.getElementById("model-selector-group-secondary"),
   ].filter(Boolean);
 
-  // sync all groups to reflect the newly chosen model
+  // sync model buttons to EAL per capita on load
   function syncModelGroups(scheme) {
     containers.forEach((container) => {
       // remove active status from all buttons in the group
@@ -303,6 +307,8 @@ function wireModelControls() {
       });
     });
   }
+
+  syncModelGroups("EAL per capita");
 
   containers.forEach((container) => {
     container.addEventListener("change", (e) => {

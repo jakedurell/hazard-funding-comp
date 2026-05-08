@@ -151,7 +151,7 @@ function renderRankings(metric, isRelative, selectedTown) {
       if (metricKey === "funding_rank") {
         const nonZero = townData.filter((d) => +d.funding_rank > 0);
         vtValue = d3.median(nonZero, (d) => +d.funding_per_capita);
-        vtLabel = "VT (median)";
+        vtLabel = "Median funded town";
         // otherwise just take the value
       } else {
         vtValue = vtBaseline[rawKey];

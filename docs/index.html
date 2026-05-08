@@ -49,26 +49,47 @@
     <!-- Main Dashboard Header -->
     <div class="dashboard-header">
       <h1>Floodlines</h1>
-      <h2>Witty subtitle</h2>
-      <!-- <div class="dashboard-subtitle">
-        Witty sub-subtitle
-      </div> -->
-      <div class="analysis-link">
+      <h2>Mapping the gap between flood risk and flood funding</h2>
+      <div class="dashboard-subtitle">
+        An interactive look at how Vermont’s flood mitigation funding aligns,
+        and fails to align, with measured need.
+      </div>
+      <!-- <div class="analysis-link">
         <a href="" class="analysis-button">
           Report & Analysis
           <span class="arrow">→</span>
         </a>
-      </div>
+      </div> -->
     </div>
 
     <!-- Lede -->
-    <div class="lede">Lorem ipsum dolor sit amet</div>
-    <div class="why-brief">Lorem ipsum dolor sit amet</div>
+    <div class="lede">
+      Vermont’s floods are becoming more frequent, more damaging, and harder to
+      treat as isolated disasters. The pattern is accelerating. After each
+      flood, federal mitigation funding flows into affected communities. But the
+      data suggests it follows where damage has already happened, not
+      necessarily where future risk is greatest.
+    </div>
+    <div class="why-brief">
+      This dashboard compares flood mitigation funding against several measures
+      of flood risk and social vulnerability across Vermont towns. Explore how
+      the picture changes depending on how “need” is defined.
+    </div>
 
     <!-- Context Band -->
     <div class="context-band">
-      <div class="context-title">About This Dashboard</div>
-      <div class="context-body">Lorem ipsum dolor sit amet</div>
+      <div class="context-title">How to Read This Map</div>
+      <div class="context-body">
+        The default view groups towns into funding “quadrants” based on two
+        questions:
+        <strong>How high is the risk?</strong> and
+        <strong>How much funding has been received?</strong> <br /><br />
+        Use the model selector to compare different ways of measuring risk:
+        total expected losses, risk per resident, and FEMA’s National Risk
+        Index. Across all three risk models, roughly half of Vermont towns have
+        received no federal flood mitigation funding, including many in the
+        highest-need quartile.
+      </div>
     </div>
 
     <!-- Map -->
@@ -90,42 +111,48 @@
           class="choropleth-muted"
           aria-label="Toggle different data layers"
         >
-          <button id="risk-button" data-overlay="Risk" aria-label="Show Risk">
-            Risk
+          <button
+            id="risk-button"
+            data-overlay="Flood Risk"
+            aria-label="Show Flood Risk"
+          >
+            Flood Risk
           </button>
           <button
             id="vulnerability-button"
-            data-overlay="Social Vulnerability"
-            aria-label="Show Social Vulnerability"
+            data-overlay="Vulnerability"
+            aria-label="Show Vulnerability"
           >
-            Social Vulnerability
+            Vulnerability
           </button>
           <button
             id="need-button"
-            data-overlay="Need Index"
-            aria-label="Show Need Index"
+            data-overlay="Combined Need"
+            aria-label="Show Combined Need"
           >
-            Need Index
+            Combined Need
           </button>
           <button
             id="funding-button"
-            data-overlay="Funding"
-            aria-label="Show Funding"
+            data-overlay="Mitigation Funding"
+            aria-label="Show Mitigation Funding"
           >
-            Funding
+            Mitigation Funding
           </button>
           <button
             id="gap-button"
-            data-overlay="Gap (Funding vs Need)"
-            aria-label="Show Gap (Funding vs Need)"
+            data-overlay="Funding Gap"
+            aria-label="Show Funding Gap"
           >
-            Gap (Funding vs Need)
+            Funding Gap
           </button>
         </div>
       </div>
       <!-- Special Overlay Buttons (Quadrants) — primary dashboard view -->
       <div class="col-md-12 text-center">
-        <!-- <div class="special-overlay-label">Main view:</div> -->
+        <div class="special-overlay-label">
+          Start here:<br />Compare flood risk against funding received
+        </div>
         <div
           id="choropleth-control-special"
           aria-label="Toggle special map overlays"
@@ -142,30 +169,27 @@
       <!-- Context Layer Buttons (Population, Funding, River Corridors) -->
       <div class="col-md-12 text-center">
         <div class="context-controls-label">Context Layers:</div>
-        <div
-          id="context-controls"
-          aria-label="Toggle context map layers"
-        >
+        <div id="context-controls" aria-label="Toggle context map layers">
           <button
             id="population-button"
             data-overlay="Population"
             aria-label="Show Population"
           >
-            Population
+            Population Density
           </button>
           <button
             id="funding-bubble-button"
             data-overlay="Funding Bubble"
             aria-label="Show Total Funding"
           >
-            Total Funding
+            Funding Totals
           </button>
           <button
             id="river-corridors-button"
             data-overlay="River Corridors"
             aria-label="Show River Corridors"
           >
-            River Corridors
+            Flood Corridors
           </button>
         </div>
       </div>
@@ -180,26 +204,26 @@
           aria-label="Select model"
           style="margin-top: 1em"
         >
-          <label class="btn btn-primary active" aria-pressed="true">
+          <label class="btn btn-primary" aria-pressed="false">
             <input
               type="radio"
               name="model-selector"
               id="model-eal"
               autocomplete="off"
               data-overlay="EAL"
-              checked
             />
-            EAL
+            Total Risk
           </label>
-          <label class="btn btn-primary" aria-pressed="false">
+          <label class="btn btn-primary active" aria-pressed="true">
             <input
               type="radio"
               name="model-selector"
               id="model-eal-per-capita"
               autocomplete="off"
               data-overlay="EAL per capita"
+              checked
             />
-            EAL per capita
+            Risk per Person
           </label>
           <label class="btn btn-primary">
             <input
@@ -209,8 +233,11 @@
               autocomplete="off"
               data-overlay="NRI"
             />
-            NRI
+            FEMA Risk Index
           </label>
+        </div>
+        <div class="model-controls-sub">
+          How risk is measured changes which towns appear most vulnerable
         </div>
         <!-- NRI note: shown when NRI model is active -->
         <div
@@ -223,16 +250,16 @@
           model to avoid double-counting.
         </div>
       </div>
-      <!-- Toggle for Rank vs Relative Values (for choropleth color scales) -->
+      <!-- Toggle for Percentile vs Relative Values (for choropleth color scales) -->
       <div class="col-md-12 text-center">
-        <div class="slider-label">Show Values As:</div>
+        <div class="slider-label">Show Metric As:</div>
         <div class="container-fluid justify-content-center">
-          <span class="toggle-label absolute-label">Rank</span>
+          <span class="toggle-label absolute-label">Statewide Percentile</span>
           <label class="switch">
             <input type="checkbox" id="toggle-relative" />
             <span class="slider"></span>
           </label>
-          <span class="toggle-label">Relative</span>
+          <span class="toggle-label">Compared to VT Avg</span>
         </div>
       </div>
     </div>
@@ -240,34 +267,93 @@
     <!-- Metric Definitions -->
     <div id="map-metric-definitions" class="metric-definitions">
       <div class="metric-definition" id="def-risk">
-        <strong>Risk</strong><br />
-        Risk definition goes here. Higher risk = higher rank. Lorem ipsum dolor
-        sit amet, consectetur adipiscing elit.
+        <strong>Flood Risk</strong><br />
+        <!-- Estimated flood exposure based on expected annual losses from flooding.
+        Higher values indicate greater projected damage risk. -->
+        Expected annual flood loss — a dollar estimate of damage per year based
+        on local hazard intensity and property exposure. Higher rank = greater
+        expected damage.
       </div>
       <div class="metric-definition" id="def-vulnerability">
-        <strong>Social Vulnerability</strong><br />
-        Social Vulnerability definition goes here. Higher vulnerability = higher
-        rank. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        <strong>Vulnerability</strong><br />
+        <!-- Measures how difficult a community may find it to prepare for, respond
+        to, and recover from flooding. Based on social, economic, and
+        demographic factors. Higher values indicate greater vulnerability. -->
+        A composite of demographics that shape recovery capacity: poverty, age,
+        and access to transportation. Higher rank = harder to bounce back after
+        a flood.
       </div>
       <div class="metric-definition" id="def-need">
-        <strong>Need Index</strong><br />
-        Need Index definition goes here. Higher need = higher rank. Lorem ipsum
-        dolor sit amet, consectetur adipiscing elit.
+        <strong>Combined Need</strong><br />
+        <!-- A blended measure of flood exposure and social vulnerability. Higher
+        values suggest greater overall need for mitigation support. -->
+        A combined measure of flood risk and social vulnerability. Towns with
+        high need face both significant exposure and limited capacity to recover
+        without outside support.
       </div>
       <div class="metric-definition" id="def-funding">
-        <strong>Funding</strong><br />
-        Funding definition goes here. Higher funding = better. Lorem ipsum dolor
-        sit amet, consectetur adipiscing elit.
+        <strong>Mitigation Funding</strong><br />
+        Flood-related FEMA Hazard Mitigation Assistance grants received since
+        1990, adjusted for inflation. Higher values indicate more funding
+        received.
       </div>
       <div class="metric-definition" id="def-gap">
-        <strong>Gap (Funding vs Need)</strong><br />
-        Gap definition goes here. Negative = underfunded = bad. Lorem ipsum
-        dolor sit amet, consectetur adipiscing elit.
+        <strong>Funding Gap</strong><br />
+        <!-- Compares measured need against funding received. Red indicates towns
+        receiving less funding relative to need; blue indicates comparatively
+        higher funding levels. -->
+        The gap between a town's need rank and its funding rank. Negative =
+        funded below what need would predict. Positive = funded above it. This
+        is the dashboard's central argument.
       </div>
-      <!-- <div class="metric-definition" id="def-total_listings">
-        <strong>Total Listings</strong><br />
-        Total Listings definition goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      </div> -->
+      <div class="metric-definition" id="def-quadrants">
+        <strong>Quadrants</strong><br />
+        Each town is placed based on its flood need rank and total funding
+        received. Quadrant Analysis is the dashboard's default view — it encodes
+        the central question directly.
+      </div>
+      <div class="metric-definition" id="def-population">
+        <strong>Population</strong><br />
+        Total population. Provides context for interpreting risk and funding
+        levels. Higher values indicate more populated towns.
+      </div>
+      <div class="metric-definition" id="def-funding-bubble">
+        <strong>Funding Bubble</strong><br />
+        Total mitigation funding received, represented as bubble size. Larger
+        bubbles indicate more funding.
+      </div>
+      <div class="metric-definition" id="def-river-corridors">
+        <strong>River Corridors</strong><br />
+        River corridors defined by State of Vermont ANR. Shaded areas show
+        mapped flood-prone river corridors. Many underfunded towns overlap these
+        high-risk zones.
+      </div>
+      <!-- </div>
+
+    <div id="model-definition" class="metric-definitions"> -->
+      <div class="metric-definition" id="model-def-eal">
+        <strong>Total Risk (EAL)</strong>
+        <p>
+          Expected annual loss in dollars. Larger towns with more infrastructure
+          tend to score higher. Asks: who loses the most?
+        </p>
+      </div>
+      <div class="metric-definition" id="model-def-eal-per-capita">
+        <strong>Risk per Person</strong>
+        <p>
+          Expected annual loss divided by population. Surfaces small,
+          high-exposure towns that total-loss models obscure. Asks: who is most
+          at risk relative to their size?
+        </p>
+      </div>
+      <div class="metric-definition" id="model-def-nri">
+        <strong>FEMA National Risk Index</strong>
+        <p>
+          FEMA’s National Risk Index combines hazard exposure, social
+          vulnerability, and community resilience into a single composite
+          measure, standardized at the national level.
+        </p>
+      </div>
     </div>
 
     <!-- Stats Card Container -->
@@ -276,9 +362,13 @@
         <h3 id="stats-town-name">Town Snapshot</h3>
         <p id="stats-quadrant" class="quadrant-label"></p>
         <p class="stats-note">
-          Values shown are index scores. Map shows relative ranking.
+          The map shows statewide comparisons. This panel shows detailed local
+          values.
         </p>
-        <p class="stats-note">Map = relative position. Card = actual values.</p>
+        <p class="stats-note">
+          N.b., Risk and funding rankings change depending on how flood risk is
+          defined.
+        </p>
         <p
           id="stats-zero-pop-note"
           class="stats-note-warning"
@@ -292,35 +382,39 @@
         <div class="stats-section">
           <h4>Risk & Exposure</h4>
           <ul>
-            <li><span id="stat-risk"></span> risk index</li>
-            <li><span id="stat-risk-vs"></span> vs VT average</li>
-            <li><span id="stat-corridor"></span> in flood zone</li>
+            <li><span id="stat-risk"></span> flood risk</li>
+            <li><span id="stat-risk-vs"></span> compared to VT average</li>
+            <li>
+              <span id="stat-corridor"></span> within mapped flood corridors
+            </li>
           </ul>
         </div>
 
         <div class="stats-section">
           <h4>Social Vulnerability</h4>
           <ul>
-            <li><span id="stat-vuln"></span> vulnerability index</li>
-            <li><span id="stat-poverty"></span> below poverty</li>
-            <li><span id="stat-elderly"></span> elderly</li>
+            <li><span id="stat-vuln"></span> vulnerability score</li>
+            <li><span id="stat-poverty"></span> residents below poverty</li>
+            <li><span id="stat-elderly"></span> residents age 65+</li>
           </ul>
         </div>
 
         <div class="stats-section">
           <h4>Funding</h4>
           <ul>
-            <li>$<span id="stat-funding-total"></span> total</li>
-            <li>$<span id="stat-funding-pc"></span> per capita</li>
-            <li>Rank: <span id="stat-funding-rank"></span></li>
+            <li>
+              <span id="stat-funding-total"></span> total mitigation funding
+            </li>
+            <li><span id="stat-funding-pc"></span> funding per resident</li>
+            <li><span id="stat-funding-rank"></span> statewide funding rank</li>
           </ul>
         </div>
 
         <div class="stats-section">
           <h4>Need vs Funding</h4>
           <ul>
-            <li><span id="stat-need"></span> need index</li>
-            <li><span id="stat-gap"></span> funding gap</li>
+            <li><span id="stat-need"></span> combined need</li>
+            <li><span id="stat-gap"></span> funding alignment</li>
           </ul>
         </div>
       </div>
@@ -328,7 +422,7 @@
 
     <!-- Plot Container -->
     <div id="plot-title" class="plot-title" style="display: none">
-      Funding vs. Need
+      Funding vs. Measured Need
     </div>
     <div
       id="plot-subtitle"
@@ -339,27 +433,39 @@
 
     <div id="plot-captions" class="plot-captions">
       <div class="plot-caption" id="caption-eal">
-        <h3>EAL</h3>
-        <p>Lorem ipsum dolor sit amet</p>
+        <h3>Total Risk (EAL)</h3>
+        <p>
+          Funding is only weakly correlated with total expected flood loss. A
+          few high-loss towns attract significant grants, but many high-need
+          towns receive little or nothing.
+        </p>
       </div>
       <div class="plot-caption" id="caption-eal-per-capita">
-        <h3>EAL Per Capita</h3>
-        <p>Lorem ipsum dolor sit amet</p>
+        <h3>Risk per Person</h3>
+        <p>
+          Adjusting for population reshuffles the map. Smaller, high-exposure
+          towns rise in need, but their funding levels rarely follow. Switching
+          to this view is where priorities diverge most sharply.
+        </p>
       </div>
       <div class="plot-caption" id="caption-nri">
         <h3>FEMA National Risk Index</h3>
-        <p>Lorem ipsum dolor sit amet</p>
+        <p>
+          FEMA's own composite risk benchmark shows similar patterns. Funding
+          appears driven more by where damage has already occurred than by where
+          risk is currently greatest.
+        </p>
       </div>
     </div>
 
     <!-- Secondary Controls (Muted Version) -->
     <div id="secondary-controls">
       <div id="choropleth-control-secondary" class="choropleth-muted">
-        <button data-overlay="Risk">Risk</button>
-        <button data-overlay="Social Vulnerability">Vulnerability</button>
-        <button data-overlay="Need Index">Need</button>
-        <button data-overlay="Funding">Funding</button>
-        <button data-overlay="Gap (Funding vs Need)">Gap</button>
+        <button data-overlay="Flood Risk">Flood Risk</button>
+        <button data-overlay="Vulnerability">Vulnerability</button>
+        <button data-overlay="Combined Need">Combined Need</button>
+        <button data-overlay="Mitigation Funding">Mitigation Funding</button>
+        <button data-overlay="Funding Gap">Funding Gap</button>
       </div>
 
       <div
@@ -369,24 +475,24 @@
         role="group"
         aria-label="Select model"
       >
-        <label class="active" aria-pressed="true">
-          <input
-            type="radio"
-            name="model-selector-secondary"
-            autocomplete="off"
-            data-overlay="EAL"
-            checked
-          />
-          EAL
-        </label>
         <label class="" aria-pressed="false">
           <input
             type="radio"
             name="model-selector-secondary"
             autocomplete="off"
-            data-overlay="EAL per capita"
+            data-overlay="EAL"
           />
-          EAL per capita
+          Total Risk
+        </label>
+        <label class="active" aria-pressed="true">
+          <input
+            type="radio"
+            name="model-selector-secondary"
+            autocomplete="off"
+            data-overlay="EAL per capita"
+            checked
+          />
+          Risk per Person
         </label>
         <label class="">
           <input
@@ -395,17 +501,17 @@
             autocomplete="off"
             data-overlay="NRI"
           />
-          NRI
+          FEMA Risk Index
         </label>
       </div>
 
       <div class="slider-muted-wrapper">
-        <span class="toggle-label absolute-label">Rank</span>
+        <span class="toggle-label absolute-label">Statewide Percentile</span>
         <label class="switch switch-muted">
           <input type="checkbox" id="toggle-relative-secondary" />
           <span class="slider"></span>
         </label>
-        <span class="toggle-label">Relative</span>
+        <span class="toggle-label">Compared to VT Avg</span>
       </div>
     </div>
 
@@ -414,8 +520,10 @@
     <div class="rankings-section-header">
       <!-- <div class="rankings-section-main">Town Comparison</div> -->
       <div class="rankings-section-sub">
-        Towns ranked by selected metric.<br />
-        Baseline shown in both rank and relative views for comparison.
+        Compare how towns rank under different definitions of flood risk and
+        funding need.<br />
+        Switching models reshuffles priorities, especially between total risk
+        and risk per person.
       </div>
     </div>
     <div id="rankings-container"></div>

@@ -3,11 +3,11 @@
 
 // overlay label (data-overlay attribute) → base metric key
 const overlayToBase = {
-  Risk: "risk",
-  "Social Vulnerability": "vulnerability",
-  "Need Index": "need",
-  Funding: "funding",
-  "Gap (Funding vs Need)": "gap",
+  "Flood Risk": "risk",
+  Vulnerability: "vulnerability",
+  "Combined Need": "need",
+  "Mitigation Funding": "funding",
+  "Funding Gap": "gap",
 };
 
 // base metric key → display label (derived — do not edit directly)
@@ -20,6 +20,15 @@ const modelLabels = {
   EAL: "eal",
   "EAL per capita": "eal_per_capita",
   NRI: "nri",
+};
+
+// human-readable quadrant labels (keys match quadrantColors)
+const quadrantLabels = {
+  zero_funding: "No FEMA Funding", // No Funding
+  underfunded: "High Need / Low Funding",
+  aligned: "Funding Roughly Aligned",
+  overfunded: "Lower Need / Higher Funding", // Over-allocated
+  low_priority: "Lower Need / Lower Funding", // Low Exposure
 };
 
 // default map view for Vermont

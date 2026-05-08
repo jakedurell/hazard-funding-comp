@@ -2,9 +2,9 @@
 
 // model display names for plot subtitle
 const modelDisplayNames = {
-  eal: "Expected Annual Loss (EAL)",
-  eal_per_capita: "EAL per Capita",
-  nri: "FEMA National Risk Index",
+  eal: "Total Risk (Expected Annual Loss)", //Funding shows only a weak relationship with projected flood losses statewide.
+  eal_per_capita: "Risk per Person (EAL per Capita)", //Per-person risk reshapes priorities, elevating some smaller towns.
+  nri: "FEMA Risk Index (FEMA National Risk Index)", //Composite risk measures produce a different geography of need and vulnerability.
 };
 
 // render plot based on selected metric and town
@@ -31,7 +31,7 @@ function showPlotHeader(visible) {
   if (subtitleDiv) {
     subtitleDiv.style.display = visible ? "block" : "none";
     subtitleDiv.textContent = visible
-      ? `Model: ${modelDisplayNames[metricEngine.model] ?? metricEngine.model}`
+      ? `${modelDisplayNames[metricEngine.model] ?? metricEngine.model}`
       : "";
   }
 }
@@ -254,27 +254,27 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
   // position lables based on median lines
   const labels = [
     {
-      text: "Aligned",
+      text: quadrantLabels.aligned,
       x: xMed + 0.75 * (xMax - xMed),
       y: yMed + 0.95 * (yMax - yMed),
     },
     {
-      text: "Underfunded",
+      text: quadrantLabels.underfunded,
       x: xMed + 0.75 * (xMax - xMed),
       y: yMed - 0.5 * (yMed - yMin),
     },
     {
-      text: "Overfunded",
+      text: quadrantLabels.overfunded,
       x: xMed - 0.75 * (xMed - xMin),
       y: yMed + 0.95 * (yMax - yMed),
     },
     {
-      text: "Low Priority",
+      text: quadrantLabels.low_priority,
       x: xMed - 0.75 * (xMed - xMin),
       y: yMed - 0.5 * (yMed - yMin),
     },
     {
-      text: "Zero Funding",
+      text: quadrantLabels.zero_funding,
       x: xMed,
       y: yMed - 0.95 * (yMed - yMin),
     },

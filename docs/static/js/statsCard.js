@@ -25,10 +25,10 @@ function renderStatsCard(town) {
     return Number.isFinite(num) ? `${num.toFixed(0)}%` : "—";
   };
 
-  const fmtNum = (v) => {
+  const fmtCurrency = (v) => {
     if (v == null || v === "") return "—";
     const num = Number(v);
-    return Number.isFinite(num) ? num.toLocaleString() : "—";
+    return Number.isFinite(num) ? `${num.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}` : "—";
   };
 
   const fmtIdx = (v) => {
@@ -73,15 +73,15 @@ function renderStatsCard(town) {
     stats.percent_elderly,
   );
 
-  document.getElementById("stat-funding-total").textContent = fmtNum(
+  document.getElementById("stat-funding-total").textContent = fmtCurrency(
     stats.funding_total,
   );
 
-  document.getElementById("stat-funding-pc").textContent = fmtNum(
+  document.getElementById("stat-funding-pc").textContent = fmtCurrency(
     stats.funding_per_capita,
   );
 
-  document.getElementById("stat-funding-rank").textContent = fmtNum(
+  document.getElementById("stat-funding-rank").textContent = fmtIdx(
     stats.funding_rank,
   );
 
@@ -91,6 +91,6 @@ function renderStatsCard(town) {
 
   // headline insight
   document.getElementById("stats-quadrant").textContent = stats[quadKey]
-    ? stats[quadKey].replace(/_/g, " ")
+    ? (quadrantLabels[stats[quadKey]] ?? stats[quadKey])
     : "—";
 }

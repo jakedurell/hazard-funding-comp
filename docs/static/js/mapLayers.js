@@ -181,7 +181,7 @@ function addLegend(type) {
           ([key, color]) => `
         <div class="quadrants-legend-row">
           <span class="legend-swatch" style="background:${color};"></span>
-          ${key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+          ${quadrantLabels[key] ?? key}
         </div>
       `,
         )
@@ -472,7 +472,7 @@ function initializeQuadrantLayer() {
 
       // bind popup showing quadrant assignment
       layer.bindPopup(
-        `<b>${town}</b><br>${quadrant ? quadrant.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "No data"}`,
+        `<b>${town}</b><br>${quadrant ? (quadrantLabels[quadrant] ?? quadrant) : "No data"}`,
       );
 
       // sync with dropdown on click to zoom in on town and update dashboard

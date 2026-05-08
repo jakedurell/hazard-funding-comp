@@ -3,6 +3,9 @@
 (When Disaster Funding Follows the Past, Not the Future)  
 (Why Vermont’s Flood Money Misses the Mark)  
 (The Mismatch Between Risk and Relief)  
+(Where flood funding falls short of risk) 
+(Mapping the gap between flood risk and flood funding)   
+
 
 May 2026  
 Bryan Johns

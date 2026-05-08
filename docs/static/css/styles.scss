@@ -301,7 +301,7 @@ body {
   margin-bottom: 0;
   letter-spacing: 0.01em;
   text-align: center;
-  text-transform: uppercase;
+  // text-transform: uppercase;
   opacity: 0.85;
 }
 #choropleth-control-special {
@@ -413,6 +413,7 @@ body {
   font-size: 0.85em;
   color: #999;
   font-weight: 500;
+  margin-top: 0.2em;
   margin-bottom: 0;
   letter-spacing: 0.01em;
   text-align: center;
@@ -475,6 +476,15 @@ body {
       z-index: 2;
     }
   }
+}
+.model-controls-sub {
+  font-size: 0.75em;
+  color: #999;
+  font-weight: 500;
+  margin-top: 0.2em;
+  letter-spacing: 0.01em;
+  text-align: center;
+  margin-bottom: 0.2em;
 }
 
 // slider styling
