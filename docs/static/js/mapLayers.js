@@ -22,7 +22,7 @@ const RIVER_STYLE_FOCUSED = {
 const RIVER_STYLE_TIER2 = {
   stroke: false,
   fillColor: defaultColors.riverColor,
-  fillOpacity: 0.3,
+  fillOpacity: 0.5,
 };
 
 ///////////////////////////////////////////////////////

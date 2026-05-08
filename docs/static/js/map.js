@@ -24,6 +24,17 @@ const mapState = {
   choroplethLegend: null,
 };
 
+// base tile layers
+const baseLayers = {
+  Satellite: L.esri.basemapLayer("Imagery"),
+  "Street Map": L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  ),
+  "National Geographic": L.esri.basemapLayer("NationalGeographic"),
+  Topographic: L.esri.basemapLayer("Topographic"),
+  Grayscale: L.esri.basemapLayer("Gray"),
+};
+
 // zoom thresholds for map layer visibility
 const ZOOM_LABELS = 9; // minimum zoom to show town labels
 const ZOOM_RIVER_DETAIL = 11; // minimum zoom to switch to tier 2 river corridors
@@ -37,7 +48,7 @@ let lockedPopupLayer = null;
 function createMap() {
   mapState.map = initializeMap();
 
-  addBaseLayerControl();
+  // addBaseLayerControl();
 
   // initialize dropdown and choropleth layer
   initializeTownsDropdown();
@@ -73,18 +84,14 @@ function createMap() {
 
 // initialize the map
 function initializeMap() {
-  const baseLayer = L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    },
-  );
   mapState.map = L.map("map-id", {
     center: vtDefaultView.center,
     zoom: vtDefaultView.zoom,
-    layers: [baseLayer],
+    layers: [baseLayers.Satellite],
   });
+
+  // add base layers and control (satellite, street, topo, etc.)
+  L.control.layers(baseLayers, null).addTo(mapState.map);
 
   // custom pane below overlayPane (400) so river corridors always sit under towns
   mapState.map.createPane("riverCorridorsPane");
@@ -132,20 +139,6 @@ function wireLockedPopupDismiss() {
       lockedPopupLayer = null;
     }
   });
-}
-
-// add the base layers and control
-function addBaseLayerControl() {
-  let baseMap = {
-    "Street Map": L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    ),
-    Satellite: L.esri.basemapLayer("Imagery"),
-    "National Geographic": L.esri.basemapLayer("NationalGeographic"),
-    Topographic: L.esri.basemapLayer("Topographic"),
-    Grayscale: L.esri.basemapLayer("Gray"),
-  };
-  L.control.layers(baseMap, null).addTo(mapState.map);
 }
 
 //////////////////////////////////////////////////////////

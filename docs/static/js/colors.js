@@ -1,6 +1,6 @@
 // set default color scheme
 const defaultColors = {
-  defaultGray: "#343a40", // #6c757d
+  defaultGray: "#6c757d", // #343a40
   townColor: "#ff9800",
   // riverColor: "#1f78b4",
   riverColor: "#2e86c1",
