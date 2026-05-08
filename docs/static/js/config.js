@@ -15,11 +15,31 @@ const baseToOverlay = Object.fromEntries(
   Object.entries(overlayToBase).map(([label, key]) => [key, label]),
 );
 
+// overlay defintion mapping (for metric definition HTML)
+const overlayDefMap = {
+  "Flood Risk": "def-risk",
+  Vulnerability: "def-vulnerability",
+  "Combined Need": "def-need",
+  "Mitigation Funding": "def-funding",
+  "Funding Gap": "def-gap",
+  Quadrants: "def-quadrants",
+  Population: "def-population",
+  "Funding Bubble": "def-funding-bubble",
+  "River Corridors": "def-river-corridors",
+};
+
 // model label (data-overlay attribute on model selector) → model key
 const modelLabels = {
   EAL: "eal",
   "EAL per capita": "eal_per_capita",
   NRI: "nri",
+};
+
+// model definition mapping (for model definition HTML)
+const modelDefMap = {
+  eal: "model-def-eal",
+  eal_per_capita: "model-def-eal-per-capita",
+  nri: "model-def-nri",
 };
 
 // human-readable quadrant labels (keys match quadrantColors)

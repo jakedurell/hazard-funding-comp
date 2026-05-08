@@ -9,18 +9,9 @@ const modelDisplayNames = {
 
 // render plot based on selected metric and town
 function renderPlot(metric, selectedTown) {
-  showMetricDefinition(metric);
   renderQuadrantScatter(selectedTown);
   showPlotHeader(true);
   showPlotCaption();
-}
-
-// toggle visibility of metric definitions based on selected metric
-function showMetricDefinition(metricKey) {
-  const all = document.querySelectorAll(".metric-definition");
-  all.forEach((el) => (el.style.display = "none"));
-  const sel = document.getElementById("def-" + metricKey);
-  if (sel) sel.style.display = "block";
 }
 
 // show/hide plot title and model subtitle

@@ -6,6 +6,7 @@ const mapState = {
   selectedTown: "top",
   model: "eal_per_capita",
   isRelative: false,
+  _activeOverlay: "Quadrants",
 
   riverCorridorsLayer: null,
   riverCorridorsTier2Layer: null,
@@ -244,8 +245,11 @@ function wireChoroplethButtons() {
       if (!selectedOverlay) return;
 
       // update map based on selected overlay
+      mapState._activeOverlay = selectedOverlay;
       handleOverlaySelection(selectedOverlay);
       syncChoroplethButtons(selectedOverlay);
+      updateOverlayDefinition();
+      updateModelDefinition();
     });
   });
 }
@@ -704,6 +708,37 @@ function updateDashboard() {
     metricEngine.isRelative,
     mapState.selectedTown,
   );
+  updateOverlayDefinition();
+  updateModelDefinition();
+}
+
+// show the definition matching the currently active overlay; hides all others
+function updateOverlayDefinition() {
+  document.querySelectorAll(".metric-definition").forEach((el) => {
+    el.style.display = "none";
+  });
+  const id = overlayDefMap[mapState._activeOverlay];
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "block";
+  }
+}
+
+// show the definition matching the currently active model; hides all others
+function updateModelDefinition() {
+  const modelDefMap = {
+    eal: "model-def-eal",
+    eal_per_capita: "model-def-eal-per-capita",
+    nri: "model-def-nri",
+  };
+  document.querySelectorAll(".model-definition").forEach((el) => {
+    el.style.display = "none";
+  });
+  const id = modelDefMap[mapState.model];
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "block";
+  }
 }
 
 // render choropleth based on selected metric and town

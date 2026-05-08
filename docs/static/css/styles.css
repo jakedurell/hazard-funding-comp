@@ -549,6 +549,26 @@ body {
   font-size: 1.04em;
 }
 
+.model-definition {
+  margin-top: 1em;
+  padding-top: 1em;
+  border-top: 1px solid #e3eafc;
+  color: #444;
+  font-size: 1em;
+  line-height: 1.5;
+  display: none; /* hide by default for toggle */
+}
+
+.model-definition strong {
+  color: #1a237e;
+  font-weight: 600;
+  font-size: 1.04em;
+}
+
+.model-definition p {
+  margin: 0.4em 0 0;
+}
+
 .stats-card {
   padding: 20px;
   margin-top: 20px;
