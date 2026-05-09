@@ -18,15 +18,16 @@ const quadrantColors = {
 // choropleth colors
 const choroplethConfig = {
   gap_rank: {
-    // scale: d3.scaleSequential(d3.interpolateRdBu).domain([0, 1]),
+    // gap = need - funding: rank 1.0 = most underfunded = dark red
     scale: d3
-      .scaleSequential((t) => d3.interpolateYlOrRd(1 - t))
+      .scaleSequential(d3.interpolateYlOrRd)
       .domain([0, 1]),
     label: "Funding Gap",
   },
   gap_rel: {
-    scale: d3.scaleDiverging(d3.interpolateRdYlBu).domain([-1, 0, 1]),
-    label: "Funding Gap vs VT Avg",
+    // positive gap_rel = underfunded = red; negative = overfunded = blue
+    scale: d3.scaleDiverging((t) => d3.interpolateRdYlBu(1 - t)).domain([-1, 0, 1]),
+    label: "Funding Gap vs. VT Average",
   },
   funding_rank: {
     scale: d3.scaleSequential(d3.interpolateBlues).domain([0, 1]),
@@ -60,20 +61,20 @@ const choroplethConfig = {
     scale: d3
       .scaleSequential((t) => d3.interpolateOranges(1 - t))
       .domain([0, 1]),
-    label: "Vulnerability",
+    label: "Social Vulnerability",
   },
   vulnerability_rel: {
     scale: d3
       .scaleDiverging((t) => d3.interpolateRdYlBu(1 - t))
       .domain([-1, 0, 1]),
-    label: "Vulnerability vs VT Avg",
+    label: "Vulnerability vs. VT Average",
   },
 };
 
 // semantic left/right labels for choropleth legend gradient bar
 const legendLabels = {
-  gap_rank: { low: "Funded below need", high: "Funded above need" },
-  gap_rel: { low: "Further below average", high: "Further above average" },
+  gap_rank: { low: "Funded above need", high: "Funded below need" },
+  gap_rel: { low: "Funded above average", high: "Funded below average" },
   funding_rank: { low: "Less funding", high: "More funding" },
   funding_rel: { low: "Below VT average", high: "Above VT average" },
   need_rank: { low: "Lower need", high: "Higher need" },

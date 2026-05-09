@@ -40,9 +40,9 @@ function renderRankings(metric, isRelative, selectedTown) {
       rank: rankKey ? +d[rankKey] : null,
     }));
 
-  // sort by rank if available
+  // sort descending: rank 1.0 (highest/worst) at top for all metrics
   if (rankKey) {
-    townData.sort((a, b) => a.value - b.value); // sort by actual value, not rank
+    townData.sort((a, b) => b.value - a.value);
   }
 
   // compute scale for bar widths based on min/max values in the current metric
@@ -157,20 +157,23 @@ function renderRankings(metric, isRelative, selectedTown) {
         vtValue = vtBaseline[rawKey];
       }
 
-      // sorted towns by raw metric value to compute VT's position in the rank list
+      // sorted towns by raw metric value to compute VT's position in the descending rank list
       const sortedValues = townData
         .map((d) => +d[rawKey])
         .filter((v) => !isNaN(v))
         .sort(d3.ascending);
 
+      // // all metrics sort descending (highest at top): towns above VT = those with value > vtValue
+      // const vtIndex = sortedValues.length - d3.bisectLeft(sortedValues, vtValue);
+
       // ascending metrics (funding, gap): low value = top of list, so towns above VT = those with value < vtValue
       // descending metrics (risk, need, vuln): high value = top of list, so towns above VT = those with value > vtValue
-      const isAscending =
+      const isRankAscending =
         metricEngine.baseMetric === "funding" ||
         metricEngine.baseMetric === "gap";
-      const vtIndex = isAscending
-        ? d3.bisectLeft(sortedValues, vtValue)
-        : sortedValues.length - d3.bisectLeft(sortedValues, vtValue);
+      const vtIndex = isRankAscending
+        ? sortedValues.length - d3.bisectLeft(sortedValues, vtValue)
+        : d3.bisectLeft(sortedValues, vtValue);
 
       // place reference line at appropriate position based on computed rank index and row heights
       const firstRow = container.select(".rank-row").node();
