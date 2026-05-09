@@ -85,6 +85,10 @@ function renderStatsCard(town) {
     stats.funding_rank,
   );
 
+  document.getElementById("stat-claims-pc").textContent = fmtCurrency(
+    stats.claims_paid_per_capita,
+  );
+
   document.getElementById("stat-need").textContent = fmtIdx(stats[needKey]);
 
   document.getElementById("stat-gap").textContent = fmtIdx(stats[gapKey]);

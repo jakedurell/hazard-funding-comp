@@ -28,7 +28,8 @@ function renderRankings(metric, isRelative, selectedTown) {
   const rawKey = metricKey
     .replace(/^(\w+)_rank_(.+)$/, "$1_$2") // swaps a middle "_rank_" with "_" if present
     .replace(/_rank$/, "") // strips a trailing "_rank" if present
-    .replace(/^funding$/, "funding_per_capita"); // funding_rank → funding_per_capita for display
+    .replace(/^funding$/, "funding_per_capita") // funding_rank → funding_per_capita for display
+    .replace(/^claims$/, "claims_paid_per_capita"); // claims_rank → claims_paid_per_capita for display
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank
   const townData = rankingsData

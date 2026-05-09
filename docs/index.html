@@ -146,6 +146,24 @@
           >
             Funding Gap
           </button>
+          <button
+            id="claims-button"
+            data-overlay="NFIP Claims"
+            aria-label="Show NFIP Claims per Capita"
+            title="Reactive benchmark: shows where insured flood losses occurred, not where future risk is greatest"
+          >
+            NFIP Claims
+          </button>
+        </div>
+        <!-- Claims note: shown when NFIP Claims overlay is active -->
+        <div
+          id="claims-benchmark-note"
+          class="stats-note stats-note-warning"
+          style="display: none"
+        >
+          <em>Reactive benchmark</em> — NFIP claims show where insured losses
+          occurred, not where future risk is greatest. This layer is not part of
+          the need model.
         </div>
       </div>
       <!-- Special Overlay Buttons (Quadrants) — primary dashboard view -->
@@ -306,6 +324,14 @@
         funded below what need would predict. Negative = funded above it. This
         is the dashboard's central argument.
       </div>
+      <div class="metric-definition" id="def-claims">
+        <strong>NFIP Claims per Capita</strong><br />
+        Inflation-adjusted NFIP insurance payouts per resident since 1989. This
+        is a <em>reactive benchmark</em>. Unlike the other metrics, NFIP claims
+        measure where flood damage has already occurred, not where future risk
+        is greatest. Compare this layer against Flood Risk to see how closely
+        funding follows past damage versus projected exposure.
+      </div>
       <div class="metric-definition" id="def-quadrants">
         <strong>Quadrants</strong><br />
         Each town is placed based on its flood need rank and total funding
@@ -407,6 +433,7 @@
             </li>
             <li><span id="stat-funding-pc"></span> funding per resident</li>
             <li><span id="stat-funding-rank"></span> statewide funding rank</li>
+            <li><span id="stat-claims-pc"></span> NFIP claims per resident</li>
           </ul>
         </div>
 
@@ -466,6 +493,9 @@
         <button data-overlay="Combined Need">Combined Need</button>
         <button data-overlay="Mitigation Funding">Mitigation Funding</button>
         <button data-overlay="Funding Gap">Funding Gap</button>
+        <button id="claims-button-secondary" data-overlay="NFIP Claims">
+          NFIP Claims
+        </button>
       </div>
 
       <div
@@ -567,7 +597,7 @@
         >
           OpenFEMA Hazard Mitigation Assistance
         </a>
-        (funding), and
+        (funding),
         <a
           href="https://www.fema.gov/about/openfema/data-sets/national-risk-index-data"
           target="_blank"
@@ -575,7 +605,15 @@
         >
           FEMA National Risk Index
         </a>
-        (risk benchmarks).
+        (risk benchmarks), and
+        <a
+          href="https://www.fema.gov/openfema-data-page/fima-nfip-redacted-claims-v2"
+          target="_blank"
+          rel="noopener"
+        >
+          OpenFEMA NFIP Redacted Claims
+        </a>
+        (flood insurance claims).
       </em>
     </div>
 

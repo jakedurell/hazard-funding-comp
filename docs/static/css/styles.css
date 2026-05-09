@@ -390,6 +390,33 @@ body {
   cursor: not-allowed;
   pointer-events: auto;
 }
+.choropleth-muted #claims-button,
+.choropleth-muted #claims-button-secondary,
+#context-controls #claims-button,
+#context-controls #claims-button-secondary {
+  margin-left: 10px;
+  border-left: 2px solid #bbb;
+  padding-left: 14px;
+  font-style: italic;
+  color: #555;
+}
+.choropleth-muted #claims-button:hover,
+.choropleth-muted #claims-button-secondary:hover,
+#context-controls #claims-button:hover,
+#context-controls #claims-button-secondary:hover {
+  background: #e8e4f0;
+  color: #333;
+}
+.choropleth-muted #claims-button.active,
+.choropleth-muted #claims-button-secondary.active,
+#context-controls #claims-button.active,
+#context-controls #claims-button-secondary.active {
+  background: #d8cfe8;
+  color: #222;
+  font-weight: 600;
+  border-bottom: 2px solid #7b5ea7;
+  border-left: 2px solid #bbb;
+}
 
 .context-controls-label {
   font-size: 0.85em;

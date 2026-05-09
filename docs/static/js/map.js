@@ -250,6 +250,7 @@ function wireChoroplethButtons() {
       syncChoroplethButtons(selectedOverlay);
       updateOverlayDefinition();
       updateModelDefinition();
+      updateClaimsBenchmarkNote();
     });
   });
 }
@@ -328,14 +329,14 @@ function wireModelControls() {
       updateDashboard();
 
       // disable Risk and Vulnerability buttons when NRI model is active (NRI score already embeds SOVI)
-      updateNriModelUI(scheme === "NRI");
+      updateNRIModelUI(scheme === "NRI");
     });
   });
 }
 
 // disable risk/vulnerability choropleth buttons and show note when NRI model is active
 // if an incompatible overlay is currently active, auto-switch to Gap
-function updateNriModelUI(isNri) {
+function updateNRIModelUI(isNri) {
   const riskBtn = document.getElementById("risk-button");
   const vulnBtn = document.getElementById("vulnerability-button");
   const note = document.getElementById("nri-model-note");
@@ -598,7 +599,11 @@ const metricEngine = {
     if (!baseMetric) return null;
 
     // non-model metrics share the same _rel / _rank pattern
-    if (baseMetric === "funding" || baseMetric === "vulnerability") {
+    if (
+      baseMetric === "funding" ||
+      baseMetric === "vulnerability" ||
+      baseMetric === "claims"
+    ) {
       return isRelative ? `${baseMetric}_rel` : `${baseMetric}_rank`;
     }
 
@@ -617,6 +622,7 @@ const metricEngine = {
 
     if (baseMetric === "funding") return "funding_rank";
     if (baseMetric === "vulnerability") return "vulnerability_rank";
+    if (baseMetric === "claims") return "claims_rank";
 
     return `${baseMetric}_rank_${model}`;
   },
@@ -627,6 +633,8 @@ const metricEngine = {
     if (metric.includes("funding_total")) return `$${d3.format(",.0f")(value)}`;
     if (metric.includes("funding_per_capita"))
       return `$${d3.format(",.0f")(value)} pp`;
+    if (metric.includes("claims_paid_per_capita"))
+      return `$${d3.format(",.0f")(value)} pp`;
     if (metric.includes("_rel"))
       return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
     if (metric.includes("rank")) return `${Math.round(value * 100)}%`;
@@ -636,7 +644,7 @@ const metricEngine = {
 
 /////////////////////////////////////////////////////////////
 
-// update map layers and dashboard components based on selected metric and model
+// update dashboard components based on selected metric and model
 
 // change map overlay based on selected option
 function handleOverlaySelection(selectedOverlay) {
@@ -712,6 +720,7 @@ function updateDashboard() {
   );
   updateOverlayDefinition();
   updateModelDefinition();
+  updateClaimsBenchmarkNote();
 }
 
 // show the definition matching the currently active overlay; hides all others
@@ -742,6 +751,18 @@ function updateModelDefinition() {
     if (el) el.style.display = "block";
   }
 }
+
+// show/hide the claims benchmark note based on active overlay
+function updateClaimsBenchmarkNote() {
+  const note = document.getElementById("claims-benchmark-note");
+  if (note)
+    note.style.display =
+      metricEngine.baseMetric === "claims" ? "block" : "none";
+}
+
+/////////////////////////////////////////////////////////////
+
+// update map layers based on selected metric, model, and active overlay
 
 // render choropleth based on selected metric and town
 function updateMetric() {

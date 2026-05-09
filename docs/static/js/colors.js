@@ -67,6 +67,16 @@ const choroplethConfig = {
       .domain([-1, 0, 1]),
     label: "Vulnerability vs. VT Average",
   },
+  claims_rank: {
+    scale: d3.scaleSequential(d3.interpolatePurples).domain([0, 1]),
+    label: "NFIP Claims per Capita",
+  },
+  claims_rel: {
+    scale: d3
+      .scaleDiverging((t) => d3.interpolateRdYlBu(1 - t))
+      .domain([-1, 0, 1]),
+    label: "NFIP Claims vs. VT Average",
+  },
 };
 
 // semantic left/right labels for choropleth legend gradient bar
@@ -81,4 +91,6 @@ const legendLabels = {
   risk_rel: { low: "Below VT average", high: "Above VT average" },
   vulnerability_rank: { low: "Less vulnerable", high: "More vulnerable" },
   vulnerability_rel: { low: "Below VT average", high: "Above VT average" },
+  claims_rank: { low: "Fewer claims", high: "More claims" },
+  claims_rel: { low: "Below VT average", high: "Above VT average" },
 };

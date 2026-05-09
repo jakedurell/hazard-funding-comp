@@ -8,6 +8,7 @@ const overlayToBase = {
   "Combined Need": "need",
   "Mitigation Funding": "funding",
   "Funding Gap": "gap",
+  "NFIP Claims": "claims",
 };
 
 // base metric key → display label (derived — do not edit directly)
@@ -22,6 +23,7 @@ const overlayDefMap = {
   "Combined Need": "def-need",
   "Mitigation Funding": "def-funding",
   "Funding Gap": "def-gap",
+  "NFIP Claims": "def-claims",
   Quadrants: "def-quadrants",
   Population: "def-population",
   "Funding Bubble": "def-funding-bubble",
