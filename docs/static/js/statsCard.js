@@ -24,11 +24,17 @@ function renderStatsCard(town) {
     const num = Number(v);
     return Number.isFinite(num) ? `${num.toFixed(0)}%` : "—";
   };
-
+  const fmtInt = (v) => {
+    if (v == null || v === "") return "\u2014";
+    const num = Number(v);
+    return Number.isFinite(num) ? num.toLocaleString("en-US") : "\u2014";
+  };
   const fmtCurrency = (v) => {
     if (v == null || v === "") return "—";
     const num = Number(v);
-    return Number.isFinite(num) ? `${num.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}` : "—";
+    return Number.isFinite(num)
+      ? `${num.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 })}`
+      : "—";
   };
 
   const fmtIdx = (v) => {
@@ -51,6 +57,14 @@ function renderStatsCard(town) {
   const riskVsKey = `${riskKey}_rel`;
 
   // populate stats values, using helpers for formatting
+  document.getElementById("stat-population").textContent = fmtInt(
+    stats.population,
+  );
+
+  document.getElementById("stat-eal-raw").textContent = fmtCurrency(
+    stats.IFLD_EALT_weighted,
+  );
+
   document.getElementById("stat-risk").textContent = fmtIdx(stats[riskKey]);
 
   document.getElementById("stat-risk-vs").textContent = fmtRatio(
@@ -71,6 +85,18 @@ function renderStatsCard(town) {
 
   document.getElementById("stat-elderly").textContent = fmtPct(
     stats.percent_elderly,
+  );
+
+  document.getElementById("stat-no-vehicle").textContent = fmtPct(
+    stats.pct_no_vehicle,
+  );
+
+  document.getElementById("stat-income").textContent = fmtCurrency(
+    stats.median_income,
+  );
+
+  document.getElementById("stat-renter").textContent = fmtPct(
+    stats.pct_renter_occupied,
   );
 
   document.getElementById("stat-funding-total").textContent = fmtCurrency(
