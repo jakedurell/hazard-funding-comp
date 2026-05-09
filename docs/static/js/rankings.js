@@ -172,8 +172,8 @@ function renderRankings(metric, isRelative, selectedTown) {
         metricEngine.baseMetric === "funding" ||
         metricEngine.baseMetric === "gap";
       const vtIndex = isRankAscending
-        ? sortedValues.length - d3.bisectLeft(sortedValues, vtValue)
-        : d3.bisectLeft(sortedValues, vtValue);
+        ? d3.bisectLeft(sortedValues, vtValue)
+        : sortedValues.length - d3.bisectLeft(sortedValues, vtValue);
 
       // place reference line at appropriate position based on computed rank index and row heights
       const firstRow = container.select(".rank-row").node();
