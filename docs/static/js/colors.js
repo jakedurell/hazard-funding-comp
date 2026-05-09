@@ -19,14 +19,14 @@ const quadrantColors = {
 const choroplethConfig = {
   gap_rank: {
     // gap = need - funding: rank 1.0 = most underfunded = dark red
-    scale: d3
-      .scaleSequential(d3.interpolateYlOrRd)
-      .domain([0, 1]),
+    scale: d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 1]),
     label: "Funding Gap",
   },
   gap_rel: {
     // positive gap_rel = underfunded = red; negative = overfunded = blue
-    scale: d3.scaleDiverging((t) => d3.interpolateRdYlBu(1 - t)).domain([-1, 0, 1]),
+    scale: d3
+      .scaleDiverging((t) => d3.interpolateRdYlBu(1 - t))
+      .domain([-1, 0, 1]),
     label: "Funding Gap vs. VT Average",
   },
   funding_rank: {
@@ -58,9 +58,7 @@ const choroplethConfig = {
     label: "Risk vs VT Avg",
   },
   vulnerability_rank: {
-    scale: d3
-      .scaleSequential((t) => d3.interpolateOranges(1 - t))
-      .domain([0, 1]),
+    scale: d3.scaleSequential(d3.interpolateOranges).domain([0, 1]),
     label: "Social Vulnerability",
   },
   vulnerability_rel: {
