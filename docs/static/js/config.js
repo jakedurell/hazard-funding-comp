@@ -44,6 +44,10 @@ const modelDefMap = {
   nri: "model-def-nri",
 };
 
+// base metric keys that are incompatible with the NRI model (NRI score already embeds SOVI)
+// add entries here when new metrics become NRI-incompatible — updateNRIModelUI derives button selectors automatically
+const nriBlockedMetrics = ["risk", "vulnerability"];
+
 // human-readable quadrant labels (keys match quadrantColors)
 const quadrantLabels = {
   zero_funding: "No FEMA Funding", // No Funding

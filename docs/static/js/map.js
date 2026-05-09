@@ -337,39 +337,27 @@ function wireModelControls() {
 // disable risk/vulnerability choropleth buttons and show note when NRI model is active
 // if an incompatible overlay is currently active, auto-switch to Gap
 function updateNRIModelUI(isNri) {
-  const riskBtn = document.getElementById("risk-button");
-  const vulnBtn = document.getElementById("vulnerability-button");
   const note = document.getElementById("nri-model-note");
 
-  // secondary controls use data-overlay attributes instead of IDs
-  const secondaryContainer = document.getElementById(
-    "choropleth-control-secondary",
-  );
-  const riskBtnSecondary = secondaryContainer?.querySelector(
-    '[data-overlay="Risk"]',
-  );
-  const vulnBtnSecondary = secondaryContainer?.querySelector(
-    '[data-overlay="Social Vulnerability"]',
-  );
-
-  [riskBtn, vulnBtn, riskBtnSecondary, vulnBtnSecondary].forEach((btn) => {
-    if (!btn) return;
-    btn.disabled = isNri;
-    btn.title = isNri
-      ? "Not available for NRI model — NRI Risk Score already includes social vulnerability"
-      : "";
+  // derive overlay labels from config.js and toggle all matching buttons across every container
+  nriBlockedMetrics.forEach((metric) => {
+    const label = baseToOverlay[metric];
+    if (!label) return;
+    document.querySelectorAll(`[data-overlay="${label}"]`).forEach((btn) => {
+      btn.disabled = isNri;
+      btn.title = isNri
+        ? "Not available for NRI model — NRI Risk Score already includes social vulnerability"
+        : "";
+    });
   });
 
   if (note) note.style.display = isNri ? "block" : "none";
 
   // if NRI is now active and an incompatible overlay is selected, switch to Gap
-  if (
-    isNri &&
-    (metricEngine.baseMetric === "risk" ||
-      metricEngine.baseMetric === "vulnerability")
-  ) {
-    handleOverlaySelection("Gap (Funding vs Need)");
-    syncChoroplethButtons("Gap (Funding vs Need)");
+  if (isNri && nriBlockedMetrics.includes(metricEngine.baseMetric)) {
+    const fallback = baseToOverlay["gap"];
+    handleOverlaySelection(fallback);
+    syncChoroplethButtons(fallback);
   }
 }
 
