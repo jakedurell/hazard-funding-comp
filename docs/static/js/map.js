@@ -625,6 +625,8 @@ const metricEngine = {
   format(metric, value) {
     if (!metric || value == null || isNaN(value)) return "";
     if (metric.includes("funding_total")) return `$${d3.format(",.0f")(value)}`;
+    if (metric.includes("funding_per_capita"))
+      return `$${d3.format(",.0f")(value)} pp`;
     if (metric.includes("_rel"))
       return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
     if (metric.includes("rank")) return `${Math.round(value * 100)}%`;
