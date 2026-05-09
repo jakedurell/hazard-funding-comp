@@ -65,6 +65,10 @@ function renderStatsCard(town) {
     stats.IFLD_EALT_weighted,
   );
 
+  document.getElementById("stat-eal-per-capita").textContent = fmtCurrency(
+    stats.EAL_per_capita,
+  );
+
   document.getElementById("stat-risk").textContent = fmtIdx(stats[riskKey]);
 
   document.getElementById("stat-risk-vs").textContent = fmtRatio(
