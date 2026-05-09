@@ -315,6 +315,9 @@ body {
 }
 #choropleth-control-special button.active {
   background-color: #00a8cc;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.15);
+  transform: translateY(2px);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.2);
 }
 @media (max-width: 600px) {
   #choropleth-control-special {
