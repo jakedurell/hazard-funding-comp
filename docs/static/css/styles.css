@@ -752,10 +752,54 @@ body {
   text-align: center;
 }
 
+.rank-jumps {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.rank-jumps button {
+  font-size: 11px;
+  padding: 2px 8px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  color: #555;
+}
+.rank-jumps button:hover {
+  background: #f0f0f0;
+}
+
 #rankings-container {
   width: 100%;
   font-family: sans-serif;
   position: relative;
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  scroll-behavior: smooth;
+}
+
+#rankings-container::before,
+#rankings-container::after {
+  content: "";
+  position: sticky;
+  display: block;
+  height: 30px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#rankings-container::before {
+  top: 0;
+  background: linear-gradient(to bottom, white, transparent);
+}
+
+#rankings-container::after {
+  bottom: 0;
+  background: linear-gradient(to top, white, transparent);
 }
 
 .rank-row {
@@ -857,6 +901,13 @@ body {
 }
 
 @media (max-width: 600px) {
+  #rankings-container {
+    max-height: 400px;
+  }
+  .rank-row {
+    font-size: 13px;
+    padding: 5px 3px;
+  }
   .rank-col {
     display: none;
   }

@@ -759,6 +759,7 @@ body {
   color: #444;
   letter-spacing: 0.01em;
 }
+// rankings header
 .rankings-section-header {
   text-align: center;
   margin-bottom: 1em;
@@ -778,10 +779,55 @@ body {
   line-height: 1.3;
   text-align: center;
 }
+// jump buttons for rankings scroll navigation
+.rank-jumps {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 6px;
+
+  button {
+    font-size: 11px;
+    padding: 2px 8px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    color: #555;
+
+    &:hover {
+      background: #f0f0f0;
+    }
+  }
+}
+// rankings container (with scrolling and fixed height)
 #rankings-container {
   width: 100%;
   font-family: sans-serif;
   position: relative;
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  scroll-behavior: smooth;
+}
+// fade effect at top and bottom of rankings container to indicate scrollability
+#rankings-container::before,
+#rankings-container::after {
+  content: "";
+  position: sticky;
+  display: block;
+  height: 30px;
+  pointer-events: none;
+  z-index: 10;
+}
+#rankings-container::before {
+  top: 0;
+  background: linear-gradient(to bottom, white, transparent);
+}
+#rankings-container::after {
+  bottom: 0;
+  background: linear-gradient(to top, white, transparent);
 }
 // rows
 .rank-row {
@@ -886,6 +932,13 @@ body {
 }
 // responsive adjustments for rankings table
 @media (max-width: 600px) {
+  #rankings-container {
+    max-height: 400px;
+  }
+  .rank-row {
+    font-size: 13px;
+    padding: 5px 3px;
+  }
   // hide rank column on mobile to save space
   .rank-col {
     display: none;

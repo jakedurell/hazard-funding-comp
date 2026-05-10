@@ -27,6 +27,7 @@ Promise.all([
 
   // initialize rankings data
   initializeRankings(statsRaw);
+  wireRankingJumps();
 
   // create the map
   createMap();

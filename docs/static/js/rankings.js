@@ -7,15 +7,44 @@ let vtBaseline = {};
 // base metric key → display label (sourced from config.js)
 const reverseMetricMap = baseToOverlay;
 
+// module-level scroll targets updated on each render — read by wireRankingJumps buttons
+let _vtScrollTop = null;
+let _selectedScrollTop = null;
+let _zeroScrollTop = null;
+let _vtScrollBottom = null;
+
 // initialize rankings data and VT baseline
 function initializeRankings(data) {
   rankingsData = data;
   vtBaseline = data.find((d) => d.town_name === "State of Vermont");
 }
 
+// wire jump buttons once after DOM loads (call from app.js after initializeRankings)
+function wireRankingJumps() {
+  const containerEl = document.getElementById("rankings-container");
+  if (!containerEl) return;
+
+  document.getElementById("jump-top")?.addEventListener("click", () => {
+    containerEl.scrollTop = 0;
+  });
+  document.getElementById("jump-vt")?.addEventListener("click", () => {
+    if (_vtScrollTop !== null) containerEl.scrollTop = _vtScrollTop;
+  });
+  document.getElementById("jump-selected")?.addEventListener("click", () => {
+    if (_selectedScrollTop !== null) containerEl.scrollTop = _selectedScrollTop;
+  });
+  document.getElementById("jump-bottom")?.addEventListener("click", () => {
+    containerEl.scrollTop = containerEl.scrollHeight;
+  });
+}
+
 // render rankings table based on selected metric and town
 function renderRankings(metric, isRelative, selectedTown) {
+  // get container element for rendering and scroll calculations
   const container = d3.select("#rankings-container");
+  const containerEl = container.node();
+
+  // ── resolve keys and title ──────────────────────────────────────────────────
 
   // populate title (before resolving metric)
   const baseMetric = metricEngine.baseMetric;
@@ -30,6 +59,8 @@ function renderRankings(metric, isRelative, selectedTown) {
     .replace(/_rank$/, "") // strips a trailing "_rank" if present
     .replace(/^funding$/, "funding_per_capita") // funding_rank → funding_per_capita for display
     .replace(/^claims$/, "claims_paid_per_capita"); // claims_rank → claims_paid_per_capita for display
+
+  // ── prepare and sort town data ──────────────────────────────────────────────
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank
   const townData = rankingsData
@@ -55,6 +86,8 @@ function renderRankings(metric, isRelative, selectedTown) {
   const scale = isRelative
     ? d3.scaleLinear().domain([min, 0, max]).range([0, 50, 100])
     : d3.scaleLinear().domain([0, max]).range([0, 100]);
+
+  // ── bind rows (enter / exit / merge) ───────────────────────────────────────
 
   // bind data to rows by town name (unique identifier) for efficient re-rendering
   const rows = container
@@ -91,6 +124,16 @@ function renderRankings(metric, isRelative, selectedTown) {
   // highlight selected town
   rowsMerge.classed("selected", (d) => d.town_name === selectedTown);
 
+  // ── update row content (rank, name, value label) ───────────────────────────
+
+  // capture selected row scroll position for jump button
+  const selectedRow = container.select(".rank-row.selected").node();
+  _selectedScrollTop = selectedRow
+    ? selectedRow.offsetTop -
+      containerEl.clientHeight / 2 +
+      selectedRow.offsetHeight / 2
+    : null;
+
   // update rank, name, and value label for all rows
   rowsMerge
     .select(".rank-col")
@@ -99,6 +142,8 @@ function renderRankings(metric, isRelative, selectedTown) {
   rowsMerge
     .select(".value-label")
     .text((d) => metricEngine.format(rawKey, +d[rawKey]));
+
+  // ── render bars ────────────────────────────────────────────────────────────
 
   // update bar widths and positions based on metric values and relative vs rank mode
   rowsMerge.each(function (d) {
@@ -139,8 +184,24 @@ function renderRankings(metric, isRelative, selectedTown) {
     }
   });
 
+  // ── scroll targets (vt reference line + zero crossover) ───────────────────
+
+  // in relative mode, find the zero-crossover row for scroll targeting
+  _zeroScrollTop = null;
+  if (isRelative) {
+    const firstRowEl = container.select(".rank-row").node();
+    const crossoverIdx = townData.findIndex((d) => d.value < 0);
+    if (firstRowEl && crossoverIdx >= 0) {
+      _zeroScrollTop =
+        firstRowEl.offsetHeight * crossoverIdx - containerEl.clientHeight / 2;
+    }
+  }
+
   // remove existing VT reference line and label
   container.selectAll(".vt-ref-line, .vt-ref-label").remove();
+
+  // tracks the pixel offset of the VT ref line so scroll logic can center on it
+  let vtTopPx = null;
 
   // add reference line for VT baseline if in rank mode
   if (!isRelative && vtBaseline) {
@@ -174,6 +235,8 @@ function renderRankings(metric, isRelative, selectedTown) {
         // get row height, compute top position, subtract 1px to center the 2px line on the boundary between rows
         const rowHeight = firstRow.offsetHeight;
         const topPx = rowHeight * vtIndex - 1;
+        vtTopPx = topPx;
+        _vtScrollTop = topPx - containerEl.clientHeight / 2;
 
         // add reference line at computed position
         container
@@ -189,5 +252,19 @@ function renderRankings(metric, isRelative, selectedTown) {
           .text(`${vtLabel}: ${metricEngine.format(rawKey, vtValue)}`);
       }
     }
+  }
+
+  // ── auto-scroll ────────────────────────────────────────────────────────────
+
+  // scroll the container to bring the relevant position into view
+  if (_selectedScrollTop !== null && selectedTown && selectedTown !== "top") {
+    // selected town: center its highlighted row
+    containerEl.scrollTop = _selectedScrollTop;
+  } else if (!isRelative && _vtScrollTop !== null) {
+    // rank mode, no town selected: center on the VT reference line
+    containerEl.scrollTop = _vtScrollTop;
+  } else if (isRelative && _zeroScrollTop !== null) {
+    // relative mode, no town selected: center on the zero crossover
+    containerEl.scrollTop = _zeroScrollTop;
   }
 }
