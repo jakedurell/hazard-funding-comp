@@ -60,6 +60,67 @@ function renderRankings(metric, isRelative, selectedTown) {
     .replace(/^funding$/, "funding_per_capita") // funding_rank → funding_per_capita for display
     .replace(/^claims$/, "claims_paid_per_capita"); // claims_rank → claims_paid_per_capita for display
 
+  // populate dynamic blurb below the title
+  const blurbEl = document.getElementById("rankings-blurb");
+  if (blurbEl) {
+    const modelLabel =
+      modelKeyToLabel[metricEngine.model] ?? metricEngine.model;
+    const n = rankingsData.filter(
+      (d) => d.town_name !== "State of Vermont" && +d.population > 0,
+    ).length;
+
+    // metrics that don't use a model (funding, vulnerability, claims) skip the model qualifier
+    const modelQualifier = ["funding", "vulnerability", "claims"].includes(
+      baseMetric,
+    )
+      ? " · model independent"
+      : ` · ${modelLabel} model`;
+
+    if (selectedTown && selectedTown !== "top") {
+      // town selected: show its rank and relative distance from VT average
+      const townRow = rankingsData.find((d) => d.town_name === selectedTown);
+      const rankVal = townRow ? +townRow[rankKey] : null;
+      if (rankVal !== null && !isNaN(rankVal)) {
+        const rankPct = Math.round(rankVal * 100);
+        const rankNum = Math.round(rankVal * n);
+        const relVal = townRow ? +townRow[metricKey] : null;
+        if (isRelative && !isNaN(relVal)) {
+          // relative mode: show % above/below VT average
+          const sign = relVal >= 0 ? "+" : "";
+          blurbEl.textContent = `${selectedTown} is ${sign}${Math.round(relVal * 100)}% vs. VT average${modelQualifier}`;
+        } else {
+          // rank mode: show numeric rank and percentile
+          blurbEl.textContent = `${selectedTown} ranks ${rankNum} of ${n} towns — higher than ${rankPct}% of towns${modelQualifier}`;
+        }
+      } else {
+        blurbEl.textContent = "";
+      }
+    } else if (isRelative) {
+      // relative mode, no town: show above/below split
+      const aboveCount = rankingsData.filter(
+        (d) =>
+          d.town_name !== "State of Vermont" &&
+          +d.population > 0 &&
+          +d[metricKey] >= 0,
+      ).length;
+      blurbEl.textContent = `${aboveCount} towns above average · ${n - aboveCount} below${modelQualifier}`;
+    } else {
+      // rank mode, no town: show how many rank above VT average
+      const vtVal = vtBaseline ? +vtBaseline[rawKey] : null;
+      if (vtVal !== null && !isNaN(vtVal)) {
+        const aboveVT = rankingsData.filter(
+          (d) =>
+            d.town_name !== "State of Vermont" &&
+            +d.population > 0 &&
+            +d[rawKey] > vtVal,
+        ).length;
+        blurbEl.textContent = `${aboveVT} of ${n} towns rank above the Vermont average${modelQualifier}`;
+      } else {
+        blurbEl.textContent = "";
+      }
+    }
+  }
+
   // ── prepare and sort town data ──────────────────────────────────────────────
 
   // prepare data: filter out VT, convert values to numbers, sort by pre-computed rank

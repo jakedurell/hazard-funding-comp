@@ -228,7 +228,7 @@
               name="model-selector"
               id="model-eal"
               autocomplete="off"
-              data-overlay="EAL"
+              data-overlay="Total Risk"
             />
             Total Risk
           </label>
@@ -238,7 +238,7 @@
               name="model-selector"
               id="model-eal-per-capita"
               autocomplete="off"
-              data-overlay="EAL per capita"
+              data-overlay="Risk per Person"
               checked
             />
             Risk per Person
@@ -249,7 +249,7 @@
               name="model-selector"
               id="model-nri"
               autocomplete="off"
-              data-overlay="NRI"
+              data-overlay="FEMA Risk Index"
             />
             FEMA Risk Index
           </label>
@@ -521,7 +521,7 @@
             type="radio"
             name="model-selector-secondary"
             autocomplete="off"
-            data-overlay="EAL"
+            data-overlay="Total Risk"
           />
           Total Risk
         </label>
@@ -530,7 +530,7 @@
             type="radio"
             name="model-selector-secondary"
             autocomplete="off"
-            data-overlay="EAL per capita"
+            data-overlay="Risk per Person"
             checked
           />
           Risk per Person
@@ -540,7 +540,7 @@
             type="radio"
             name="model-selector-secondary"
             autocomplete="off"
-            data-overlay="NRI"
+            data-overlay="FEMA Risk Index"
           />
           FEMA Risk Index
         </label>
@@ -558,15 +558,7 @@
 
     <!-- Rankings Table -->
     <div id="rankings-title" class="rankings-title"></div>
-    <div class="rankings-section-header">
-      <div class="rankings-section-main">Town Comparison</div>
-      <div class="rankings-section-sub">
-        Compare how towns rank under different definitions of flood risk and
-        funding need.<br />
-        Switching models reshuffles priorities, especially between total risk
-        and risk per person.
-      </div>
-    </div>
+    <div id="rankings-blurb" class="rankings-blurb"></div>
     <div class="rank-jumps">
       <button id="jump-top">Top</button>
       <button id="jump-vt">VT avg</button>

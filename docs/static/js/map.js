@@ -294,7 +294,7 @@ function wireModelControls() {
     document.getElementById("model-selector-group-secondary"),
   ].filter(Boolean);
 
-  // sync model buttons to EAL per capita on load
+  // sync model buttons to Risk per Person on load
   function syncModelGroups(scheme) {
     containers.forEach((container) => {
       // remove active status from all buttons in the group
@@ -313,7 +313,7 @@ function wireModelControls() {
     });
   }
 
-  syncModelGroups("EAL per capita");
+  syncModelGroups("Risk per Person");
 
   containers.forEach((container) => {
     container.addEventListener("change", (e) => {
@@ -324,12 +324,12 @@ function wireModelControls() {
       syncModelGroups(scheme);
 
       // update model in mapState and metricEngine, update choropleth and other components
-      mapState.model = modelLabels[scheme] ?? "eal"; // default to EAL, modelLabels in config.js maps from label to key
+      mapState.model = modelLabels[scheme] ?? "eal_per_capita"; // default to EAL per capita, modelLabels in config.js maps from label to key
       metricEngine.model = mapState.model;
       updateDashboard();
 
       // disable Risk and Vulnerability buttons when NRI model is active (NRI score already embeds SOVI)
-      updateNRIModelUI(scheme === "NRI");
+      updateNRIModelUI(scheme === "FEMA Risk Index");
     });
   });
 }
@@ -571,9 +571,9 @@ function applyZoomLabelVisibility() {
 
 // render choropleth layer based on selected metric and model
 const metricEngine = {
-  // default to gap metric and EAL model on load
+  // default to gap metric and EAL per capita model on load
   baseMetric: "gap",
-  model: "eal",
+  model: "eal_per_capita",
   isRelative: false,
 
   // mapping from user-friendly overlay labels to metric keys (sourced from config.js)

@@ -32,10 +32,15 @@ const overlayDefMap = {
 
 // model label (data-overlay attribute on model selector) → model key
 const modelLabels = {
-  EAL: "eal",
-  "EAL per capita": "eal_per_capita",
-  NRI: "nri",
+  "Total Risk": "eal",
+  "Risk per Person": "eal_per_capita",
+  "FEMA Risk Index": "nri",
 };
+
+// model key → display label (derived — do not edit directly)
+const modelKeyToLabel = Object.fromEntries(
+  Object.entries(modelLabels).map(([label, key]) => [key, label]),
+);
 
 // model definition mapping (for model definition HTML)
 const modelDefMap = {
