@@ -745,7 +745,7 @@ function updateClaimsBenchmarkNote() {
   const note = document.getElementById("claims-benchmark-note");
   if (note)
     note.style.display =
-      metricEngine.baseMetric === "claims" ? "block" : "none";
+      mapState._activeOverlay === baseToOverlay["claims"] ? "block" : "none";
 }
 
 /////////////////////////////////////////////////////////////
