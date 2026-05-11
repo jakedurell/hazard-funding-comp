@@ -201,14 +201,28 @@ body {
   text-shadow: 0 0 2px black, 0 0 4px black;
 }
 
-.popup-text-right {
+.map-popup .leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+.map-popup .leaflet-popup-content {
+  margin: 10px 14px;
+  font-size: 1.2em;
+  line-height: 1.6;
+  min-width: 190px;
+}
+.map-popup .leaflet-popup-content b {
   display: block;
-  text-align: right;
+  font-size: 1.35em;
+  margin-bottom: 3px;
 }
 
-.popup-text-right-larger {
+.popup-note {
   display: block;
-  font-size: 1.2em;
+  font-size: 1em;
+  color: #888;
+  font-style: italic;
+  margin-top: 2px;
 }
 
 .custom-legend {

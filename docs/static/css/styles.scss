@@ -224,14 +224,32 @@ body {
 }
 
 // right-align choropleth and bubble popup text
-.popup-text-right {
-  display: block;
-  text-align: right;
-  // font-weight: bold;
+// bubble and quadrant popup
+.map-popup {
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+  }
+  .leaflet-popup-content {
+    margin: 10px 14px;
+    font-size: 1.2em;
+    line-height: 1.6;
+    min-width: 190px;
+
+    b {
+      display: block;
+      font-size: 1.35em;
+      margin-bottom: 3px;
+    }
+  }
 }
-.popup-text-right-larger {
+// muted explanatory / contextual line inside any popup
+.popup-note {
   display: block;
-  font-size: 1.2em;
+  font-size: 1em;
+  color: #888;
+  font-style: italic;
+  margin-top: 2px;
 }
 
 // map legend box

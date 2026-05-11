@@ -406,9 +406,10 @@ function initializePopBubbleChartLayer() {
       opacity: 1,
       fillOpacity: 0.8,
     }).bindPopup(
-      `<b>${town}</b><br>
-      <span class="popup-text-right popup-text-right-larger">Town population: ${population.toLocaleString()}</span>`,
-      { className: "marker-popup" },
+      `<b>${town}</b>
+      Population: ${population.toLocaleString()} residents.<br>
+      <span class="popup-note">Used as context for per-capita risk and funding comparisons.</span>`,
+      { className: "map-popup" },
     );
 
     // create marker with text inside and add to layer
@@ -474,6 +475,12 @@ function initializeFundingBubbleLayer() {
 
     if (funding === 0) return; // skip unfunded towns
 
+    const fundingPc = +statsByTown[town]?.funding_per_capita;
+    const fundingPcLine =
+      Number.isFinite(fundingPc) && fundingPc > 0
+        ? `<br>Equivalent to $${Math.round(fundingPc).toLocaleString()} per resident.`
+        : "";
+
     const circleMarker = L.circleMarker(latlng, {
       radius,
       fillColor: "#2166ac",
@@ -483,8 +490,9 @@ function initializeFundingBubbleLayer() {
       fillOpacity: 0.75,
     }).bindPopup(
       `<b>${town}</b>
-      <br><span class="popup-text-right popup-text-right-larger">Total Funding: $${Math.round(funding).toLocaleString()}</span>`,
-      { className: "marker-popup" },
+      Received $${Math.round(funding).toLocaleString()} in flood mitigation funding since 1990.${fundingPcLine}<br>
+      <span class="popup-note">Bubble size reflects total federal mitigation investment.</span>`,
+      { className: "map-popup" },
     );
 
     // create marker with text inside and add to layer
