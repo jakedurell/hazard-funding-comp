@@ -339,6 +339,21 @@ function initializePopBubbleChartLayer() {
   mapState.popBubbleLabels = L.layerGroup(); // separate layer for zoom-gated text labels
   initializeTownOutlines(bubbleLayerGroup); // add town outlines to bubble layer for context
 
+  // top N towns by population get persistent labels at all zoom levels;
+  // the rest are zoom-gated via popBubbleLabels (hover tooltips work for all)
+  const TOP_LABEL_COUNT = 6;
+  const alwaysLabelSet = new Set(
+    [...towns.features]
+      .filter((f) => +statsByTown[f.properties.town_name]?.population > 0)
+      .sort(
+        (a, b) =>
+          (+statsByTown[b.properties.town_name]?.population || 0) -
+          (+statsByTown[a.properties.town_name]?.population || 0),
+      )
+      .slice(0, TOP_LABEL_COUNT)
+      .map((f) => f.properties.town_name),
+  );
+
   // loop through towns and create bubbles
   towns.features.forEach((feature) => {
     // get town stats for bubble size and popup content
@@ -375,9 +390,13 @@ function initializePopBubbleChartLayer() {
     // open || close popup
     popupMouseEvents(circleMarker);
 
-    // add circle to main layer, text to separate label layer
+    // add circle to main layer; top N labels always shown, rest are zoom-gated
     bubbleLayerGroup.addLayer(circleMarker);
-    mapState.popBubbleLabels.addLayer(textMarker);
+    if (alwaysLabelSet.has(town)) {
+      bubbleLayerGroup.addLayer(textMarker);
+    } else {
+      mapState.popBubbleLabels.addLayer(textMarker);
+    }
   });
 
   return bubbleLayerGroup;
@@ -388,6 +407,21 @@ function initializeFundingBubbleLayer() {
   const bubbleLayerGroup = L.layerGroup(); // create layer group for circle markers
   mapState.fundingBubbleLabels = L.layerGroup(); // separate layer for zoom-gated text labels
   initializeTownOutlines(bubbleLayerGroup); // add town outlines to bubble layer for context
+
+  // top N towns by population get persistent labels at all zoom levels;
+  // the rest are zoom-gated via fundingBubbleLabels (hover tooltips work for all)
+  const TOP_LABEL_COUNT = 6;
+  const alwaysLabelSet = new Set(
+    [...towns.features]
+      .filter((f) => +statsByTown[f.properties.town_name]?.funding_total > 0)
+      .sort(
+        (a, b) =>
+          (+statsByTown[b.properties.town_name]?.funding_total || 0) -
+          (+statsByTown[a.properties.town_name]?.funding_total || 0),
+      )
+      .slice(0, TOP_LABEL_COUNT)
+      .map((f) => f.properties.town_name),
+  );
 
   // get max funding value to create a scale for bubble sizes
   const maxFunding = d3.max(
@@ -432,9 +466,13 @@ function initializeFundingBubbleLayer() {
     // open || close popup
     popupMouseEvents(circleMarker);
 
-    // add circle to main layer, text to separate label layer
+    // add circle to main layer; top N labels always shown, rest are zoom-gated
     bubbleLayerGroup.addLayer(circleMarker);
-    mapState.fundingBubbleLabels.addLayer(textMarker);
+    if (alwaysLabelSet.has(town)) {
+      bubbleLayerGroup.addLayer(textMarker);
+    } else {
+      mapState.fundingBubbleLabels.addLayer(textMarker);
+    }
   });
 
   return bubbleLayerGroup;
