@@ -171,8 +171,8 @@ function addLegend(type) {
       div.appendChild(rangeLabels);
 
       return div;
-      // quadrant legend -- create discrete legend based on quadrantColors mapping
     } else if (type === "quadrant") {
+      // quadrant legend -- create discrete legend based on quadrantColors mapping
       div.innerHTML = `<div class="legend-title">Funding Alignment</div>`;
 
       // build legend rows (color swatch + label)
@@ -189,6 +189,41 @@ function addLegend(type) {
 
       // add rows to legend container
       div.innerHTML += items;
+      return div;
+    } else if (type === "population-bubble") {
+      // population bubble legend -- create example bubbles with labels for population sizes
+      div.innerHTML = `<div class="legend-title">Town Population</div>`;
+      const sizes = [1000, 5000, 10000];
+      sizes.forEach((pop) => {
+        const r = Math.round(Math.sqrt(pop) * 0.15);
+        const d = r * 2;
+        div.innerHTML += `
+          <div style="display:flex;align-items:center;gap:8px;margin:5px 0;">
+            <div style="width:${d}px;height:${d}px;border-radius:50%;background:${defaultColors.townColor};opacity:0.8;flex-shrink:0;"></div>
+            <span>${pop.toLocaleString()}</span>
+          </div>`;
+      });
+      return div;
+    } else if (type === "funding-bubble") {
+      // funding bubble legend -- create example bubbles with labels for funding amounts
+      div.innerHTML = `<div class="legend-title">Total Funding</div>`;
+      const maxFunding = d3.max(
+        Object.values(statsByTown),
+        (d) => +d.funding_total || 0,
+      );
+      const radiusScale = d3.scaleSqrt().domain([0, maxFunding]).range([0, 60]);
+      const sizes = [500_000, 1_000_000, 3_000_000].filter(
+        (v) => v <= maxFunding * 1.1,
+      );
+      sizes.forEach((amount) => {
+        const r = Math.round(radiusScale(amount));
+        const d = r * 2;
+        div.innerHTML += `
+          <div style="display:flex;align-items:center;gap:8px;margin:5px 0;">
+            <div style="width:${d}px;height:${d}px;border-radius:50%;background:#2166ac;opacity:0.75;flex-shrink:0;"></div>
+            <span>$${(amount / 1_000_000).toFixed(1)}M</span>
+          </div>`;
+      });
       return div;
     }
   };

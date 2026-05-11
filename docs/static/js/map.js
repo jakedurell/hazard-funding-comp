@@ -823,6 +823,9 @@ function togglePopBubbleLayer() {
 
   // set choropleth to null (default borders, no fill), update legend, hide choropleth labels
   clearChoroplethFill();
+  mapState.choroplethLegend = addLegend("population-bubble").addTo(
+    mapState.map,
+  );
 }
 
 // toggle funding bubble layer on/off
@@ -840,6 +843,7 @@ function toggleFundingBubbleLayer() {
 
   // clear choropleth
   clearChoroplethFill();
+  mapState.choroplethLegend = addLegend("funding-bubble").addTo(mapState.map);
 }
 
 // toggle quadrant layer on/off
