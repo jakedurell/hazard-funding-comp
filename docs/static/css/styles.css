@@ -765,6 +765,13 @@ body {
 .rank-jumps button:hover {
   background: #f0f0f0;
 }
+.rank-jumps button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.rank-jumps button:disabled:hover {
+  background: white;
+}
 
 #rankings-container {
   width: 100%;

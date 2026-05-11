@@ -28,7 +28,11 @@ function wireRankingJumps() {
     containerEl.scrollTop = 0;
   });
   document.getElementById("jump-vt")?.addEventListener("click", () => {
-    if (_vtScrollTop !== null) containerEl.scrollTop = _vtScrollTop;
+    if (metricEngine.isRelative) {
+      if (_zeroScrollTop !== null) containerEl.scrollTop = _zeroScrollTop;
+    } else {
+      if (_vtScrollTop !== null) containerEl.scrollTop = _vtScrollTop;
+    }
   });
   document.getElementById("jump-selected")?.addEventListener("click", () => {
     if (_selectedScrollTop !== null) containerEl.scrollTop = _selectedScrollTop;
@@ -250,11 +254,13 @@ function renderRankings(metric, isRelative, selectedTown) {
   // in relative mode, find the zero-crossover row for scroll targeting
   _zeroScrollTop = null;
   if (isRelative) {
-    const firstRowEl = container.select(".rank-row").node();
     const crossoverIdx = townData.findIndex((d) => d.value < 0);
-    if (firstRowEl && crossoverIdx >= 0) {
-      _zeroScrollTop =
-        firstRowEl.offsetHeight * crossoverIdx - containerEl.clientHeight / 2;
+    if (crossoverIdx >= 0) {
+      const rowNodes = container.selectAll(".rank-row").nodes();
+      const crossoverRow = rowNodes[crossoverIdx];
+      if (crossoverRow) {
+        _zeroScrollTop = crossoverRow.offsetTop - containerEl.clientHeight / 2;
+      }
     }
   }
 
@@ -290,12 +296,12 @@ function renderRankings(metric, isRelative, selectedTown) {
       const vtIndex =
         sortedValues.length - d3.bisectLeft(sortedValues, vtValue);
 
-      // place reference line at appropriate position based on computed rank index and row heights
-      const firstRow = container.select(".rank-row").node();
-      if (firstRow) {
-        // get row height, compute top position, subtract 1px to center the 2px line on the boundary between rows
-        const rowHeight = firstRow.offsetHeight;
-        const topPx = rowHeight * vtIndex - 1;
+      // place reference line at the actual pixel position of the vtIndex-th row
+      const rowNodes = container.selectAll(".rank-row").nodes();
+      const vtRow = rowNodes[vtIndex];
+      if (vtRow) {
+        // subtract 1px to center the 2px line on the boundary between rows
+        const topPx = vtRow.offsetTop - 1;
         vtTopPx = topPx;
         _vtScrollTop = topPx - containerEl.clientHeight / 2;
 
@@ -314,6 +320,19 @@ function renderRankings(metric, isRelative, selectedTown) {
       }
     }
   }
+
+  // ── jump button state ────────────────────────────────────────────────────────
+
+  // enable "My Town" only when a town is selected and has a scroll target
+  const jumpSelectedBtn = document.getElementById("jump-selected");
+  if (jumpSelectedBtn) {
+    jumpSelectedBtn.disabled =
+      !selectedTown || selectedTown === "top" || _selectedScrollTop === null;
+  }
+
+  // label "VT avg" in rank mode, "Zero" in relative mode
+  const jumpVtBtn = document.getElementById("jump-vt");
+  if (jumpVtBtn) jumpVtBtn.textContent = isRelative ? "Zero" : "VT avg";
 
   // ── auto-scroll ────────────────────────────────────────────────────────────
 

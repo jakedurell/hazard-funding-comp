@@ -793,6 +793,15 @@ body {
     &:hover {
       background: #f0f0f0;
     }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+
+      &:hover {
+        background: white;
+      }
+    }
   }
 }
 // rankings container (with scrolling and fixed height)
