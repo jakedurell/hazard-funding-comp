@@ -11,6 +11,7 @@ const mapState = {
   riverCorridorsLayer: null,
   riverCorridorsTier2Layer: null,
   riverCorridorsFocused: false,
+  riverCorridorsLegend: null,
 
   popBubbleLayer: null,
   popBubbleLabels: null,
@@ -889,6 +890,9 @@ function toggleRiverCorridorsFocusView() {
     if (mapState.riverCorridorsLayer) {
       mapState.riverCorridorsLayer.setStyle(RIVER_STYLE_FOCUSED);
     }
+
+    // show explanatory legend
+    mapState.riverCorridorsLegend = addLegend("river-corridors").addTo(mapState.map);
   } else {
     restoreRiverCorridorsDefaultStyle();
   }
@@ -906,6 +910,12 @@ function restoreRiverCorridorsDefaultStyle() {
   // restore river corridors tier 1 style
   if (mapState.riverCorridorsLayer) {
     mapState.riverCorridorsLayer.setStyle(RIVER_STYLE_DEFAULT);
+  }
+
+  // remove explanatory legend
+  if (mapState.riverCorridorsLegend) {
+    mapState.map.removeControl(mapState.riverCorridorsLegend);
+    mapState.riverCorridorsLegend = null;
   }
 }
 

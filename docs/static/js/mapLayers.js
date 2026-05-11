@@ -135,7 +135,7 @@ function calculateCentroid(feature) {
 
 //////////////////////////////////////////////////////////
 
-// create legend
+// create legend, depending on layer type (choropleth vs quadrant vs bubble vs river corridors)
 function addLegend(type) {
   let legend = L.control({ position: "topright" });
 
@@ -224,6 +224,20 @@ function addLegend(type) {
             <span>$${(amount / 1_000_000).toFixed(1)}M</span>
           </div>`;
       });
+      return div;
+    } else if (type === "river-corridors") {
+      // river corridors legend -- swatch + short geomorphic description
+      div.innerHTML = `
+        <div class="legend-title">River Corridors</div>
+        <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px;">
+          <div style="width:18px;height:12px;background:${defaultColors.riverColor};opacity:0.7;border-radius:2px;flex-shrink:0;"></div>
+          <span> VT ANR corridor</span>
+        </div>
+        <div class="river-corridors-legend-note">
+          Areas vulnerable to channel migration<br>
+          and flood-related erosion —<br>
+          not just mapped inundation zones.
+        </div>`;
       return div;
     }
   };
