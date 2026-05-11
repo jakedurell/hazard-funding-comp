@@ -65,12 +65,40 @@ function initializeChoroplethLayer() {
         fillOpacity: 0.6,
       };
     },
-    // on click, update dropdown to zoom in on town
+    // hover tooltip (desktop) + click popup (mobile / persistent)
     onEachFeature: (feature, layer) => {
+      const town = feature.properties.town_name;
+
+      // tooltip: lightweight, follows cursor, suppressed while popup is open
+      layer.bindTooltip("", {
+        sticky: true,
+        className: "choropleth-tooltip",
+      });
+
+      layer.on("mouseover", function () {
+        if (!this.isPopupOpen()) {
+          this.setTooltipContent(buildChoroplethTooltip(town));
+          this.openTooltip();
+        }
+      });
+
+      layer.on("mouseout", function () {
+        this.closeTooltip();
+      });
+
+      // popup: persists on click (works on mobile); reuses same content builder
+      layer.bindPopup("", { className: "choropleth-tooltip" });
+
+      // belt-and-suspenders: close tooltip after popup fully opens
+      layer.on("popupopen", function () {
+        this.closeTooltip();
+      });
+
       layer.on("click", function () {
-        const selectedTown = feature.properties.town_name;
+        this.closeTooltip();
+        this.setPopupContent(buildChoroplethTooltip(town));
         const dropdown = document.getElementById("towns-dropdown");
-        dropdown.value = selectedTown;
+        dropdown.value = town;
         dropdown.dispatchEvent(new Event("change"));
       });
     },
@@ -306,6 +334,181 @@ function createRangeLabels(metric, ...domain) {
   `;
 
   return labelContainer;
+}
+
+//////////////////////////////////////////////////////////
+
+// build narrative tooltip content for choropleth layer based on active metric
+function buildChoroplethTooltip(town) {
+  const stats = statsByTown[town];
+  // safety check in case stats are missing for this town (shouldn't happen)
+  if (!stats) return `<b>${town}</b>`;
+
+  const base = metricEngine.baseMetric;
+  const model = metricEngine.model;
+
+  // rank (0–1) → percentile integer; returns null if missing
+  const pct = (key) => {
+    const v = +stats[key];
+    return Number.isFinite(v) ? Math.round(v * 100) : null;
+  };
+
+  // format currency values with safety checks
+  const fmt$ = (v) => {
+    const n = +v;
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return n.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    });
+  };
+
+  // tooltip div
+  const note = (text) => `<span class="popup-note">${text}</span>`;
+
+  // conditionals for each metric to build popup content
+  if (base === "risk") {
+    const rankPct = pct(`risk_rank_${model}`);
+    const ealPc = fmt$(stats.EAL_per_capita);
+    const inCorridor = +stats.pct_river_corridor > 5;
+    let html = `<b>${town}</b><br>`;
+    html +=
+      rankPct !== null
+        ? `Projected flood exposure ranks higher than ${rankPct}% of Vermont towns.`
+        : "Expected flood loss data unavailable.";
+    if (ealPc) html += note(`Est. annual flood loss: ${ealPc}/person`);
+    if (inCorridor)
+      html += note(
+        "Large portions of town fall within mapped river corridors.",
+      );
+    return html;
+  }
+
+  if (base === "vulnerability") {
+    const rankPct = pct("vulnerability_rank");
+    const poverty = +stats.pct_below_poverty;
+    const elderly = +stats.percent_elderly;
+    const no_vehicle = +stats.pct_no_vehicle;
+    let html = `<b>${town}</b><br>`;
+    if (rankPct !== null && rankPct >= 50) {
+      html += `Residents may face greater difficulty recovering from floods.`;
+      html += `<br>Higher vulnerability than ${rankPct}% of Vermont towns.`;
+    } else if (rankPct !== null) {
+      html += `Below-average social vulnerability relative to other Vermont towns.`;
+    }
+    if (poverty > 15)
+      html += note("Higher poverty rates may limit recovery capacity.");
+    if (elderly > 25)
+      html += note(
+        "Older residents may face additional evacuation and recovery challenges.",
+      );
+    if (no_vehicle > 10)
+      html += note("Limited vehicle access may constrain evacuation options.");
+    return html;
+  }
+
+  if (base === "need") {
+    const rankPct = pct(`need_rank_${model}`);
+    const fundRank = pct("funding_rank");
+    const hasFunding = +stats.funding_total > 0;
+    let html = `<b>${town}</b><br>`;
+    html +=
+      rankPct !== null
+        ? `Combined flood need ranks higher than ${rankPct}% of Vermont towns.`
+        : "Combined need data unavailable.";
+    if (rankPct !== null && fundRank !== null) {
+      const diff = rankPct - fundRank;
+      if (diff > 15)
+        html += note("Funding received does not match this level of need.");
+      else if (diff < -15 && hasFunding)
+        html += note(
+          "Funding levels exceed what measured need alone would predict.",
+        );
+    }
+    return html;
+  }
+
+  if (base === "funding") {
+    const rankPct = pct("funding_rank");
+    const needRank = pct(`need_rank_${model}`);
+    const hasFunding = +stats.funding_total > 0;
+    const fund = fmt$(stats.funding_total);
+    const fpc = fmt$(stats.funding_per_capita);
+    let html = `<b>${town}</b><br>`;
+    if (!hasFunding) {
+      html += "No recorded FEMA mitigation funding.";
+      if (needRank >= 50) {
+        html += note("Despite comparatively high measured flood need.");
+      }
+    } else if (rankPct !== null) {
+      html += `Received more mitigation funding than ${rankPct}% of Vermont towns.`;
+      if (fund) html += note(`Total funding: ${fund}`);
+      if (fpc) html += note(`Equivalent to ${fpc} per resident.`);
+    }
+    return html;
+  }
+
+  if (base === "gap") {
+    const gapRank = pct(`gap_rank_${model}`);
+    const needRank = pct(`need_rank_${model}`);
+    const fundRank = pct("funding_rank");
+    const hasFunding = +stats.funding_total > 0;
+    let html = `<b>${town}</b><br>`;
+    if (gapRank !== null) {
+      if (!hasFunding) {
+        if (needRank >= 70) {
+          html +=
+            "No recorded FEMA mitigation funding despite elevated flood risk.";
+        } else {
+          html += "No recorded FEMA mitigation funding.";
+        }
+      } else if (gapRank >= 70) {
+        html += "Appears underfunded relative to measured flood need.";
+        const diff =
+          needRank !== null && fundRank !== null ? needRank - fundRank : null;
+        if (diff !== null && diff > 10)
+          html += note(
+            `Funding trails measured need by ${diff} percentile points.`,
+          );
+      } else if (gapRank <= 30) {
+        html += hasFunding
+          ? "Has received comparatively more mitigation funding than its measured need would predict."
+          : "Flood need is relatively limited compared to other Vermont towns.";
+      } else {
+        html += "Funding levels roughly track measured need.";
+      }
+    }
+    return html;
+  }
+
+  if (base === "claims") {
+    const rankPct = pct("claims_rank");
+    const riskRank = pct(`risk_rank_${model}`);
+    const diff =
+      rankPct !== null && riskRank !== null ? rankPct - riskRank : null;
+    let html = `<b>${town}</b><br>`;
+    if (rankPct !== null && rankPct >= 50) {
+      html += `Historical flood insurance claims rank higher than ${rankPct}% of Vermont towns.`;
+      // if (diff !== null && diff > 20)
+      //   html += note(
+      //     "Historical losses exceed what current modeled risk alone would suggest.",
+      //   );
+      html += note(
+        "Reflects past insured losses, not necessarily future exposure.",
+      );
+    } else if (rankPct !== null) {
+      html += `Relatively limited NFIP claims history.`;
+      if (diff !== null && diff < -20)
+        html += note(
+          "Projected flood exposure appears higher than historical claims patterns.",
+        );
+      html += note("Past claims do not fully capture future flood exposure.");
+    }
+    return html;
+  }
+
+  return `<b>${town}</b>`;
 }
 
 //////////////////////////////////////////////////////////

@@ -203,7 +203,13 @@ body {
     fill-opacity 0.3s ease;
 }
 
-// choropleth markers
+// suppress browser focus outline on clicked SVG features
+// (weird box outline that appears when clicking on choropleths)
+.leaflet-interactive:focus {
+  outline: none;
+}
+
+// choropleth labels
 .choropleth-label {
   @include flex-center();
   font-size: 15px;
@@ -213,7 +219,7 @@ body {
     0 0 4px black;
 }
 
-// bubble markers
+// bubble labels
 .bubble-text {
   @include flex-center();
   font-size: 12px;
@@ -223,7 +229,6 @@ body {
     0 0 4px black;
 }
 
-// right-align choropleth and bubble popup text
 // bubble and quadrant popup
 .map-popup {
   .leaflet-popup-content-wrapper {
@@ -250,6 +255,53 @@ body {
   color: #888;
   font-style: italic;
   margin-top: 2px;
+}
+
+// choropleth hover tooltip + click popup (shared class)
+.choropleth-tooltip {
+  // tooltip variant (Leaflet applies these directly to the tooltip element)
+  &.leaflet-tooltip {
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 11px;
+    font-size: 1.2em;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    width: 220px; // set width to prevent wihte-space: normal from making tooltip too narrow and tall when content is long
+    white-space: normal; // text wrap (override Leaflet's default no-wrap)
+    pointer-events: none;
+
+    &::before {
+      display: none;
+    }
+
+    b {
+      display: block;
+      font-size: 1.35em;
+      margin-bottom: 2px;
+    }
+  }
+
+  // popup variant (Leaflet wraps content inside .leaflet-popup-content-wrapper)
+  &.leaflet-popup {
+    .leaflet-popup-content-wrapper {
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+    .leaflet-popup-content {
+      margin: 9px 13px;
+      font-size: 1.2em;
+      line-height: 1.5;
+      max-width: 230px;
+
+      b {
+        display: block;
+        font-size: 1.35em;
+        margin-bottom: 2px;
+      }
+    }
+  }
 }
 
 // map legend box

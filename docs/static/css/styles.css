@@ -181,6 +181,10 @@ body {
   transition: fill 0.3s ease, fill-opacity 0.3s ease;
 }
 
+.leaflet-interactive:focus {
+  outline: none;
+}
+
 .choropleth-label {
   display: flex;
   justify-content: center;
@@ -223,6 +227,42 @@ body {
   color: #888;
   font-style: italic;
   margin-top: 2px;
+}
+
+.choropleth-tooltip.leaflet-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 11px;
+  font-size: 1.2em;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  width: 220px;
+  white-space: normal;
+  pointer-events: none;
+}
+.choropleth-tooltip.leaflet-tooltip::before {
+  display: none;
+}
+.choropleth-tooltip.leaflet-tooltip b {
+  display: block;
+  font-size: 1.35em;
+  margin-bottom: 2px;
+}
+.choropleth-tooltip.leaflet-popup .leaflet-popup-content-wrapper {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.choropleth-tooltip.leaflet-popup .leaflet-popup-content {
+  margin: 9px 13px;
+  font-size: 1.2em;
+  line-height: 1.5;
+  max-width: 230px;
+}
+.choropleth-tooltip.leaflet-popup .leaflet-popup-content b {
+  display: block;
+  font-size: 1.35em;
+  margin-bottom: 2px;
 }
 
 .custom-legend {
@@ -1057,3 +1097,5 @@ body {
     gap: 0.5em;
   }
 }
+
+/*# sourceMappingURL=styles.css.map */

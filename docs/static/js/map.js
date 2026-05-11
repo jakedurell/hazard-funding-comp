@@ -678,6 +678,7 @@ function resetOverlayState() {
 
 // clear choropleth fill, legend, and labels — called before activating any special overlay
 function clearChoroplethFill(weight = 1) {
+  mapState.map.closePopup(); // close any open choropleth feature popup
   mapState.choroplethMetric = null;
   mapState.choroplethLayer.setStyle(() => ({
     color: defaultColors.defaultGray,
@@ -699,6 +700,7 @@ function hideLayer(layer) {
 
 // update all dashboard components after any state change
 function updateDashboard() {
+  refreshChoroplethPopups();
   updateMetric();
   renderPlot(metricEngine.baseMetric, mapState.selectedTown);
   renderStatsCard(mapState.selectedTown);
@@ -710,6 +712,21 @@ function updateDashboard() {
   updateOverlayDefinition();
   updateModelDefinition();
   updateClaimsBenchmarkNote();
+}
+
+// refresh open choropleth popup and current tooltip content (eachLayer reaches individual feature layers)
+function refreshChoroplethPopups() {
+  // refresh open choropleth popup and current tooltip content (eachLayer reaches individual feature layers)
+  if (mapState.choroplethLayer) {
+    mapState.choroplethLayer.eachLayer((fl) => {
+      const town = fl.feature.properties.town_name;
+      if (fl.isPopupOpen()) {
+        fl.setPopupContent(buildChoroplethTooltip(town));
+      }
+      // always update tooltip content so sticky tooltips don't re-open with stale text
+      fl.setTooltipContent(buildChoroplethTooltip(town));
+    });
+  }
 }
 
 // show the definition matching the currently active overlay; hides all others
@@ -892,7 +909,9 @@ function toggleRiverCorridorsFocusView() {
     }
 
     // show explanatory legend
-    mapState.riverCorridorsLegend = addLegend("river-corridors").addTo(mapState.map);
+    mapState.riverCorridorsLegend = addLegend("river-corridors").addTo(
+      mapState.map,
+    );
   } else {
     restoreRiverCorridorsDefaultStyle();
   }
