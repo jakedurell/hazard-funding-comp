@@ -365,7 +365,7 @@ function initializePopBubbleChartLayer() {
     const textMarker = L.marker(latlng, {
       icon: L.divIcon({
         className: "bubble-text",
-        html: `<div>${population.toLocaleString()}</div>`,
+        html: `<div>${d3.format(".2s")(population)}</div>`,
         iconSize: [radius * 2, radius * 2], // match size of circle marker
         iconAnchor: [radius, radius], // center text
       }),
