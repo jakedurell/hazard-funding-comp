@@ -760,13 +760,10 @@ function initializeQuadrantLayer() {
     // add popup and sync town click with dropdown to update other components
     onEachFeature: (feature, layer) => {
       const town = feature.properties.town_name;
-      const quadKey = `quadrant_${mapState.model}`;
-      const quadrant = statsByTown[town]?.[quadKey];
 
-      // bind popup showing quadrant assignment
-      layer.bindPopup(
-        `<b>${town}</b><br>${quadrant ? (quadrantLabels[quadrant] ?? quadrant) : "No data"}`,
-      );
+      layer.bindPopup(() => buildQuadrantPopup(town), {
+        className: "choropleth-tooltip",
+      });
 
       // sync with dropdown on click to zoom in on town and update dashboard
       layer.on("click", function () {
@@ -776,6 +773,52 @@ function initializeQuadrantLayer() {
       });
     },
   });
+}
+
+// build narrative popup content for quadrant layer
+function buildQuadrantPopup(town) {
+  const stats = statsByTown[town];
+  if (!stats) return `<b>${town}</b>`;
+
+  const quadrant = stats[`quadrant_${metricEngine.model}`];
+  const note = (text) => `<span class="popup-note">${text}</span>`;
+  const riskRank = Math.round(
+    (+stats[`risk_rank_${metricEngine.model}`] || 0) * 100,
+  );
+
+  switch (quadrant) {
+    case "underfunded":
+      return (
+        `<b>${town}</b><br>High flood need, limited mitigation funding.<br>` +
+        note(
+          "One of Vermont's more exposed towns, but has received relatively little federal support.",
+        )
+      );
+    case "aligned":
+      return (
+        `<b>${town}</b><br>Funding levels are broadly aligned with measured flood need.` +
+        note("Risk and investment are roughly proportional.")
+      );
+    case "overfunded":
+      return (
+        `<b>${town}</b><br>Has received comparatively high mitigation funding relative to measured need.` +
+        note(
+          "May reflect past disaster events or infrastructure investments not fully captured by the model.",
+        )
+      );
+    case "low_priority":
+      return `<b>${town}</b><br>Lower measured flood need and relatively limited mitigation funding.`;
+    case "zero_funding": {
+      let html = `<b>${town}</b><br>No recorded FEMA mitigation funding.`;
+      if (riskRank >= 50)
+        html += note(
+          `Despite flood risk ranking higher than ${riskRank}% of Vermont towns.`,
+        );
+      return html;
+    }
+    default:
+      return `<b>${town}</b><br>${quadrantLabels[quadrant] ?? "No data"}`;
+  }
 }
 
 //////////////////////////////////////////////////////////
