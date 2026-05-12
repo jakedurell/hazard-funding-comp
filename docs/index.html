@@ -359,14 +359,14 @@
 
     <div id="model-definition" class="metric-definitions"> -->
       <div class="model-definition" id="model-def-eal">
-        <strong>Total Risk (EAL)</strong>
+        <strong>Total Risk (Expected Annual Loss)</strong>
         <p>
           Expected annual loss in dollars. Larger towns with more infrastructure
           tend to score higher. Asks: who loses the most?
         </p>
       </div>
       <div class="model-definition" id="model-def-eal-per-capita">
-        <strong>Risk per Person</strong>
+        <strong>Risk per Person (Expected Annual Loss per Capita)</strong>
         <p>
           Expected annual loss divided by population. Surfaces small,
           high-exposure towns that total-loss models obscure. Asks: who is most
@@ -392,7 +392,7 @@
         <p class="stats-note">
           The map shows statewide comparisons. This panel shows detailed local
           values.
-        </br>
+          <br />
           N.b., Risk and funding rankings change depending on how flood risk is
           defined.
         </p>
@@ -471,14 +471,12 @@
 
     <!-- Plot Container -->
     <div id="plot-title" class="plot-title" style="display: none">
-      Funding vs. Measured Need
+      Flood Mitigation Funding vs. Relative Need
     </div>
-    <div id="plot-subtitle" class="plot-subtitle" style="display: none"></div>
-    <div id="plot-container"></div>
-
+    <!-- Captions -->
     <div id="plot-captions" class="plot-captions">
       <div class="plot-caption" id="caption-eal">
-        <h3>Total Risk (EAL)</h3>
+        <h3>Model: Total Risk (Expected Annual Loss)</h3>
         <p>
           Funding is only weakly correlated with total expected flood loss. A
           few high-loss towns attract significant grants, but many high-need
@@ -486,7 +484,7 @@
         </p>
       </div>
       <div class="plot-caption" id="caption-eal-per-capita">
-        <h3>Risk per Person</h3>
+        <h3>Model: Risk per Person (Expected Annual Loss per Capita)</h3>
         <p>
           Adjusting for population reshuffles the map. Smaller, high-exposure
           towns rise in need, but their funding levels rarely follow. Switching
@@ -501,6 +499,12 @@
           risk is currently greatest.
         </p>
       </div>
+    </div>
+    <!-- Actual Plot -->
+    <div id="plot-container"></div>
+    <div class="stats-note">
+      Axes show percentile rankings relative to other Vermont towns, not raw
+      dollar values or FEMA scores.
     </div>
 
     <!-- Secondary Controls (Muted Version) -->

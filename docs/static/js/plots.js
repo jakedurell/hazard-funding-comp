@@ -1,11 +1,4 @@
-// Description: JavaScript file for creating plots
-
-// model display names for plot subtitle
-const modelDisplayNames = {
-  eal: "Total Risk (Expected Annual Loss)", //Funding shows only a weak relationship with projected flood losses statewide.
-  eal_per_capita: "Risk per Person (EAL per Capita)", //Per-person risk reshapes priorities, elevating some smaller towns.
-  nri: "FEMA Risk Index (FEMA National Risk Index)", //Composite risk measures produce a different geography of need and vulnerability.
-};
+// Description: JavaScript file for creating plot
 
 // render plot based on selected metric and town
 function renderPlot(metric, selectedTown) {
@@ -14,17 +7,10 @@ function renderPlot(metric, selectedTown) {
   showPlotCaption();
 }
 
-// show/hide plot title and model subtitle
+// show/hide plot title
 function showPlotHeader(visible) {
   const titleDiv = document.getElementById("plot-title");
-  const subtitleDiv = document.getElementById("plot-subtitle");
   if (titleDiv) titleDiv.style.display = visible ? "block" : "none";
-  if (subtitleDiv) {
-    subtitleDiv.style.display = visible ? "block" : "none";
-    subtitleDiv.textContent = visible
-      ? `${modelDisplayNames[metricEngine.model] ?? metricEngine.model}`
-      : "";
-  }
 }
 
 // toggle visibility of plot captions based on active model
@@ -40,22 +26,43 @@ function showPlotCaption() {
 
 //////////////////////////////////////////////////////////
 
-// helper to build data array for scatter plot based on current model, with necessary transformations and filtering for valid numeric values
+// module-level state for scatter plot
+let _prevScatterModel = null;
+let _scatterTooltip = null;
+
+// lazy-initialize a fixed-position tooltip div for scatter dot clicks (mobile-friendly)
+function getScatterTooltip() {
+  if (!_scatterTooltip) {
+    _scatterTooltip = document.createElement("div");
+    _scatterTooltip.className = "scatter-tooltip";
+    document.body.appendChild(_scatterTooltip);
+    // dismiss on any non-circle click (circle click uses stopPropagation)
+    document.addEventListener("click", () => {
+      _scatterTooltip.style.display = "none";
+    });
+  }
+  return _scatterTooltip;
+}
+
+// helper to build data array for scatter plot — both axes are percentile ranks (0–1)
 function buildScatterData(model) {
   const quadKey = `quadrant_${model}`;
+  const needRankKey = `need_rank_${model}`;
 
   return statsRaw
     .filter((d) => d.town_name !== "State of Vermont")
     .map((d) => ({
       town_name: d.town_name,
-      need: +d[`need_${model}`],
-      funding: +d.funding_rank,
-      funding_pc: +d.funding_per_capita,
+      need: +d[needRankKey], // percentile rank of combined need
+      funding: +d.funding_rank, // percentile rank of per-capita funding
+      funding_pc: +d.funding_per_capita, // for tooltip display
       quadrant: d[quadKey],
-      population: +d.population || 0,
+      population: +d.population || 0, // for circle sizing
     }))
     .filter((d) => !isNaN(d.need) && !isNaN(d.funding));
 }
+
+///////////////////////////////////////////////
 
 // render quadrant scatter plot with median lines and interactive labels based on current model, highlighting selected town
 function renderQuadrantScatter(selectedTown) {
@@ -63,7 +70,7 @@ function renderQuadrantScatter(selectedTown) {
   const container = document.getElementById("plot-container");
   const width = container.clientWidth;
   const height = 420;
-  const margin = { top: 40, right: 20, bottom: 50, left: 60 };
+  const margin = { top: 40, right: 20, bottom: 60, left: 60 };
 
   // select or create persistent SVG — preserves circles between renders for transitions
   let svg = d3.select(container).select("svg.scatter-svg");
@@ -76,47 +83,70 @@ function renderQuadrantScatter(selectedTown) {
       .attr("height", height);
   }
 
-  // scales
+  // capture current circle positions from the DOM before any changes (used for movement trails)
+  const prevPositions = new Map();
+  svg
+    .select("g.dots")
+    .selectAll("circle")
+    .each(function (d) {
+      prevPositions.set(d.town_name, {
+        cx: +this.getAttribute("cx"),
+        cy: +this.getAttribute("cy"),
+      });
+    });
+
+  // detect model switch — trails only on model change, not on town selection change
+  const isModelSwitch =
+    _prevScatterModel !== null && _prevScatterModel !== metricEngine.model;
+  _prevScatterModel = metricEngine.model;
+
+  // fixed 0–1 domain: both axes are percentile ranks → clean 0%–100% scale
   const x = d3
     .scaleLinear()
-    .domain(d3.extent(data, (d) => d.need))
-    .nice()
+    .domain([0, 1])
     .range([margin.left, width - margin.right]);
 
   const y = d3
     .scaleLinear()
-    .domain(
-      d3.extent(
-        data.filter((d) => d.funding > 0),
-        (d) => d.funding,
-      ),
-    )
-    .nice()
+    .domain([0, 1])
     .range([height - margin.bottom, margin.top]);
 
-  // medians (exclude zero-funding towns to avoid median skew)
+  // get medians (exclude zero-funding towns from funding median to avoid skew)
   const xMed = d3.median(data, (d) => d.need);
   const yMed = d3.median(
     data.filter((d) => d.funding > 0),
     (d) => d.funding,
   );
 
-  // snap-update all static elements (axes, lines, labels)
+  // snap-update all static elements (axes, labels, median lines, any leftover trails)
   svg
-    .selectAll(".x-axis, .y-axis, .y-label, .median-line, .quadrant-labels")
+    .selectAll(
+      ".x-axis, .y-axis, .x-label, .y-label, .median-line, .quadrant-labels, .trails",
+    )
     .remove();
 
+  // axes with percentage labels, styled ticks, and axis titles
   svg
     .append("g")
     .attr("class", "x-axis")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x));
+    .call(d3.axisBottom(x).tickFormat(d3.format(".0%")));
 
   svg
     .append("g")
     .attr("class", "y-axis")
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
+
+  svg
+    .append("text")
+    .attr("class", "x-label")
+    .attr("x", margin.left + (width - margin.left - margin.right) / 2)
+    .attr("y", height - 8)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "11px")
+    .attr("fill", "#555")
+    .text("Flood risk & vulnerability (overall need percentile)");
 
   svg
     .append("text")
@@ -127,8 +157,9 @@ function renderQuadrantScatter(selectedTown) {
     .attr("text-anchor", "middle")
     .attr("font-size", "11px")
     .attr("fill", "#555")
-    .text("Funding per capita (percentile rank)");
+    .text("Mitigation funding per resident (percentile)");
 
+  // median lines to divide quadrants
   svg
     .append("line")
     .attr("class", "median-line")
@@ -149,12 +180,48 @@ function renderQuadrantScatter(selectedTown) {
     .attr("stroke", "#999")
     .attr("stroke-dasharray", "4");
 
+  // draw movement trails on model switch: thin lines from old position → new position
+  if (isModelSwitch && prevPositions.size > 0) {
+    const trailsGroup = svg
+      .insert("g", "g.dots") // insert below dots so circles sit on top
+      .attr("class", "trails")
+      .attr("opacity", 1);
+
+    data.forEach((d) => {
+      const prev = prevPositions.get(d.town_name);
+      if (!prev) return;
+      const newCx = x(d.need);
+      const newCy = d.funding > 0 ? y(d.funding) : y(0);
+      if (Math.hypot(newCx - prev.cx, newCy - prev.cy) < 4) return; // skip trivial moves
+      trailsGroup
+        .append("line")
+        .attr("x1", prev.cx)
+        .attr("y1", prev.cy)
+        .attr("x2", newCx)
+        .attr("y2", newCy)
+        .attr("stroke", quadrantColors[d.quadrant] ?? "#aaa")
+        .attr("stroke-width", 1)
+        .attr("stroke-opacity", 0.4);
+    });
+
+    // fade out after circle transition completes
+    trailsGroup
+      .transition()
+      .delay(350)
+      .duration(500)
+      .attr("opacity", 0)
+      .remove();
+  }
+
   // persistent dots group — create once, raise above median lines after each static redraw
   let dotsGroup = svg.select("g.dots");
   if (dotsGroup.empty()) {
     dotsGroup = svg.append("g").attr("class", "dots");
   }
   dotsGroup.raise(); // the SVG equivalent of z-index: ensure dots are above static elements for better interactivity
+
+  // create tooltip
+  const tooltip = getScatterTooltip();
 
   // keyed join by town_name so D3 can match circles across renders and transition them
   dotsGroup
@@ -167,7 +234,7 @@ function renderQuadrantScatter(selectedTown) {
           .append("circle")
           .call((c) => c.append("title")) // add tooltip slot on enter
           .attr("cx", (d) => x(d.need))
-          .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(y.domain()[0])))
+          .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(0)))
           .attr("fill", (d) => quadrantColors[d.quadrant] ?? "#888")
           .attr("stroke", (d) =>
             d.town_name === selectedTown ? "#000" : "none",
@@ -196,7 +263,7 @@ function renderQuadrantScatter(selectedTown) {
           .transition()
           .duration(400)
           .attr("cx", (d) => x(d.need))
-          .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(y.domain()[0])))
+          .attr("cy", (d) => (d.funding > 0 ? y(d.funding) : y(0)))
           .attr("r", (d) =>
             d.town_name === selectedTown ? 7 : Math.sqrt(d.population) * 0.05,
           )
@@ -209,28 +276,40 @@ function renderQuadrantScatter(selectedTown) {
             selectedTown === "top" || d.town_name === selectedTown ? 0.9 : 0.3,
           ),
     )
-    // add click handler to update selected town on click
-    .on("click", (_, d) => {
+    .on("click", (event, d) => {
+      // select town in dropdown on click to update dashboard
       const dropdown = document.getElementById("towns-dropdown");
       dropdown.value = d.town_name;
       dropdown.dispatchEvent(new Event("change"));
+
+      // show click tooltip (works on mobile where <title> hover doesn't)
+      const needPct = d3.format(".0%")(d.need);
+      const fundPct = d3.format(".0%")(d.funding);
+      const fundAmt =
+        d.funding_pc > 0
+          ? ` &nbsp;·&nbsp; $${Math.round(d.funding_pc).toLocaleString()}/resident`
+          : "";
+      tooltip.innerHTML = `<strong>${d.town_name}</strong><br>Need: ${needPct}<br>Funding: ${fundPct}${fundAmt}`;
+      tooltip.style.left =
+        Math.min(event.clientX + 12, window.innerWidth - 240) + "px";
+      tooltip.style.top = event.clientY - 52 + "px";
+      tooltip.style.display = "block";
+      event.stopPropagation(); // prevent document click handler from immediately hiding it
     });
 
-  // update tooltip text on all circles after join
+  // update <title> tooltip text on all circles after join
   dotsGroup
     .selectAll("circle")
     .select("title")
     .text(
       (d) =>
         d.town_name +
-        "\n" +
-        "Need: " +
-        d.need.toFixed(2) +
-        "\n" +
-        "Funding rank: " +
+        "\nNeed: " +
+        d3.format(".0%")(d.need) +
+        "\nFunding: " +
         d3.format(".0%")(d.funding) +
         (d.funding_pc > 0
-          ? " ($" + Math.round(d.funding_pc).toLocaleString() + "/cap)"
+          ? " ($" + Math.round(d.funding_pc).toLocaleString() + "/resident)"
           : ""),
     );
 
@@ -242,7 +321,7 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
   // calculate plot bounds for dynamic label positioning
   const [xMin, xMax] = x.domain();
   const [yMin, yMax] = y.domain();
-  // position lables based on median lines
+  // position labels based on median lines
   const labels = [
     {
       text: quadrantLabels.aligned,
