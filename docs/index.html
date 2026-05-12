@@ -115,6 +115,7 @@
             id="risk-button"
             data-overlay="Flood Risk"
             aria-label="Show Flood Risk"
+            title="Expected annual flood loss based on modeled hazard exposure and property damage — not historical disaster declarations."
           >
             Flood Risk
           </button>
@@ -122,6 +123,7 @@
             id="vulnerability-button"
             data-overlay="Vulnerability"
             aria-label="Show Vulnerability"
+            title="Composite measure of social vulnerability based on poverty, age, transportation access, and related demographic factors."
           >
             Vulnerability
           </button>
@@ -129,6 +131,7 @@
             id="need-button"
             data-overlay="Combined Need"
             aria-label="Show Combined Need"
+            title="Combined measure of flood exposure and social vulnerability — used here as a proxy for overall mitigation need."
           >
             Combined Need
           </button>
@@ -136,6 +139,7 @@
             id="funding-button"
             data-overlay="Mitigation Funding"
             aria-label="Show Mitigation Funding"
+            title="Federal FEMA Hazard Mitigation Assistance funding received since 1990, adjusted for inflation."
           >
             Mitigation Funding
           </button>
@@ -143,6 +147,7 @@
             id="gap-button"
             data-overlay="Funding Gap"
             aria-label="Show Funding Gap"
+            title="Difference between measured need and mitigation funding received. Larger gaps indicate towns receiving less funding relative to risk."
           >
             Funding Gap
           </button>
@@ -179,6 +184,7 @@
             id="quadrants-button"
             data-overlay="Quadrants"
             aria-label="Show Quadrants"
+            title="Quadrant view compares relative flood need against mitigation funding received to highlight alignment and mismatch."
           >
             Quadrant Analysis
           </button>
@@ -192,6 +198,7 @@
             id="population-button"
             data-overlay="Population"
             aria-label="Show Population"
+            title="Town population based on the most recent census data."
           >
             Town Population
           </button>
@@ -199,6 +206,7 @@
             id="funding-bubble-button"
             data-overlay="Funding Bubble"
             aria-label="Show Total Funding"
+            title="Total mitigation funding received by each town since 1990, adjusted for inflation."
           >
             Funding Totals
           </button>
@@ -223,7 +231,11 @@
           aria-label="Select model"
           style="margin-top: 1em"
         >
-          <label class="btn btn-primary" aria-pressed="false">
+          <label
+            class="btn btn-primary"
+            aria-pressed="false"
+            title="Uses total expected annual flood loss. Larger towns and infrastructure-heavy communities tend to rank higher."
+          >
             <input
               type="radio"
               name="model-selector"
@@ -233,7 +245,11 @@
             />
             Total Risk
           </label>
-          <label class="btn btn-primary active" aria-pressed="true">
+          <label
+            class="btn btn-primary active"
+            aria-pressed="true"
+            title="Adjusts expected annual flood loss by population to highlight smaller but highly exposed communities."
+          >
             <input
               type="radio"
               name="model-selector"
@@ -244,7 +260,10 @@
             />
             Risk per Person
           </label>
-          <label class="btn btn-primary">
+          <label
+            class="btn btn-primary"
+            title="FEMA’s National Risk Index combines hazard exposure, social vulnerability, and resilience into a national composite score."
+          >
             <input
               type="radio"
               name="model-selector"
@@ -276,7 +295,10 @@
           <span class="toggle-label absolute-label">Statewide Percentile</span>
           <label class="switch">
             <input type="checkbox" id="toggle-relative" />
-            <span class="slider"></span>
+            <span
+              class="slider"
+              title="Toggle between statewide percentile rankings and comparison against the Vermont average."
+            ></span>
           </label>
           <span class="toggle-label">Compared to VT Avg</span>
         </div>
@@ -510,12 +532,41 @@
     <!-- Secondary Controls (Muted Version) -->
     <div id="secondary-controls">
       <div id="choropleth-control-secondary" class="choropleth-muted">
-        <button data-overlay="Flood Risk">Flood Risk</button>
-        <button data-overlay="Vulnerability">Vulnerability</button>
-        <button data-overlay="Combined Need">Combined Need</button>
-        <button data-overlay="Mitigation Funding">Mitigation Funding</button>
-        <button data-overlay="Funding Gap">Funding Gap</button>
-        <button id="claims-button-secondary" data-overlay="NFIP Claims">
+        <button
+          data-overlay="Flood Risk"
+          title="Flood risk based on modeled hazard exposure and property damage"
+        >
+          Flood Risk
+        </button>
+        <button
+          data-overlay="Vulnerability"
+          title="Social vulnerability based on demographics and socioeconomic factors."
+        >
+          Vulnerability
+        </button>
+        <button
+          data-overlay="Combined Need"
+          title="Composite measure of flood risk and social vulnerability."
+        >
+          Combined Need
+        </button>
+        <button
+          data-overlay="Mitigation Funding"
+          title="Total mitigation funding received by the town."
+        >
+          Mitigation Funding
+        </button>
+        <button
+          data-overlay="Funding Gap"
+          title="Difference between funding received and estimated need."
+        >
+          Funding Gap
+        </button>
+        <button
+          id="claims-button-secondary"
+          data-overlay="NFIP Claims"
+          title="Number of National Flood Insurance Program claims."
+        >
           NFIP Claims
         </button>
       </div>
@@ -527,7 +578,11 @@
         role="group"
         aria-label="Select model"
       >
-        <label class="" aria-pressed="false">
+        <label
+          class=""
+          aria-pressed="false"
+          title="Models risk based on total expected annual flood loss."
+        >
           <input
             type="radio"
             name="model-selector-secondary"
@@ -536,7 +591,11 @@
           />
           Total Risk
         </label>
-        <label class="active" aria-pressed="true">
+        <label
+          class="active"
+          aria-pressed="true"
+          title="Adjusts expected annual flood loss by population."
+        >
           <input
             type="radio"
             name="model-selector-secondary"
@@ -546,7 +605,7 @@
           />
           Risk per Person
         </label>
-        <label class="">
+        <label class="" title="FEMA's national composite score.">
           <input
             type="radio"
             name="model-selector-secondary"
@@ -561,7 +620,10 @@
         <span class="toggle-label absolute-label">Statewide Percentile</span>
         <label class="switch switch-muted">
           <input type="checkbox" id="toggle-relative-secondary" />
-          <span class="slider"></span>
+          <span
+            class="slider"
+            title="Toggle between statewide percentile rankings and comparison against the Vermont average."
+          ></span>
         </label>
         <span class="toggle-label">Compared to VT Avg</span>
       </div>
@@ -571,10 +633,12 @@
     <div id="rankings-title" class="rankings-title"></div>
     <div id="rankings-blurb" class="rankings-blurb"></div>
     <div class="rank-jumps">
-      <button id="jump-top">Top</button>
-      <button id="jump-vt">VT avg</button>
-      <button id="jump-selected" disabled>My Town</button>
-      <button id="jump-bottom">Bottom</button>
+      <button id="jump-top" title="Jump to top">Top</button>
+      <button id="jump-vt" title="Jump to benchmark">VT avg</button>
+      <button id="jump-selected" disabled title="Jump to selected town">
+        My Town
+      </button>
+      <button id="jump-bottom" title="Jump to bottom">Bottom</button>
     </div>
     <div id="rankings-container"></div>
 
