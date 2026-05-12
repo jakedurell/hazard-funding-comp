@@ -44,25 +44,29 @@ function getColorForMetric(metric, value) {
 function initializeChoroplethLayer() {
   const choroplethLayer = L.geoJSON(towns, {
     style: (feature) => {
+      // dynamic styling for selected town highlight
+      const town = feature.properties.town_name;
+      const isSelected =
+        town === mapState.selectedTown && mapState.selectedTown !== "top";
+
       // if no metric selected, show default gray with no fill
       if (mapState.choroplethMetric == null) {
         return {
-          color: defaultColors.defaultGray,
-          weight: 1,
+          color: isSelected ? "white" : defaultColors.defaultGray,
+          weight: isSelected ? 5 : 1,
           fillOpacity: 0,
         };
       }
 
       // get metric value for town to determine fill color
       const metric = metricEngine.getMetricKey();
-      // const metric = mapState.choroplethLayer.options.metric;
-      const value = statsByTown[feature.properties.town_name]?.[metric] || 0;
+      const value = statsByTown[town]?.[metric] || 0;
 
       return {
         fillColor: getColorForMetric(metric, value),
-        weight: 1,
-        color: "white",
-        fillOpacity: 0.6,
+        weight: isSelected ? 5 : 1,
+        color: isSelected ? getColorForMetric(metric, value) : "white",
+        fillOpacity: isSelected ? 0 : 0.6,
       };
     },
     // hover tooltip (desktop) + click popup (mobile / persistent)
@@ -942,15 +946,18 @@ function initializeQuadrantLayer() {
   return L.geoJSON(towns, {
     // style based on quadrant assignment for current model
     style: (feature) => {
+      // dynamic styling for selected town highlight
       const town = feature.properties.town_name;
+      const isSelected =
+        town === mapState.selectedTown && mapState.selectedTown !== "top";
       const quadKey = `quadrant_${mapState.model}`;
       const quadrant = statsByTown[town]?.[quadKey];
 
       return {
         fillColor: quadrantColors[quadrant] || defaultColors.defaultGray,
-        weight: 1,
-        color: "white",
-        fillOpacity: 0.7,
+        weight: isSelected ? 5 : 1,
+        color: isSelected ? quadrantColors[quadrant] : "white",
+        fillOpacity: isSelected ? 0 : 0.7,
       };
     },
 

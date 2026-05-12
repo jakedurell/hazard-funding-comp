@@ -781,17 +781,8 @@ function updateMetric() {
     mapState.map.hasLayer(mapState.fundingBubbleLayer);
 
   if (quadrantActive) {
-    // quadrant layer is visible: update its colors for the new model and keep its legend
-    mapState.quadrantLayer.setStyle((feature) => {
-      const town = feature.properties.town_name;
-      const quadrant = statsByTown[town]?.[`quadrant_${mapState.model}`];
-      return {
-        fillColor: quadrantColors[quadrant] || defaultColors.defaultGray,
-        weight: 1,
-        color: "white",
-        fillOpacity: 0.7,
-      };
-    });
+    // quadrant layer is visible: re-run its own style function so selected-town highlight applies too
+    mapState.quadrantLayer.setStyle(mapState.quadrantLayer.options.style);
     updateQuadrantLegend();
   } else if (
     bubbleActive ||
@@ -807,6 +798,20 @@ function updateMetric() {
     mapState.choroplethLayer.setStyle(mapState.choroplethLayer.options.style);
     updateChoroplethLabels();
     updateChoroplethLegend();
+  }
+
+  // after any setStyle call, bring the selected town's <path> to the top of the SVG DOM
+  // so its bold border renders above neighboring town borders
+  if (mapState.selectedTown && mapState.selectedTown !== "top") {
+    const activeLayer = quadrantActive
+      ? mapState.quadrantLayer
+      : mapState.choroplethLayer;
+    if (activeLayer) {
+      const sel = activeLayer
+        .getLayers()
+        .find((l) => l.feature.properties.town_name === mapState.selectedTown);
+      if (sel) sel.bringToFront();
+    }
   }
 }
 
@@ -975,17 +980,20 @@ function zoomIn() {
       (layer) => layer.feature.properties.town_name === mapState.selectedTown,
     );
 
-  // update map view
+  // update map view — selected-town highlight is handled in the style function, not here
   if (boundaries) {
-    // set style for selected town
-    boundaries.setStyle({
-      weight: 3,
-      color: "transparent",
-      fillOpacity: 0,
-      opacity: 0,
-    });
-
-    // zoom to town boundaries
     mapState.map.fitBounds(boundaries.getBounds());
+    // move selected town's <path> to end of SVG DOM so its border renders on top
+    boundaries.bringToFront();
+  }
+
+  // same bringToFront for quadrant layer, so its border render on top
+  if (mapState.quadrantLayer) {
+    const qBoundaries = mapState.quadrantLayer
+      .getLayers()
+      .find(
+        (layer) => layer.feature.properties.town_name === mapState.selectedTown,
+      );
+    if (qBoundaries) qBoundaries.bringToFront();
   }
 }
