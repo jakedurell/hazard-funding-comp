@@ -70,6 +70,16 @@ function renderStatsCard(town) {
   const needRankKey = `need_rank_${model}`;
   const gapKey = `gap_${model}`;
 
+  // headline insight
+  const quadrant = stats[quadKey];
+  document.getElementById("stats-quadrant").textContent = quadrant
+    ? (quadrantHeadlines[quadrant] ?? quadrantLabels[quadrant] ?? quadrant)
+    : "—";
+  const summaryEl = document.getElementById("stats-summary");
+  if (summaryEl) {
+    summaryEl.textContent = quadrant ? (quadrantSummaries[quadrant] ?? "") : "";
+  }
+
   // populate stats values, using helpers for formatting
   document.getElementById("stat-population").textContent = fmtInt(
     stats.population,
@@ -140,9 +150,4 @@ function renderStatsCard(town) {
   );
 
   document.getElementById("stat-gap").textContent = fmtGap(stats[gapKey]);
-
-  // headline insight
-  document.getElementById("stats-quadrant").textContent = stats[quadKey]
-    ? (quadrantLabels[stats[quadKey]] ?? stats[quadKey])
-    : "—";
 }

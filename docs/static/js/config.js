@@ -62,5 +62,27 @@ const quadrantLabels = {
   low_priority: "Lower Need / Lower Funding", // Low Exposure
 };
 
+// narrative headlines for the stats card header (longer than quadrantLabels — not used in map/plot)
+const quadrantHeadlines = {
+  zero_funding: "No recorded FEMA mitigation funding",
+  underfunded: "High flood need, limited mitigation funding",
+  aligned: "Funding broadly aligned with measured need",
+  overfunded: "Higher funding relative to measured need",
+  low_priority: "Lower flood need and lower funding priority",
+};
+
+// one-sentence interpretive sublines for the stats card
+const quadrantSummaries = {
+  zero_funding:
+    "Measurable flood exposure with no FEMA mitigation investment on record.",
+  underfunded: "Modeled flood need outpaces current mitigation investment.",
+  aligned:
+    "Mitigation investment reflects modeled flood exposure and community vulnerability.",
+  overfunded:
+    "Investment exceeds current modeled need — often reflecting past disaster recovery rather than ongoing risk.",
+  low_priority:
+    "Lower modeled risk and vulnerability; flood exposure is not a primary driver here.",
+};
+
 // default map view for Vermont
 const vtDefaultView = { center: [43.75, -72.7], zoom: 8 };
