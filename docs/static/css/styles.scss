@@ -257,6 +257,53 @@ body {
   margin-top: 2px;
 }
 
+// thin rule separating model context note from main popup content
+.popup-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 6px 0 4px;
+}
+
+// tags / badges inside click popups
+.popup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 6px;
+}
+
+.popup-tag {
+  display: inline-block;
+  font-size: 0.85em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1.5;
+
+  &.danger {
+    background: #fde8e8;
+    color: #b91c1c;
+  }
+  &.warning {
+    background: #fef3cd;
+    color: #92400e;
+  }
+  &.info {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  &.success {
+    background: #dcfce7;
+    color: #166534;
+  }
+  &.neutral {
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+}
+
 // choropleth hover tooltip + click popup (shared class)
 .choropleth-tooltip {
   // tooltip variant (Leaflet applies these directly to the tooltip element)

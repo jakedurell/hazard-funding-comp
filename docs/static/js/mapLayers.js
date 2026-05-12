@@ -338,6 +338,24 @@ function createRangeLabels(metric, ...domain) {
 
 //////////////////////////////////////////////////////////
 
+// appends note to popups re: active
+function buildModelNote() {
+  const model = metricEngine.model;
+  const note = (text) =>
+    `<hr class="popup-divider"><span class="popup-note">${text}</span>`;
+  if (model === "eal_per_capita")
+    return note(
+      "Per-capita model surfaces smaller towns with concentrated exposure.",
+    );
+  if (model === "eal")
+    return note(
+      "Absolute loss model weights larger towns with more total exposure.",
+    );
+  if (model === "nri")
+    return note("Based on FEMA's National Risk Index — a composite benchmark.");
+  return "";
+}
+
 // short one-sentence hover tooltip — shown on mouseover, quickly scannable
 function buildChoroplethHover(town) {
   const stats = statsByTown[town];
@@ -408,7 +426,7 @@ function buildChoroplethHover(town) {
       return `<b>${town}</b><br>Appears underfunded relative to measured flood need.`;
     if (gapRank <= 30)
       return `<b>${town}</b><br>Has received more funding than its measured need would predict.`;
-    return `<b>${town}</b><br>Funding levels roughly track measured need.`;
+    return `<b>${town}</b><br>Funding levels appear broadly aligned with measured need.`;
   }
 
   if (base === "claims") {
@@ -452,29 +470,31 @@ function buildChoroplethPopup(town) {
   // tooltip div
   const note = (text) => `<span class="popup-note">${text}</span>`;
 
+  // render a row of narrative status tags at the top of the popup
+  const tags = (...items) =>
+    `<div class="popup-tags">${items.map(([variant, label]) => `<span class="popup-tag ${variant}">${label}</span>`).join("")}</div>`;
+
   // one-line model context note appended to model-aware popups
-  const modelNote = () => {
-    if (model === "eal_per_capita")
-      return note(
-        "Per-capita model surfaces smaller towns with concentrated exposure.",
-      );
-    if (model === "eal")
-      return note(
-        "Absolute loss model weights larger towns with more total exposure.",
-      );
-    if (model === "nri")
-      return note(
-        "Based on FEMA's National Risk Index — a composite benchmark.",
-      );
-    return "";
-  };
+  const modelNote = () => buildModelNote();
 
   // conditionals for each metric to build popup content
   if (base === "risk") {
     const rankPct = pct(`risk_rank_${model}`);
     const ealPc = fmt$(stats.EAL_per_capita);
     const inCorridor = +stats.pct_river_corridor > 5;
-    let html = `<b>${town}</b><br>`;
+    let tagVariant = "neutral";
+    let tagLabel = "DATA LIMITED";
+    if (rankPct !== null) {
+      tagVariant =
+        rankPct >= 75 ? "danger" : rankPct >= 50 ? "warning" : "neutral";
+      tagLabel =
+        rankPct >= 75
+          ? "HIGH EXPOSURE"
+          : rankPct >= 50
+            ? "ELEVATED EXPOSURE"
+            : "LOWER EXPOSURE";
+    }
+    let html = `<b>${town}</b>` + tags([tagVariant, tagLabel]);
     html +=
       rankPct !== null
         ? `Projected flood exposure is higher than ${rankPct}% of Vermont towns.`
@@ -493,7 +513,12 @@ function buildChoroplethPopup(town) {
     const poverty = +stats.pct_below_poverty;
     const elderly = +stats.percent_elderly;
     const no_vehicle = +stats.pct_no_vehicle;
-    let html = `<b>${town}</b><br>`;
+    let html = `<b>${town}</b>`;
+    if (rankPct !== null && rankPct >= 75)
+      html += tags(["warning", "HIGH VULNERABILITY"]);
+    else if (rankPct !== null && rankPct >= 50)
+      html += tags(["warning", "ELEVATED VULNERABILITY"]);
+    else html += `<br>`;
     if (rankPct !== null && rankPct >= 50) {
       html += `Residents may face greater difficulty recovering from floods.`;
       html += `<br>Higher vulnerability than ${rankPct}% of Vermont towns.`;
@@ -517,16 +542,31 @@ function buildChoroplethPopup(town) {
     const rankPct = pct(`need_rank_${model}`);
     const fundRank = pct("funding_rank");
     const hasFunding = +stats.funding_total > 0;
-    let html = `<b>${town}</b><br>`;
+    const diff =
+      rankPct !== null && fundRank !== null ? rankPct - fundRank : null;
+    let tagVariant = "neutral";
+    let tagLabel = "DATA LIMITED";
+    if (rankPct !== null) {
+      tagVariant = rankPct >= 75 ? "info" : rankPct >= 50 ? "info" : "neutral";
+      tagLabel =
+        rankPct >= 75
+          ? "HIGH NEED"
+          : rankPct >= 50
+            ? "ELEVATED NEED"
+            : "LOWER NEED";
+    }
+    // do not add UNDERFUNDED here — that is the Gap layer's story
+    let html = `<b>${town}</b>` + tags([tagVariant, tagLabel]);
     html += "Combines estimated flood risk and social vulnerability. ";
     html +=
       rankPct !== null
         ? `Ranks higher than ${rankPct}% of Vermont towns.`
         : "Combined need data unavailable.";
-    if (rankPct !== null && fundRank !== null) {
-      const diff = rankPct - fundRank;
+    if (diff !== null) {
       if (diff > 15)
-        html += note("Funding received does not match this level of need.");
+        html += note(
+          "Federal mitigation funding trails this town's measured flood need.",
+        );
       else if (diff < -15 && hasFunding)
         html += note(
           "Funding levels exceed what measured need alone would predict.",
@@ -542,7 +582,15 @@ function buildChoroplethPopup(town) {
     const hasFunding = +stats.funding_total > 0;
     const fund = fmt$(stats.funding_total);
     const fpc = fmt$(stats.funding_per_capita);
-    let html = `<b>${town}</b><br>`;
+    const tagItems = hasFunding
+      ? [
+          [
+            rankPct >= 50 ? "success" : "neutral",
+            rankPct >= 50 ? "HIGH FEMA INVESTMENT" : "LIMITED FUNDING",
+          ],
+        ]
+      : [["warning", "NO FEMA FUNDING"]];
+    let html = `<b>${town}</b>` + tags(...tagItems);
     if (!hasFunding) {
       html += "No recorded FEMA mitigation funding.";
       if (needRank >= 50) {
@@ -561,15 +609,20 @@ function buildChoroplethPopup(town) {
     const needRank = pct(`need_rank_${model}`);
     const fundRank = pct("funding_rank");
     const hasFunding = +stats.funding_total > 0;
-    let html = `<b>${town}</b><br>`;
+    const tagItems = [];
+    if (!hasFunding) tagItems.push(["warning", "NO FEMA FUNDING"]);
+    else if (gapRank >= 70) tagItems.push(["warning", "UNDERFUNDED"]);
+    else if (gapRank <= 30) tagItems.push(["success", "FUNDING ALIGNED"]);
+    else tagItems.push(["neutral", "ROUGHLY ALIGNED"]);
+    if (needRank >= 75) tagItems.push(["info", "HIGH NEED"]);
+    let html =
+      `<b>${town}</b>` + (tagItems.length ? tags(...tagItems) : "<br>");
     if (gapRank !== null) {
       if (!hasFunding) {
-        if (needRank >= 70) {
-          html +=
-            "No recorded FEMA mitigation funding despite elevated flood risk.";
-        } else {
-          html += "No recorded FEMA mitigation funding.";
-        }
+        html +=
+          needRank >= 70
+            ? "No recorded FEMA mitigation funding despite elevated flood risk."
+            : "No recorded FEMA mitigation funding.";
       } else if (gapRank >= 70) {
         html += "Appears underfunded relative to measured flood need.";
         const diff =
@@ -583,7 +636,7 @@ function buildChoroplethPopup(town) {
           ? "Has received more funding than its measured need would predict."
           : "Flood need is relatively limited compared to other Vermont towns.";
       } else {
-        html += "Funding levels roughly track measured need.";
+        html += "Funding levels appear broadly aligned with measured need.";
       }
     }
     html += modelNote();
@@ -595,7 +648,13 @@ function buildChoroplethPopup(town) {
     const riskRank = pct(`risk_rank_${model}`);
     const diff =
       rankPct !== null && riskRank !== null ? rankPct - riskRank : null;
-    let html = `<b>${town}</b><br>`;
+    const tagItems = [];
+    if (rankPct !== null && rankPct >= 50)
+      tagItems.push(["danger", "FLOODING HISTORY"]);
+    else tagItems.push(["neutral", "LIMITED CLAIMS"]);
+    if (diff !== null && diff < -20)
+      tagItems.push(["info", "REACTIVE PATTERN"]);
+    let html = `<b>${town}</b>` + tags(...tagItems);
     if (rankPct !== null && rankPct >= 50) {
       html += `Historical flood insurance claims rank higher than ${rankPct}% of Vermont towns.`;
       if (diff !== null && diff > 20)
@@ -926,6 +985,8 @@ function buildQuadrantPopup(town) {
 
   const quadrant = stats[`quadrant_${metricEngine.model}`];
   const note = (text) => `<span class="popup-note">${text}</span>`;
+  const tag = (variant, label) =>
+    `<div class="popup-tags"><span class="popup-tag ${variant}">${label}</span></div>`;
   const riskRank = Math.round(
     (+stats[`risk_rank_${metricEngine.model}`] || 0) * 100,
   );
@@ -933,31 +994,52 @@ function buildQuadrantPopup(town) {
   switch (quadrant) {
     case "underfunded":
       return (
-        `<b>${town}</b><br>High flood need, limited mitigation funding.<br>` +
+        `<b>${town}</b>` +
+        tag("warning", "UNDERFUNDED") +
+        `High flood need, limited mitigation funding.<br>` +
         note(
           "One of Vermont's more exposed towns, but has received relatively little federal support.",
-        )
+        ) +
+        buildModelNote()
       );
     case "aligned":
       return (
-        `<b>${town}</b><br>Funding levels are broadly aligned with measured flood need.` +
-        note("Suggests federal investment has tracked exposure in this town.")
+        `<b>${town}</b>` +
+        tag("success", "FUNDING ALIGNED") +
+        `Funding levels are broadly aligned with measured flood need.` +
+        note("Suggests federal investment has tracked exposure in this town.") +
+        buildModelNote()
       );
     case "overfunded":
       return (
-        `<b>${town}</b><br>Has received comparatively high mitigation funding relative to measured need.` +
+        `<b>${town}</b>` +
+        tag("neutral", "HIGHER FUNDING") +
+        `Has received comparatively high mitigation funding relative to measured need.` +
         note(
           "May reflect past disaster events or infrastructure investments not fully captured by the model.",
-        )
+        ) +
+        buildModelNote()
       );
     case "low_priority":
-      return `<b>${town}</b><br>Lower measured flood need and relatively limited mitigation funding.`;
+      return (
+        `<b>${town}</b>` +
+        tag("neutral", "LOW NEED") +
+        `Lower measured flood need and relatively limited mitigation funding.` +
+        note(
+          "Lower exposure reduces the urgency for federal mitigation investment.",
+        ) +
+        buildModelNote()
+      );
     case "zero_funding": {
-      let html = `<b>${town}</b><br>No recorded FEMA mitigation funding.`;
+      let html =
+        `<b>${town}</b>` +
+        tag("warning", "NO FEMA FUNDING") +
+        `No recorded FEMA mitigation funding.`;
       if (riskRank >= 50)
         html += note(
           `Despite flood risk ranking higher than ${riskRank}% of Vermont towns.`,
         );
+      html += buildModelNote();
       return html;
     }
     default:
