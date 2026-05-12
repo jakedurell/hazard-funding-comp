@@ -40,21 +40,35 @@ function renderStatsCard(town) {
   const fmtIdx = (v) => {
     if (v == null || v === "") return "—";
     const num = Number(v);
-    return Number.isFinite(num) ? num.toFixed(2) : "—";
+    return Number.isFinite(num) ? (num * 100).toFixed(0) + "%" : "—";
   };
 
-  const fmtRatio = (v) => {
+  const fmtRel = (v) => {
     if (v == null || v === "") return "—";
     const num = Number(v);
-    return Number.isFinite(num) ? `${num.toFixed(2)}x` : "—";
+    if (!Number.isFinite(num)) return "—";
+    const pct = Math.round(Math.abs(num) * 100);
+    return num >= 0 ? `${pct}% above` : `${pct}% below`;
+  };
+
+  const fmtGap = (v) => {
+    if (v == null || v === "") return "—";
+    const num = Number(v);
+    if (!Number.isFinite(num)) return "—";
+
+    const pct = Math.round(Math.abs(num) * 100);
+
+    if (num > 0.05) return `${pct}% underfunded`;
+    if (num < -0.05) return `${pct}% overfunded`;
+    return "Roughly aligned";
   };
 
   // dynamic keys
-  const riskKey = `risk_${model}`;
-  const needKey = `need_${model}`;
-  const gapKey = `gap_${model}`;
   const quadKey = `quadrant_${model}`;
-  const riskVsKey = `${riskKey}_rel`;
+  const riskVsKey = `risk_${model}_rel`;
+  const riskRankKey = `risk_rank_${model}`;
+  const needRankKey = `need_rank_${model}`;
+  const gapKey = `gap_${model}`;
 
   // populate stats values, using helpers for formatting
   document.getElementById("stat-population").textContent = fmtInt(
@@ -69,9 +83,9 @@ function renderStatsCard(town) {
     stats.EAL_per_capita,
   );
 
-  document.getElementById("stat-risk").textContent = fmtIdx(stats[riskKey]);
+  document.getElementById("stat-risk").textContent = fmtIdx(stats[riskRankKey]);
 
-  document.getElementById("stat-risk-vs").textContent = fmtRatio(
+  document.getElementById("stat-risk-vs").textContent = fmtRel(
     stats[riskVsKey],
   );
 
@@ -80,7 +94,7 @@ function renderStatsCard(town) {
   );
 
   document.getElementById("stat-vuln").textContent = fmtIdx(
-    stats.vulnerability,
+    stats.vulnerability_rank,
   );
 
   document.getElementById("stat-poverty").textContent = fmtPct(
@@ -119,9 +133,13 @@ function renderStatsCard(town) {
     stats.claims_paid_per_capita,
   );
 
-  document.getElementById("stat-need").textContent = fmtIdx(stats[needKey]);
+  document.getElementById("stat-need").textContent = fmtIdx(stats[needRankKey]);
 
-  document.getElementById("stat-gap").textContent = fmtIdx(stats[gapKey]);
+  document.getElementById("stat-funding-rel").textContent = fmtRel(
+    stats.funding_rel,
+  );
+
+  document.getElementById("stat-gap").textContent = fmtGap(stats[gapKey]);
 
   // headline insight
   document.getElementById("stats-quadrant").textContent = stats[quadKey]
