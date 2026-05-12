@@ -101,6 +101,7 @@ function initializeChoroplethLayer() {
       layer.on("click", function () {
         this.closeTooltip();
         this.setPopupContent(buildChoroplethPopup(town));
+        _lockedPopupTown = town; // track for choropleth-quadrant popup persistence
         const dropdown = document.getElementById("towns-dropdown");
         dropdown.value = town;
         dropdown.dispatchEvent(new Event("change"));
@@ -992,6 +993,7 @@ function initializeQuadrantLayer() {
 
       // sync with dropdown on click to zoom in on town and update dashboard
       layer.on("click", function () {
+        _lockedPopupTown = town; // track for choropleth-quadrant popup persistence
         const dropdown = document.getElementById("towns-dropdown");
         dropdown.value = town;
         dropdown.dispatchEvent(new Event("change"));

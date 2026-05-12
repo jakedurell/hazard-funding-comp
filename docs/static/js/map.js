@@ -43,6 +43,7 @@ const ZOOM_RIVER_DETAIL = 11; // minimum zoom to switch to tier 2 river corridor
 
 // global for popups
 let lockedPopupLayer = null;
+let _lockedPopupTown = null; // tracks open town popup across overlay switches
 
 //////////////////////////////////////////////////////////
 
@@ -144,6 +145,7 @@ function wireLockedPopupDismiss() {
       lockedPopupLayer.closePopup();
       lockedPopupLayer = null;
     }
+    _lockedPopupTown = null;
   });
 }
 
@@ -637,31 +639,26 @@ const metricEngine = {
 
 // change map overlay based on selected option
 function handleOverlaySelection(selectedOverlay) {
+  // safety check
   if (!selectedOverlay) return;
 
-  // special overlays: reset all state, then activate the chosen one
-  if (selectedOverlay === "Population") {
-    resetOverlayState();
-    togglePopBubbleLayer();
-    return;
-  } else if (selectedOverlay === "Funding Bubble") {
-    resetOverlayState();
-    toggleFundingBubbleLayer();
-    return;
-  } else if (selectedOverlay === "Quadrants") {
-    resetOverlayState();
-    toggleQuadrantLayer();
-    return;
-  } else if (selectedOverlay === "River Corridors") {
-    resetOverlayState();
+  // reset all layers and states before activating the new overlay
+  resetOverlayState();
+
+  // conditional logic for each overlay type
+  if (selectedOverlay === "Population") togglePopBubbleLayer();
+  else if (selectedOverlay === "Funding Bubble") toggleFundingBubbleLayer();
+  else if (selectedOverlay === "Quadrants") toggleQuadrantLayer();
+  else if (selectedOverlay === "River Corridors")
     toggleRiverCorridorsFocusView();
-    return;
+  else {
+    // choropleth overlays
+    metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
+    updateDashboard();
   }
 
-  // choropleth metric overlay
-  resetOverlayState();
-  metricEngine.baseMetric = metricEngine.overlayToBase[selectedOverlay];
-  updateDashboard();
+  // for choropleth-quadrant popup persistence
+  reopenLockedPopup(selectedOverlay);
 }
 
 // tear down all special overlays before activating a new one
@@ -674,6 +671,34 @@ function resetOverlayState() {
   if (!mapState.riverCorridorsTier2Layer) {
     showLayer(mapState.riverCorridorsLayer);
   }
+}
+
+// re-open the last town popup on the newly active layer after an overlay switch
+function reopenLockedPopup(overlay) {
+  if (!_lockedPopupTown) return;
+
+  // non-popup overlays — clear tracking and bail
+  if (["Population", "Funding Bubble", "River Corridors"].includes(overlay)) {
+    _lockedPopupTown = null;
+    return;
+  }
+
+  const isQuadrant = overlay === "Quadrants";
+  const activeLayer = isQuadrant
+    ? mapState.quadrantLayer
+    : mapState.choroplethLayer;
+  if (!activeLayer) return;
+
+  const featureLayer = activeLayer
+    .getLayers()
+    .find((l) => l.feature.properties.town_name === _lockedPopupTown);
+  if (!featureLayer) return;
+
+  // choropleth needs explicit content set; quadrant uses its bindPopup factory
+  if (!isQuadrant) {
+    featureLayer.setPopupContent(buildChoroplethPopup(_lockedPopupTown));
+  }
+  featureLayer.openPopup();
 }
 
 // clear choropleth fill, legend, and labels — called before activating any special overlay
