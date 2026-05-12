@@ -77,7 +77,7 @@ function initializeChoroplethLayer() {
 
       layer.on("mouseover", function () {
         if (!this.isPopupOpen()) {
-          this.setTooltipContent(buildChoroplethTooltip(town));
+          this.setTooltipContent(buildChoroplethHover(town));
           this.openTooltip();
         }
       });
@@ -96,7 +96,7 @@ function initializeChoroplethLayer() {
 
       layer.on("click", function () {
         this.closeTooltip();
-        this.setPopupContent(buildChoroplethTooltip(town));
+        this.setPopupContent(buildChoroplethPopup(town));
         const dropdown = document.getElementById("towns-dropdown");
         dropdown.value = town;
         dropdown.dispatchEvent(new Event("change"));
@@ -338,8 +338,93 @@ function createRangeLabels(metric, ...domain) {
 
 //////////////////////////////////////////////////////////
 
-// build narrative tooltip content for choropleth layer based on active metric
-function buildChoroplethTooltip(town) {
+// short one-sentence hover tooltip — shown on mouseover, quickly scannable
+function buildChoroplethHover(town) {
+  const stats = statsByTown[town];
+  if (!stats) return `<b>${town}</b>`;
+
+  const base = metricEngine.baseMetric;
+  const model = metricEngine.model;
+
+  const pct = (key) => {
+    const v = +stats[key];
+    return Number.isFinite(v) ? Math.round(v * 100) : null;
+  };
+
+  if (base === "risk") {
+    const rankPct = pct(`risk_rank_${model}`);
+    return (
+      `<b>${town}</b><br>` +
+      (rankPct !== null
+        ? `Projected flood exposure is higher than ${rankPct}% of Vermont towns.`
+        : "Expected flood loss data unavailable.")
+    );
+  }
+
+  if (base === "vulnerability") {
+    const rankPct = pct("vulnerability_rank");
+    if (rankPct !== null && rankPct >= 50)
+      return `<b>${town}</b><br>Higher vulnerability than ${rankPct}% of Vermont towns.`;
+    if (rankPct !== null)
+      return `<b>${town}</b><br>Relatively lower social vulnerability than most Vermont towns.`;
+    return `<b>${town}</b>`;
+  }
+
+  if (base === "need") {
+    const rankPct = pct(`need_rank_${model}`);
+    return (
+      `<b>${town}</b><br>` +
+      (rankPct !== null
+        ? `Combined flood need ranks higher than ${rankPct}% of Vermont towns.`
+        : "Combined need data unavailable.")
+    );
+  }
+
+  if (base === "funding") {
+    const hasFunding = +stats.funding_total > 0;
+    const rankPct = pct("funding_rank");
+    if (!hasFunding)
+      return `<b>${town}</b><br>No recorded FEMA mitigation funding.`;
+    return (
+      `<b>${town}</b><br>` +
+      (rankPct !== null
+        ? `Received more mitigation funding than ${rankPct}% of Vermont towns.`
+        : "Has received FEMA mitigation funding.")
+    );
+  }
+
+  if (base === "gap") {
+    const gapRank = pct(`gap_rank_${model}`);
+    const needRank = pct(`need_rank_${model}`);
+    const hasFunding = +stats.funding_total > 0;
+    if (!hasFunding)
+      return (
+        `<b>${town}</b><br>` +
+        (needRank >= 70
+          ? "No recorded FEMA funding despite elevated flood need."
+          : "No recorded FEMA mitigation funding.")
+      );
+    if (gapRank >= 70)
+      return `<b>${town}</b><br>Appears underfunded relative to measured flood need.`;
+    if (gapRank <= 30)
+      return `<b>${town}</b><br>Has received more funding than its measured need would predict.`;
+    return `<b>${town}</b><br>Funding levels roughly track measured need.`;
+  }
+
+  if (base === "claims") {
+    const rankPct = pct("claims_rank");
+    if (rankPct !== null && rankPct >= 50)
+      return `<b>${town}</b><br>Historical flood insurance claims rank higher than ${rankPct}% of Vermont towns.`;
+    if (rankPct !== null)
+      return `<b>${town}</b><br>Relatively limited NFIP claims history.`;
+    return `<b>${town}</b>`;
+  }
+
+  return `<b>${town}</b>`;
+}
+
+// expanded click popup — full interpretation with notes, comparisons, and context
+function buildChoroplethPopup(town) {
   const stats = statsByTown[town];
   // safety check in case stats are missing for this town (shouldn't happen)
   if (!stats) return `<b>${town}</b>`;
@@ -367,6 +452,23 @@ function buildChoroplethTooltip(town) {
   // tooltip div
   const note = (text) => `<span class="popup-note">${text}</span>`;
 
+  // one-line model context note appended to model-aware popups
+  const modelNote = () => {
+    if (model === "eal_per_capita")
+      return note(
+        "Per-capita model surfaces smaller towns with concentrated exposure.",
+      );
+    if (model === "eal")
+      return note(
+        "Absolute loss model weights larger towns with more total exposure.",
+      );
+    if (model === "nri")
+      return note(
+        "Based on FEMA's National Risk Index — a composite benchmark.",
+      );
+    return "";
+  };
+
   // conditionals for each metric to build popup content
   if (base === "risk") {
     const rankPct = pct(`risk_rank_${model}`);
@@ -375,13 +477,14 @@ function buildChoroplethTooltip(town) {
     let html = `<b>${town}</b><br>`;
     html +=
       rankPct !== null
-        ? `Projected flood exposure ranks higher than ${rankPct}% of Vermont towns.`
+        ? `Projected flood exposure is higher than ${rankPct}% of Vermont towns.`
         : "Expected flood loss data unavailable.";
     if (ealPc) html += note(`Est. annual flood loss: ${ealPc}/person`);
     if (inCorridor)
       html += note(
         "Large portions of town fall within mapped river corridors.",
       );
+    html += modelNote();
     return html;
   }
 
@@ -395,7 +498,7 @@ function buildChoroplethTooltip(town) {
       html += `Residents may face greater difficulty recovering from floods.`;
       html += `<br>Higher vulnerability than ${rankPct}% of Vermont towns.`;
     } else if (rankPct !== null) {
-      html += `Below-average social vulnerability relative to other Vermont towns.`;
+      html += `Relatively lower social vulnerability than most Vermont towns.`;
     }
     if (poverty > 15)
       html += note("Higher poverty rates may limit recovery capacity.");
@@ -404,7 +507,9 @@ function buildChoroplethTooltip(town) {
         "Older residents may face additional evacuation and recovery challenges.",
       );
     if (no_vehicle > 10)
-      html += note("Limited vehicle access may constrain evacuation options.");
+      html += note(
+        "Limited vehicle access may constrain evacuation and recovery options.",
+      );
     return html;
   }
 
@@ -413,9 +518,10 @@ function buildChoroplethTooltip(town) {
     const fundRank = pct("funding_rank");
     const hasFunding = +stats.funding_total > 0;
     let html = `<b>${town}</b><br>`;
+    html += "Combines estimated flood risk and social vulnerability. ";
     html +=
       rankPct !== null
-        ? `Combined flood need ranks higher than ${rankPct}% of Vermont towns.`
+        ? `Ranks higher than ${rankPct}% of Vermont towns.`
         : "Combined need data unavailable.";
     if (rankPct !== null && fundRank !== null) {
       const diff = rankPct - fundRank;
@@ -426,6 +532,7 @@ function buildChoroplethTooltip(town) {
           "Funding levels exceed what measured need alone would predict.",
         );
     }
+    html += modelNote();
     return html;
   }
 
@@ -443,7 +550,7 @@ function buildChoroplethTooltip(town) {
       }
     } else if (rankPct !== null) {
       html += `Received more mitigation funding than ${rankPct}% of Vermont towns.`;
-      if (fund) html += note(`Total funding: ${fund}`);
+      if (fund) html += note(`Total funding: ${fund} since 1990.`);
       if (fpc) html += note(`Equivalent to ${fpc} per resident.`);
     }
     return html;
@@ -473,12 +580,13 @@ function buildChoroplethTooltip(town) {
           );
       } else if (gapRank <= 30) {
         html += hasFunding
-          ? "Has received comparatively more mitigation funding than its measured need would predict."
+          ? "Has received more funding than its measured need would predict."
           : "Flood need is relatively limited compared to other Vermont towns.";
       } else {
         html += "Funding levels roughly track measured need.";
       }
     }
+    html += modelNote();
     return html;
   }
 
@@ -490,10 +598,10 @@ function buildChoroplethTooltip(town) {
     let html = `<b>${town}</b><br>`;
     if (rankPct !== null && rankPct >= 50) {
       html += `Historical flood insurance claims rank higher than ${rankPct}% of Vermont towns.`;
-      // if (diff !== null && diff > 20)
-      //   html += note(
-      //     "Historical losses exceed what current modeled risk alone would suggest.",
-      //   );
+      if (diff !== null && diff > 20)
+        html += note(
+          "Historical losses exceed what current modeled risk alone would suggest.",
+        );
       html += note(
         "Reflects past insured losses, not necessarily future exposure.",
       );
@@ -625,7 +733,7 @@ function initializePopBubbleChartLayer() {
     }).bindPopup(
       `<b>${town}</b>
       Population: ${population.toLocaleString()} residents.<br>
-      <span class="popup-note">Used as context for per-capita risk and funding comparisons.</span>`,
+      <span class="popup-note">Population helps contextualize risk and funding across towns of different sizes.</span>`,
       { className: "map-popup" },
     );
 
@@ -757,9 +865,30 @@ function initializeQuadrantLayer() {
       };
     },
 
-    // add popup and sync town click with dropdown to update other components
+    // add tooltip + popup and sync town click with dropdown to update other components
     onEachFeature: (feature, layer) => {
       const town = feature.properties.town_name;
+
+      // hover tooltip: one-line label
+      layer.bindTooltip("", {
+        sticky: true,
+        className: "choropleth-tooltip",
+      });
+
+      layer.on("mouseover", function () {
+        if (!this.isPopupOpen()) {
+          this.setTooltipContent(buildQuadrantHover(town));
+          this.openTooltip();
+        }
+      });
+
+      layer.on("mouseout", function () {
+        this.closeTooltip();
+      });
+
+      layer.on("popupopen", function () {
+        this.closeTooltip();
+      });
 
       layer.bindPopup(() => buildQuadrantPopup(town), {
         className: "choropleth-tooltip",
@@ -775,7 +904,22 @@ function initializeQuadrantLayer() {
   });
 }
 
-// build narrative popup content for quadrant layer
+// short one-line hover for quadrant layer
+function buildQuadrantHover(town) {
+  const stats = statsByTown[town];
+  if (!stats) return `<b>${town}</b>`;
+  const quadrant = stats[`quadrant_${metricEngine.model}`];
+  const labels = {
+    underfunded: "High flood need, limited mitigation funding.",
+    aligned: "Funding broadly aligned with measured flood need.",
+    overfunded: "Higher funding relative to measured need.",
+    low_priority: "Lower flood need and limited mitigation funding.",
+    zero_funding: "No recorded FEMA mitigation funding.",
+  };
+  return `<b>${town}</b><br>${labels[quadrant] ?? quadrantLabels[quadrant] ?? "No data"}`;
+}
+
+// expanded click popup for quadrant layer
 function buildQuadrantPopup(town) {
   const stats = statsByTown[town];
   if (!stats) return `<b>${town}</b>`;
@@ -797,7 +941,7 @@ function buildQuadrantPopup(town) {
     case "aligned":
       return (
         `<b>${town}</b><br>Funding levels are broadly aligned with measured flood need.` +
-        note("Risk and investment are roughly proportional.")
+        note("Suggests federal investment has tracked exposure in this town.")
       );
     case "overfunded":
       return (

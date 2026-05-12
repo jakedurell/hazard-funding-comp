@@ -721,10 +721,10 @@ function refreshChoroplethPopups() {
     mapState.choroplethLayer.eachLayer((fl) => {
       const town = fl.feature.properties.town_name;
       if (fl.isPopupOpen()) {
-        fl.setPopupContent(buildChoroplethTooltip(town));
+        fl.setPopupContent(buildChoroplethPopup(town));
       }
       // always update tooltip content so sticky tooltips don't re-open with stale text
-      fl.setTooltipContent(buildChoroplethTooltip(town));
+      fl.setTooltipContent(buildChoroplethHover(town));
     });
   }
 }
