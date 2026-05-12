@@ -227,7 +227,7 @@ function addLegend(type) {
         const d = r * 2;
         div.innerHTML += `
           <div style="display:flex;align-items:center;gap:8px;margin:5px 0;">
-            <div style="width:${d}px;height:${d}px;border-radius:50%;background:${defaultColors.townColor};opacity:0.8;flex-shrink:0;"></div>
+            <div style="width:${d}px;height:${d}px;border-radius:50%;background:${defaultColors.populationColor};opacity:0.8;flex-shrink:0;"></div>
             <span>${pop.toLocaleString()}</span>
           </div>`;
       });
@@ -248,7 +248,7 @@ function addLegend(type) {
         const d = r * 2;
         div.innerHTML += `
           <div style="display:flex;align-items:center;gap:8px;margin:5px 0;">
-            <div style="width:${d}px;height:${d}px;border-radius:50%;background:#2166ac;opacity:0.75;flex-shrink:0;"></div>
+            <div style="width:${d}px;height:${d}px;border-radius:50%;background:${defaultColors.fundingColor};opacity:0.75;flex-shrink:0;"></div>
             <span>$${(amount / 1_000_000).toFixed(1)}M</span>
           </div>`;
       });
@@ -814,7 +814,7 @@ function initializePopBubbleChartLayer() {
     // create circle marker at centroid, bind popup
     const circleMarker = L.circleMarker(latlng, {
       radius: radius,
-      fillColor: defaultColors.townColor,
+      fillColor: defaultColors.populationColor,
       color: defaultColors.defaultGray,
       weight: 1,
       opacity: 1,
@@ -897,7 +897,7 @@ function initializeFundingBubbleLayer() {
 
     const circleMarker = L.circleMarker(latlng, {
       radius,
-      fillColor: "#2166ac",
+      fillColor: defaultColors.fundingColor,
       color: "#fff",
       weight: 1,
       opacity: 1,
