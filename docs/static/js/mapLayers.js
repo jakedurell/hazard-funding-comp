@@ -479,9 +479,11 @@ function buildChoroplethPopup(town) {
 
   // conditionals for each metric to build popup content
   if (base === "risk") {
+    // define variables
     const rankPct = pct(`risk_rank_${model}`);
     const ealPc = fmt$(stats.EAL_per_capita);
     const inCorridor = +stats.pct_river_corridor > 5;
+    // tags
     let tagVariant = "neutral";
     let tagLabel = "DATA LIMITED";
     if (rankPct !== null) {
@@ -494,6 +496,7 @@ function buildChoroplethPopup(town) {
             ? "ELEVATED EXPOSURE"
             : "LOWER EXPOSURE";
     }
+    // html content
     let html = `<b>${town}</b>` + tags([tagVariant, tagLabel]);
     html +=
       rankPct !== null
@@ -509,10 +512,12 @@ function buildChoroplethPopup(town) {
   }
 
   if (base === "vulnerability") {
+    // define variables
     const rankPct = pct("vulnerability_rank");
     const poverty = +stats.pct_below_poverty;
     const elderly = +stats.percent_elderly;
     const no_vehicle = +stats.pct_no_vehicle;
+    // html content with tags
     let html = `<b>${town}</b>`;
     if (rankPct !== null && rankPct >= 75)
       html += tags(["warning", "HIGH VULNERABILITY"]);
@@ -525,25 +530,41 @@ function buildChoroplethPopup(town) {
     } else if (rankPct !== null) {
       html += `Relatively lower social vulnerability than most Vermont towns.`;
     }
-    if (poverty > 15)
-      html += note("Higher poverty rates may limit recovery capacity.");
-    if (elderly > 25)
+    // conditional notes on drivers of vulnerability
+    const drivers = [];
+    if (poverty > 15) drivers.push("higher poverty rates");
+    if (elderly > 25) drivers.push("older resident populations");
+    if (no_vehicle > 10) drivers.push("limited vehicle access");
+    if (drivers.length === 1) {
+      const single = {
+        "higher poverty rates":
+          "Higher poverty rates may limit recovery capacity.",
+        "older resident populations":
+          "Older residents may face additional evacuation and recovery challenges.",
+        "limited vehicle access":
+          "Limited vehicle access may constrain evacuation and recovery options.",
+      };
+      html += note(single[drivers[0]]);
+    } else if (drivers.length >= 2) {
+      const last = drivers.pop();
+      const phrase = drivers.join(", ") + " and " + last;
       html += note(
-        "Older residents may face additional evacuation and recovery challenges.",
+        phrase.charAt(0).toUpperCase() +
+          phrase.slice(1) +
+          " may limit recovery and evacuation capacity.",
       );
-    if (no_vehicle > 10)
-      html += note(
-        "Limited vehicle access may constrain evacuation and recovery options.",
-      );
+    }
     return html;
   }
 
   if (base === "need") {
+    // define variables
     const rankPct = pct(`need_rank_${model}`);
     const fundRank = pct("funding_rank");
     const hasFunding = +stats.funding_total > 0;
     const diff =
       rankPct !== null && fundRank !== null ? rankPct - fundRank : null;
+    // tags
     let tagVariant = "neutral";
     let tagLabel = "DATA LIMITED";
     if (rankPct !== null) {
@@ -555,7 +576,7 @@ function buildChoroplethPopup(town) {
             ? "ELEVATED NEED"
             : "LOWER NEED";
     }
-    // do not add UNDERFUNDED here — that is the Gap layer's story
+    // html content
     let html = `<b>${town}</b>` + tags([tagVariant, tagLabel]);
     html += "Combines estimated flood risk and social vulnerability. ";
     html +=
@@ -577,6 +598,7 @@ function buildChoroplethPopup(town) {
   }
 
   if (base === "funding") {
+    // define variables
     const rankPct = pct("funding_rank");
     const needRank = pct(`need_rank_${model}`);
     const hasFunding = +stats.funding_total > 0;
@@ -590,6 +612,7 @@ function buildChoroplethPopup(town) {
           ],
         ]
       : [["warning", "NO FEMA FUNDING"]];
+    // html content
     let html = `<b>${town}</b>` + tags(...tagItems);
     if (!hasFunding) {
       html += "No recorded FEMA mitigation funding.";
@@ -605,16 +628,19 @@ function buildChoroplethPopup(town) {
   }
 
   if (base === "gap") {
+    // define variables
     const gapRank = pct(`gap_rank_${model}`);
     const needRank = pct(`need_rank_${model}`);
     const fundRank = pct("funding_rank");
     const hasFunding = +stats.funding_total > 0;
+    // tags
     const tagItems = [];
     if (!hasFunding) tagItems.push(["warning", "NO FEMA FUNDING"]);
     else if (gapRank >= 70) tagItems.push(["warning", "UNDERFUNDED"]);
     else if (gapRank <= 30) tagItems.push(["success", "FUNDING ALIGNED"]);
     else tagItems.push(["neutral", "ROUGHLY ALIGNED"]);
     if (needRank >= 75) tagItems.push(["info", "HIGH NEED"]);
+    // html content
     let html =
       `<b>${town}</b>` + (tagItems.length ? tags(...tagItems) : "<br>");
     if (gapRank !== null) {
@@ -644,16 +670,19 @@ function buildChoroplethPopup(town) {
   }
 
   if (base === "claims") {
+    // define variables
     const rankPct = pct("claims_rank");
     const riskRank = pct(`risk_rank_${model}`);
     const diff =
       rankPct !== null && riskRank !== null ? rankPct - riskRank : null;
+    // tags
     const tagItems = [];
     if (rankPct !== null && rankPct >= 50)
       tagItems.push(["danger", "FLOODING HISTORY"]);
     else tagItems.push(["neutral", "LIMITED CLAIMS"]);
     if (diff !== null && diff < -20)
       tagItems.push(["info", "REACTIVE PATTERN"]);
+    // html content
     let html = `<b>${town}</b>` + tags(...tagItems);
     if (rankPct !== null && rankPct >= 50) {
       html += `Historical flood insurance claims rank higher than ${rankPct}% of Vermont towns.`;
@@ -675,6 +704,7 @@ function buildChoroplethPopup(town) {
     return html;
   }
 
+  // default fallback
   return `<b>${town}</b>`;
 }
 
@@ -981,8 +1011,10 @@ function buildQuadrantHover(town) {
 // expanded click popup for quadrant layer
 function buildQuadrantPopup(town) {
   const stats = statsByTown[town];
+  // safety check in case stats are missing for this town (shouldn't happen)
   if (!stats) return `<b>${town}</b>`;
 
+  // define variables for quadrant assignment, risk rank, and helper functions to build HTML snippets
   const quadrant = stats[`quadrant_${metricEngine.model}`];
   const note = (text) => `<span class="popup-note">${text}</span>`;
   const tag = (variant, label) =>
@@ -991,6 +1023,7 @@ function buildQuadrantPopup(town) {
     (+stats[`risk_rank_${metricEngine.model}`] || 0) * 100,
   );
 
+  // conditionals for each quadrant to build tailored popup content
   switch (quadrant) {
     case "underfunded":
       return (
