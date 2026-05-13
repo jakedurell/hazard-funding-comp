@@ -114,13 +114,14 @@ body {
 
 // lede line
 .lede {
-  text-align: center;
+  text-align: left;
   font-size: 0.98em;
   color: #888;
   margin: 0.7em auto 1.2em auto;
   max-width: 800px;
   font-style: italic;
   letter-spacing: 0.01em;
+  padding: 0 10px;
 }
 
 .why-brief {
@@ -132,7 +133,8 @@ body {
   padding: 1em 1.5em;
   font-style: normal;
   color: #444;
-  text-align: center;
+  text-align: left;
+  padding: 0 10px;
 }
 
 // about band
@@ -144,7 +146,8 @@ body {
   margin: 1.2em auto;
   padding: 0.9em 1.2em;
   box-shadow: 0 1px 4px rgba(26, 35, 126, 0.02);
-  text-align: center;
+  text-align: left;
+  padding: 0 10px;
 }
 .context-title {
   font-size: 1.05em;
