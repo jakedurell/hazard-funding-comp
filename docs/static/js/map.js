@@ -276,11 +276,8 @@ function wireRelativeToggle() {
       mapState.isRelative = e.target.checked;
       metricEngine.isRelative = mapState.isRelative;
 
-      // only update choropleth if it's active (i.e., not bubble)
-      if (mapState.choroplethMetric !== null) {
-        // update choropleth metric to trigger style and legend updates
-        updateDashboard();
-      }
+      // update choropleth metric to trigger style and legend updates
+      updateDashboard();
 
       // sync both sliders
       toggles.forEach((t) => {
