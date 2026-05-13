@@ -117,14 +117,14 @@ Finding:
 
 #### Gap Index  
 To evaluate allocation effectiveness:
-- Gap = Funding − Need
+- Gap = Need − Funding
 
 Interpretation:
-- Negative values → underfunded relative to need
-- Positive values → overfunded relative to need
+- Positive values → underfunded relative to need
+- Negative values → overfunded relative to need
 
 The gap index shows:
-- Moderate negative correlation with need (~ -0.25 to -0.45), indicating it captures allocation mismatch, not just need.
+- Moderate positive correlation with need (~+0.32 to +0.49), well below +1.0, indicating it captures allocation mismatch rather than simply re-labeling need.
 
 #### Correlation Analysis
 - Need vs. funding: weak correlation (~0.10–0.30)
@@ -164,7 +164,7 @@ Key observations:
 
 ### Key Limitations
 - NFHL flood mapping is incomplete across Vermont
-- NFIP participation is extremely low (~1%), limiting claims as a comprehensive risk proxy
+- NFIP participation is extremely low (fewer than 2% of Vermont housing units), limiting claims as a comprehensive risk proxy
 - Town-level aggregation may obscure within-town variation
 - Funding data reflects approved projects, not unmet demand or unsuccessful applications
 
