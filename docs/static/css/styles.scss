@@ -816,7 +816,7 @@ body {
   margin-right: auto;
 }
 .stats-note {
-  font-size: 0.85em;
+  // font-size: 0.85em;
   color: #777;
   // margin-top: 12px;
   text-align: center;
@@ -1108,12 +1108,14 @@ body {
   }
 }
 
-// data sources note
+// data sources
 .data-sources {
-  text-align: center;
+  text-align: left;
   font-size: 0.98em;
   color: #888;
-  margin: 1.5em 0 0.5em 0;
+  max-width: 700px;
+  margin: 1.5em auto 0.5em auto;
+  padding: 0 1em;
   letter-spacing: 0.01em;
 }
 .data-sources a {
@@ -1124,6 +1126,25 @@ body {
 .data-sources a:hover {
   color: #0d47a1;
   text-decoration: underline solid;
+}
+// Notes on data
+.data-notes {
+  font-size: 0.75em;
+  color: #888;
+  max-width: 700px;
+  margin: 0.25em auto 1.5em auto;
+  text-align: left;
+  padding: 0 1em;
+
+  strong {
+    color: #666;
+  }
+
+  ul {
+    margin: 0.4em 0 0 1.2em;
+    padding: 0;
+    line-height: 1.6;
+  }
 }
 
 /* Footer styles */
