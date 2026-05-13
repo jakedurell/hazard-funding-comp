@@ -24,6 +24,7 @@ const mapState = {
   choroplethLabels: null,
   choroplethMetric: null,
   choroplethLegend: null,
+  noFundingHatchLayer: null, // overlay layer for zero-funding towns (drawn on top of choropleth)
 };
 
 // base tile layers
@@ -666,6 +667,7 @@ function resetOverlayState() {
   hideLayer(mapState.popBubbleLayer);
   hideLayer(mapState.fundingBubbleLayer);
   hideLayer(mapState.quadrantLayer);
+  hideLayer(mapState.noFundingHatchLayer); // hide hatch when leaving choropleth view
   restoreRiverCorridorsDefaultStyle();
   // restore tier 1 river corridors unless tier 2 is currently displayed
   if (!mapState.riverCorridorsTier2Layer) {
@@ -710,6 +712,7 @@ function clearChoroplethFill(weight = 1) {
     weight,
     fillOpacity: 0,
   }));
+  hideLayer(mapState.noFundingHatchLayer); // hatch only relevant when choropleth has fill
   updateChoroplethLegend();
   if (mapState.choroplethLabels)
     mapState.map.removeLayer(mapState.choroplethLabels);
@@ -816,13 +819,14 @@ function updateMetric() {
   ) {
     // bubble / river layer is visible: model changed, but don't touch the choropleth or its legend
   } else {
-    // choropleth is active: update metric, style, labels, and legend
+    // choropleth is active: update metric, style, labels, legend, and hatch overlay for zero-funding towns
     const metricKey = metricEngine.getMetricKey();
     mapState.choroplethMetric = metricKey;
     mapState.choroplethLayer.options.metric = metricKey;
     mapState.choroplethLayer.setStyle(mapState.choroplethLayer.options.style);
     updateChoroplethLabels();
     updateChoroplethLegend();
+    showLayer(initializeNoFundingHatchLayer());
   }
 
   // after any setStyle call, bring the selected town's <path> to the top of the SVG DOM
@@ -835,7 +839,16 @@ function updateMetric() {
       const sel = activeLayer
         .getLayers()
         .find((l) => l.feature.properties.town_name === mapState.selectedTown);
-      if (sel) sel.bringToFront();
+      if (sel) {
+        sel.bringToFront();
+        // hatch paths are in the same flat SVG — re-raise them so they stay on top of the choropleth fill
+        if (
+          mapState.noFundingHatchLayer &&
+          mapState.map.hasLayer(mapState.noFundingHatchLayer)
+        ) {
+          mapState.noFundingHatchLayer.bringToFront();
+        }
+      }
     }
   }
 }
@@ -1010,6 +1023,13 @@ function zoomIn() {
     mapState.map.fitBounds(boundaries.getBounds());
     // move selected town's <path> to end of SVG DOM so its border renders on top
     boundaries.bringToFront();
+    // re-raise hatch paths above the choropleth fill (all paths share one flat SVG)
+    if (
+      mapState.noFundingHatchLayer &&
+      mapState.map.hasLayer(mapState.noFundingHatchLayer)
+    ) {
+      mapState.noFundingHatchLayer.bringToFront();
+    }
   }
 
   // same bringToFront for quadrant layer, so its border render on top

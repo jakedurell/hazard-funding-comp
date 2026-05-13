@@ -367,6 +367,17 @@ body {
   text-align: right;
 }
 
+.legend-hatch-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.85em;
+  color: #555;
+}
+
 .reset-map-button {
   background-color: white;
   color: black;

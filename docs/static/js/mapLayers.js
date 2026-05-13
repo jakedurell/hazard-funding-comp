@@ -113,6 +113,43 @@ function initializeChoroplethLayer() {
   return choroplethLayer;
 }
 
+// inject SVG hatch <defs> into Leaflet's overlay SVG (called once after map is ready)
+function injectHatchPattern() {
+  const svg = document.querySelector(".leaflet-overlay-pane svg");
+  if (!svg || svg.querySelector("#hatch-no-funding")) return; // already injected
+  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+  // no background rect — pattern is transparent so choropleth color shows through
+  defs.innerHTML = `
+    <pattern id="hatch-no-funding" patternUnits="userSpaceOnUse" width="10" height="10" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#444" stroke-width="1.5" stroke-opacity="0.7"/>
+    </pattern>`;
+  svg.insertBefore(defs, svg.firstChild);
+}
+
+// create (or return cached) zero-funding hatch overlay layer
+// this is a separate GeoJSON layer drawn on top of the choropleth so color shows through
+function initializeNoFundingHatchLayer() {
+  if (mapState.noFundingHatchLayer) return mapState.noFundingHatchLayer;
+
+  injectHatchPattern();
+
+  mapState.noFundingHatchLayer = L.geoJSON(towns, {
+    filter: (feature) => {
+      const town = feature.properties.town_name;
+      return +statsByTown[town]?.funding_total === 0;
+    },
+    style: () => ({
+      fill: true,
+      fillColor: "url(#hatch-no-funding)",
+      fillOpacity: 1,
+      stroke: false, // no border — choropleth layer handles borders
+    }),
+    interactive: false, // clicks pass through to choropleth layer beneath
+  });
+
+  return mapState.noFundingHatchLayer;
+}
+
 // create choropleth labels layer with metric values for each town
 function updateChoroplethLabels() {
   const map = mapState.map;
@@ -202,6 +239,18 @@ function addLegend(type) {
 
       const rangeLabels = createRangeLabels(metric, ...scale.domain());
       div.appendChild(rangeLabels);
+
+      // hatch legend entry — shown on all choropleths
+      const hatchRow = document.createElement("div");
+      hatchRow.className = "legend-hatch-row";
+      hatchRow.innerHTML = `
+          <svg width="20" height="12" style="flex-shrink:0;vertical-align:middle;">
+            <rect width="20" height="12" fill="#ccc" rx="2"/>
+            <line x1="0" y1="12" x2="12" y2="0" stroke="#555" stroke-width="1.5"/>
+            <line x1="8" y1="12" x2="20" y2="0" stroke="#555" stroke-width="1.5"/>
+          </svg>
+          <span>No mitigation funding</span>`;
+      div.appendChild(hatchRow);
 
       return div;
     } else if (type === "quadrant") {
