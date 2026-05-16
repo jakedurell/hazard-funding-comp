@@ -68,11 +68,11 @@
       <h1>Floodlines</h1>
       <!-- <h2>Mapping the gap between flood risk and flood funding</h2> -->
       <h2>Technical Appendix</h2>
-      <div class="dashboard-subtitle">
+      <!-- <div class="dashboard-subtitle">
         Vermont has been hit by two catastrophic floods in twelve years. The
         money meant to prepare for the next one isn't going where the risk is
         greatest.
-      </div>
+      </div> -->
       <!-- <div class="analysis-link">
         <a href="index.html" class="analysis-button">
           Explore the Dashboard
@@ -86,7 +86,7 @@
       id="appendix-content"
       style="max-width: 1100px; margin-top: 1.5em"
     >
-      <h2 id="technical-methodology">Technical Methodology Appendix</h2>
+      <h2 id="technical-methodology">Methodology</h2>
 
       <p>
         This analysis evaluates whether flood mitigation funding in Vermont
@@ -400,6 +400,53 @@
           High‑need towns are overrepresented among underfunded and zero‑funded
           groups; distribution across quadrants is consistent across model
           specifications.
+        </li>
+      </ul>
+
+      <h3 id="model-selection">Model Selection Rationale</h3>
+      <p>
+        Three models were selected for the web analysis based on complementary
+        strengths in predictive signal, stability, and external
+        benchmarkability:
+      </p>
+      <ul>
+        <li>
+          <strong>EAL-based model</strong> – primary analytical model; strongest
+          ability to predict funding access.
+        </li>
+        <li>
+          <strong>EAL per capita model</strong> – robustness check; most stable
+          across normalization methods.
+        </li>
+        <li>
+          <strong>FEMA NRI model</strong> – external benchmark using FEMA’s own
+          composite risk framework.
+        </li>
+      </ul>
+
+      <h3 id="normalization-choice">Normalization Choice</h3>
+      <p>
+        Rank-based normalization was used for all published indices rather than
+        z-scores.
+      </p>
+      <ul>
+        <li>
+          Vermont flood and funding data are highly skewed, with extreme
+          outliers compressing z-score distributions.
+        </li>
+        <li>
+          Rank normalization produces bounded, interpretable values relative to
+          peer towns.
+        </li>
+        <li>
+          Variables with different units and distributions (EAL, flood exposure,
+          socioeconomic indicators) can be compared on a common scale without
+          distributional assumptions.
+        </li>
+        <li>
+          Sensitivity testing showed minimal substantive difference between
+          rank-normalized and z-score models; town rankings remained highly
+          consistent across methods.
         </li>
       </ul>
 
