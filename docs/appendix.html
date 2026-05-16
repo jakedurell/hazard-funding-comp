@@ -67,9 +67,7 @@
     <div class="dashboard-header">
       <h1>Floodlines</h1>
       <!-- <h2>Mapping the gap between flood risk and flood funding</h2> -->
-      <h2>
-        Technical Appendix
-      </h2>
+      <h2>Technical Appendix</h2>
       <div class="dashboard-subtitle">
         Vermont has been hit by two catastrophic floods in twelve years. The
         money meant to prepare for the next one isn't going where the risk is
@@ -83,10 +81,370 @@
       </div> -->
     </div>
 
-    <div class="lede">
-        Under construction! Check back soon for the full article and analysis.
-    </div>
+    <div
+      class="container appendix-content"
+      id="appendix-content"
+      style="max-width: 1100px; margin-top: 1.5em"
+    >
+      <h2 id="technical-methodology">Technical Methodology Appendix</h2>
 
+      <p>
+        This analysis evaluates whether flood mitigation funding in Vermont
+        aligns with underlying need. “Need” is treated as a normative construct
+        (what funding should target), while observed funding patterns reflect
+        real‑world allocation dynamics. Models are used as validation tools, not
+        as ends in themselves.
+      </p>
+
+      <h3 id="data-sources">Data Sources</h3>
+      <ul>
+        <li>
+          <strong
+            ><a
+              href="https://www.fema.gov/openfema-data-page/hazard-mitigation-assistance-projects-v4"
+              target="_blank"
+              rel="noopener"
+              >FEMA Hazard Mitigation Assistance (HMA)</a
+            ></strong
+          >
+          – project‑level mitigation funding data
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://www.fema.gov/about/openfema/data-sets/national-risk-index-data"
+              target="_blank"
+              rel="noopener"
+              >FEMA National Risk Index (NRI)</a
+            ></strong
+          >
+          – expected annual loss (EAL), risk, vulnerability, and resilience
+          indicators
+        </li>
+        <li>
+          <strong
+            ><a href="https://data.census.gov/" target="_blank" rel="noopener"
+              >U.S. Census Bureau American Community Survey (ACS)</a
+            ></strong
+          >
+          – demographic and socioeconomic variables
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://www.fema.gov/flood-insurance"
+              target="_blank"
+              rel="noopener"
+              >National Flood Insurance Program (NFIP)</a
+            ></strong
+          >
+          – claims and policy data
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://hazards.fema.gov/femaportal/NFHL/searchResult/"
+              target="_blank"
+              rel="noopener"
+              >FEMA National Flood Hazard Layer (NFHL)</a
+            ></strong
+          >
+          and
+          <strong
+            ><a
+              href="https://www.arcgis.com/home/item.html?id=51797aa9327343b9a04215e5e59e00c5"
+              target="_blank"
+              rel="noopener"
+              >Vermont ANR River Corridors</a
+            ></strong
+          >
+          – spatial flood exposure proxies
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://www.census.gov/cgi-bin/geo/shapefiles/index.php"
+              target="_blank"
+              rel="noopener"
+              >U.S. Census Bureau (TIGER/Line Shapefiles)</a
+            ></strong
+          >
+          – Vermont town boundaries; base geography for aggregation
+        </li>
+      </ul>
+
+      <h3 id="data-processing">Data Processing and Integration</h3>
+
+      <h4 id="spatial-data">Spatial Data</h4>
+      <ul>
+        <li>
+          All spatial datasets were standardized to an equal‑area coordinate
+          system (<code>EPSG:5070</code>) for accurate area calculations, then
+          converted to WGS84 (<code>EPSG:4326</code>) for web mapping.
+        </li>
+        <li>
+          Flood exposure was estimated by calculating the percent of each town’s
+          land area within:
+          <ul>
+            <li>FEMA high‑risk flood zones (NFHL)</li>
+            <li>State‑defined river corridors</li>
+          </ul>
+        </li>
+        <li>
+          NFHL coverage varies across the state; a coverage flag was included to
+          account for incomplete mapping.
+        </li>
+      </ul>
+
+      <h4 id="nri-aggregation">NRI Aggregation</h4>
+      <ul>
+        <li>
+          FEMA NRI data (census tract level) were spatially intersected with
+          town boundaries.
+        </li>
+        <li>
+          Tract values were allocated to towns using area‑weighted proportions;
+          sliver overlaps (&lt;1%) were removed and weights renormalized.
+        </li>
+        <li>
+          Aggregated metrics include Expected Annual Loss (EAL), population,
+          building and agricultural value, and composite
+          risk/vulnerability/resilience indices.
+        </li>
+      </ul>
+
+      <h4 id="acs-data">ACS Socioeconomic Data</h4>
+      <ul>
+        <li>
+          Multiple ACS tables were cleaned and merged using GEOID identifiers.
+        </li>
+        <li>
+          Key indicators were calculated per Census guidance (percent below
+          poverty, percent elderly, percent without vehicle access).
+        </li>
+        <li>
+          Margins of error (MOE) were retained and propagated where appropriate.
+        </li>
+      </ul>
+
+      <h4 id="fema-hma">FEMA HMA Funding Data</h4>
+      <ul>
+        <li>
+          Project‑level funding was inflation‑adjusted to 2025 dollars using CPI
+          (FRED) and filtered to flood‑related mitigation projects.
+        </li>
+        <li>
+          Projects were assigned to towns using regex parsing, manual mapping,
+          and fuzzy matching for ambiguous cases.
+        </li>
+        <li>
+          Town‑level aggregates: total funding, funding per capita & per housing
+          unit (log‑transformed), and funding by period (pre‑2011, 2011–2022,
+          2023+).
+        </li>
+      </ul>
+
+      <h4 id="nfip">NFIP Claims and Policies</h4>
+      <ul>
+        <li>
+          Claims and policies were cleaned and matched to towns; claims were
+          inflation‑adjusted and aggregated by town and period.
+        </li>
+        <li>
+          Insurance penetration rates were calculated from active policy counts.
+        </li>
+      </ul>
+
+      <h4 id="final-dataset">Final Dataset</h4>
+      <ul>
+        <li>
+          All datasets were merged at the town level using GEOID and town name;
+          consistency checks ensured alignment across population and housing
+          variables.
+        </li>
+        <li>
+          The final dataset includes all Vermont towns, including those with
+          zero funding.
+        </li>
+      </ul>
+
+      <h3 id="need-index">Construction of the Need Index</h3>
+      <p>
+        A composite need index was developed to estimate relative flood
+        mitigation need across towns.
+      </p>
+
+      <h4 id="components">Components</h4>
+      <ul>
+        <li>
+          <strong>Risk (Exposure)</strong>: primary measure was Expected Annual
+          Loss (EAL) from FEMA NRI.
+        </li>
+        <li>
+          <strong>Vulnerability (Socioeconomic)</strong>: percent below poverty,
+          percent elderly, percent without vehicle access.
+        </li>
+      </ul>
+
+      <h4 id="method">Method</h4>
+      <ul>
+        <li>
+          Variables were normalized using z‑score standardization and rank‑based
+          scaling.
+        </li>
+        <li>
+          Risk and vulnerability components were equally weighted (50/50) and
+          summed to produce the composite.
+        </li>
+      </ul>
+
+      <h4 id="rationale">Rationale</h4>
+      <p>
+        EAL was selected as the primary risk variable for its multidimensional
+        loss capture. A parsimonious set of vulnerability variables preserves
+        interpretability while retaining signal.
+      </p>
+
+      <h3 id="model-eval">Model Evaluation and Validation</h3>
+      <h4 id="robustness">Robustness Checks</h4>
+      <ul>
+        <li>
+          Need indices were highly consistent across normalization methods
+          (Spearman correlation ≈ 0.91–1.00).
+        </li>
+        <li>Rankings were stable with modest variation at the extremes.</li>
+      </ul>
+
+      <h4 id="sensitivity">Sensitivity Analysis</h4>
+      <ul>
+        <li>
+          <strong>Leave‑One‑Variable‑Out (LOVO)</strong>: tested how removing
+          each variable affected rankings and underfunded town identification.
+        </li>
+        <li>
+          <strong>Weight Variation</strong>: tested alternative weightings
+          (e.g., 70/30, 30/70 risk vs. vulnerability).
+        </li>
+        <li>
+          Key result: the model is robust to weighting; the choice of risk
+          variable (EAL vs. exposure) is most consequential.
+        </li>
+      </ul>
+
+      <h4 id="model-comparison">Model Comparison</h4>
+      <ul>
+        <li>
+          Specifications tested: exposure‑based models (river corridors, NFHL),
+          EAL‑based models, per‑capita risk models, and FEMA NRI composites.
+        </li>
+        <li>
+          Finding: EAL‑based models are more stable and policy‑relevant;
+          additional variables provide limited extra explanatory power.
+        </li>
+      </ul>
+
+      <h3 id="funding-alignment">Funding Alignment Analysis</h3>
+      <h4 id="gap-index">Gap Index</h4>
+      <p>
+        Gap = Need − Funding. Positive values indicate underfunding relative to
+        need; negative values indicate overfunding.
+      </p>
+      <p>
+        Observed: moderate positive correlation with need (~+0.32 to +0.49),
+        indicating the index captures allocation mismatch rather than simply
+        re‑labeling need.
+      </p>
+
+      <h4 id="correlation">Correlation Analysis</h4>
+      <ul>
+        <li>Need vs. funding: weak correlation (~0.10–0.30).</li>
+        <li>
+          Claims vs. funding: stronger correlation (~0.55), suggesting funding
+          aligns more with past damage than forward‑looking need.
+        </li>
+      </ul>
+
+      <h4 id="regression">Regression Analysis</h4>
+      <ul>
+        <li>
+          Logistic regression (funding access): AUC ≈ 0.6–0.8 (moderate ability
+          to predict which towns receive funding).
+        </li>
+        <li>
+          OLS regression (funding amount): R² ≈ 0 (near‑zero explanatory power).
+        </li>
+        <li>
+          Interpretation: structural variables weakly explain who gets funding
+          and do not explain funding amounts.
+        </li>
+      </ul>
+
+      <h3 id="spatial-analysis">Spatial Analysis</h3>
+      <ul>
+        <li>Moran’s I indicates significant spatial clustering of need.</li>
+        <li>
+          Choropleth maps confirm geographic consistency of risk patterns;
+          funding does not exhibit the same alignment.
+        </li>
+      </ul>
+
+      <h3 id="quadrant-analysis">Quadrant Analysis</h3>
+      <p>
+        Towns were categorized by need and funding into zero funding,
+        underfunded (high need, low funding), aligned, overfunded, and low
+        priority groups.
+      </p>
+      <ul>
+        <li>~52% of towns received zero funding.</li>
+        <li>
+          High‑need towns are overrepresented among underfunded and zero‑funded
+          groups; distribution across quadrants is consistent across model
+          specifications.
+        </li>
+      </ul>
+
+      <h3 id="limitations">Key Limitations</h3>
+      <ul>
+        <li>NFHL flood mapping is incomplete across Vermont (52%).</li>
+        <li>
+          NFIP participation is extremely low (&lt;2% of housing units),
+          limiting claims as a comprehensive risk proxy.
+        </li>
+        <li>Town‑level aggregation may obscure within‑town variation.</li>
+        <li>
+          Risk scores (EAL, NRI) are modeled annualized estimates, not
+          cumulative observed damage.
+        </li>
+        <li>
+          Funding data reflect approved projects only, not unmet demand or
+          unsuccessful applications.
+        </li>
+        <li>
+          Funding reflects only the federal share obligated under FEMA Hazard
+          Mitigation Assistance (HMA) localizable to a specific town.
+        </li>
+      </ul>
+
+      <h3 id="summary">Summary</h3>
+      <ul>
+        <li>
+          The need index is methodologically robust and stable across
+          specifications.
+        </li>
+        <li>
+          Funding is weakly aligned with structural need and more strongly
+          aligned with past damages.
+        </li>
+        <li>
+          Results suggest a reactive funding system rather than a proactive,
+          risk‑based allocation model.
+        </li>
+        <li>
+          The framework reliably identifies systemic patterns; precise town
+          rankings should be interpreted with caution.
+        </li>
+      </ul>
+    </div>
 
     <!-- Footer -->
     <footer class="site-footer" role="contentinfo">
@@ -146,6 +504,5 @@
     </script>
 
     <script src="./static/js/hamburger.js"></script>
-
   </body>
 </html>
