@@ -90,7 +90,9 @@ body {
     top: 100%;
     right: 0;
     background: rgba(255, 255, 255, 0.98);
-    width: 220px;
+    width: auto;
+    min-width: 0;
+    padding: 6px 10px;
     border-left: 1px solid #eee;
     border-bottom: 1px solid #eee;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -101,7 +103,13 @@ body {
   .site-nav-links ul {
     flex-direction: column;
     gap: 0;
-    align-items: flex-start;
+    align-items: stretch;
+    padding: 4px 0;
+  }
+  .site-nav-links a {
+    display: block;
+    width: 100%;
+    text-align: right;
   }
   .site-nav-links.show {
     display: block;
