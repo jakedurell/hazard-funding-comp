@@ -9,6 +9,116 @@ body {
   border-bottom: 2px solid white;
 }
 
+/* Site navbar layout and responsive hamburger (keeps #towns-control centered) */
+.site-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.navbar-left,
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  color: #1a237e;
+  text-decoration: none;
+  font-size: 1.05rem;
+}
+
+.site-nav-toggle {
+  background: transparent;
+  border: 1px solid #e0e0e0; /* thin gray border */
+  border-radius: 6px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: none;
+  padding: 6px 8px;
+  text-transform: uppercase;
+  color: #333333;
+  transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease, transform 120ms ease;
+}
+
+.site-nav-toggle:focus {
+  outline: 2px solid rgba(26, 35, 126, 0.12);
+  outline-offset: 2px;
+}
+
+.site-nav-toggle:hover,
+.site-nav-toggle:focus {
+  border-color: #cccccc;
+  background-color: rgba(0, 168, 204, 0.04);
+  transform: translateY(-1px);
+}
+
+.site-nav-links ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  text-transform: uppercase;
+}
+
+.site-nav-links a {
+  text-decoration: none;
+  color: #333333;
+  padding: 6px 8px;
+  font-weight: 600;
+  display: inline-block; /* allow transform */
+  transition: color 180ms ease, transform 120ms ease;
+}
+
+.site-nav-links a:hover,
+.site-nav-links a:focus {
+  color: #00a8cc;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 900px) {
+  .site-nav-toggle {
+    display: block;
+  }
+  .site-nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(255, 255, 255, 0.98);
+    width: 220px;
+    border-left: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 8px;
+    border-radius: 0 0 6px 6px;
+    z-index: 1050;
+  }
+  .site-nav-links ul {
+    flex-direction: column;
+    gap: 0;
+    align-items: flex-start;
+  }
+  .site-nav-links.show {
+    display: block;
+  }
+  /* keep towns control centered and flexible */
+  #towns-control {
+    order: 0;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+  .navbar-left {
+    order: -1;
+  }
+  .navbar-right {
+    order: 1;
+  }
+}
 #towns-control {
   padding: 10px;
   display: flex;
