@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="description"
+      content="Data analysis exploring flood risk in Vermont."
+    />
+    <meta name="author" content="Bryan C. Johns" />
+    <title>Floodlines</title>
+
+    <!-- Leaflet CSS -->
+    <!-- <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    /> -->
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./static/css/styles.css" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico" />
+  </head>
+  <body>
+    <!-- navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header"></div>
+        <div id="towns-control" class="navbar-center">
+          <div class="control-header">
+            <label for="towns-dropdown">Select a Town</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Header -->
+    <div class="dashboard-header">
+      <h1>Floodlines</h1>
+      <!-- <h2>Mapping the gap between flood risk and flood funding</h2> -->
+      <h2>
+        Risk is not equally distributed. Neither is the money to address it
+      </h2>
+      <div class="dashboard-subtitle">
+        Vermont has been hit by two catastrophic floods in twelve years. The
+        money meant to prepare for the next one isn't going where the risk is
+        greatest.
+      </div>
+      <div class="analysis-link">
+        <a href="index.html" class="analysis-button">
+          Explore the Dashboard
+          <span class="arrow">→</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="lede">
+        Under construction! Check back soon for the full article and analysis.
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+      <span class="footer-tagline">Fluent in Data. Fluent in Human.</span>
+      <span class="footer-owner">
+        &copy; <span id="copyright-year">2025</span>
+        <span class="footer-author">Bryan C. Johns</span>
+      </span>
+      <span class="footer-links">
+        <a
+          href="https://informedwanderer.com/"
+          target="_blank"
+          class="portfolio-link"
+          aria-label="Portfolio"
+        >
+          <i
+            class="fas fa-laptop-code footer-icon"
+            aria-hidden="true"
+            title="Portfolio"
+          ></i
+          >Portfolio
+        </a>
+        <a
+          href="https://www.linkedin.com/in/b-johns/"
+          target="_blank"
+          class="linkedin-link"
+          aria-label="LinkedIn"
+        >
+          <i
+            class="fab fa-linkedin footer-icon"
+            aria-hidden="true"
+            title="LinkedIn"
+          ></i
+          >LinkedIn
+        </a>
+        <a
+          href="https://github.com/johbry17/Floodlines"
+          target="_blank"
+          class="github-link"
+          aria-label="GitHub"
+        >
+          <i
+            class="fab fa-github footer-icon"
+            aria-hidden="true"
+            title="GitHub"
+          ></i
+          >GitHub
+        </a>
+      </span>
+    </footer>
+    <script>
+      // Auto-update year
+      const yearElement = document.getElementById("copyright-year");
+      if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+      }
+    </script>
+
+  </body>
+</html>
