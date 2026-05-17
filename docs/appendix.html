@@ -119,12 +119,12 @@
           </li>
           <li>
             <a href="#data-dictionary">Data Dictionary</a>
-            <ul>
+            <!-- <ul>
               <li>
                 <a href="#town-boundaries-geojson">town_boundaries.geojson</a>
               </li>
               <li><a href="#town-stats-csv">town_stats.csv</a></li>
-            </ul>
+            </ul> -->
           </li>
         </ul>
       </nav>
@@ -336,8 +336,8 @@
           scaling.
         </li>
         <li>
-          Risk and vulnerability components were equally weighted (50/50) and
-          summed to produce the composite.
+          Risk and vulnerability composites were combined with equal weighting
+          in models containing both components.
         </li>
       </ul>
 
@@ -389,8 +389,9 @@
       <h3 id="funding-alignment">Funding Alignment Analysis</h3>
       <h4 id="gap-index">Gap Index</h4>
       <p>
-        Gap = Need − Funding. Positive values indicate underfunding relative to
-        need; negative values indicate overfunding.
+        Gap = normalized need − normalized funding (log-scaled funding per
+        capita). Positive values indicate underfunding relative to need;
+        negative values indicate overfunding.
       </p>
       <p>
         Observed: moderate positive correlation with need (~+0.32 to +0.49),
@@ -414,7 +415,8 @@
           to predict which towns receive funding).
         </li>
         <li>
-          OLS regression (funding amount): R² ≈ 0 (near‑zero explanatory power).
+          OLS models using log-transformed funding per capita produced near-zero
+          explanatory power (R² ≈ 0).
         </li>
         <li>
           Interpretation: structural variables weakly explain who gets funding
@@ -541,403 +543,138 @@
       id="front-end-data-dictionary"
       style="max-width: 1100px; margin-top: 1.5em"
     >
-      <h2 id="data-dictionary">Data Dictionary</h2>
+      <h2 id="data-dictionary">Abbreviated Dashboard Data Dictionary</h2>
 
-      <h3>Exported Web Application Datasets</h3>
       <p>
-        The outputs used by the interactive dasboard are optimized for fast
-        loading, client-side filtering, choropleth rendering, rankings, and
-        tooltip/pop-up display in the web application.
+        The interactive dashboard uses a flat town table
+        (<code>town_stats.csv</code>) and a simplified town GeoJSON to power
+        choropleths, charts, rankings, and town-level summaries. Detailed data
+        dictionary available in the
+        <a
+          href="https://github.com/johbry17/Floodlines"
+          target="_blank"
+          rel="noopener"
+          >project repository</a
+        >.
       </p>
 
-      <h3 id="town-boundaries-geojson">
-        town_boundaries.geojson Data Dictionary
-      </h3>
-      <p>
-        Simplified geographic boundary layer used for map rendering and spatial
-        interaction in the dashboard.
-      </p>
+      <h3>Identifiers &amp; base attributes</h3>
       <ul>
         <li>
-          <strong>GEOID</strong>: Unique 10-digit Census identifier for the town
-          (FIPS code).
+          <code>GEOID</code>: 10‑digit Census town FIPS identifier (primary join
+          key).
         </li>
+        <li><code>town_name</code>: Standardized town label used in UI.</li>
+        <li><code>population</code>: Total resident population (integer).</li>
+        <li><code>area_sq_km</code>: Town land area (km&sup2;).</li>
         <li>
-          <strong>town_name</strong>: Full Census town name
-          (<code>NAMELSAD</code>) used for map labels and joins.
-        </li>
-        <li>
-          <strong>geometry</strong>: Polygon or multipolygon geometry
-          representing town boundaries in WGS84 (<code>EPSG:4326</code>) for web
-          mapping compatibility.
+          <code>pct_river_corridor</code>: Percent of town area inside state
+          river corridor polygons.
         </li>
       </ul>
 
-      <h3 id="town-stats-csv">town_stats.csv Data Dictionary</h3>
+      <h3>Core socioeconomic &amp; exposure fields</h3>
       <p>
-        Flat table containing town-level metrics, model outputs, rankings,
-        relative scaling values, and categorical classifications used throughout
-        the dashboard.
+        <code>pct_below_poverty</code>, <code>percent_elderly</code>,
+        <code>pct_no_vehicle</code>, <code>pct_renter_occupied</code>,
+        <code>median_income</code> — socioeconomic indicators used to build the
+        vulnerability component shown in the vulnerability choropleth and stats
+        card.<br />
+        <code>IFLD_EALT_weighted</code>, <code>EAL_per_capita</code> — expected
+        annual loss (EAL) measures used as primary exposure/risk inputs.
       </p>
 
-      <h4>Base Town Variables</h4>
-      <ul>
-        <li>
-          <strong>GEOID</strong>: Unique 10-digit Census identifier for the town
-          (FIPS code).
-        </li>
-        <li>
-          <strong>town_name</strong>: Standardized town name used across all
-          merged datasets.
-        </li>
-        <li>
-          <strong>population</strong>: Total resident population of the town.
-        </li>
-        <li>
-          <strong>valid_population</strong>: Boolean flag indicating whether the
-          town has a nonzero population (<code>True</code> if population &gt;
-          0).
-        </li>
-        <li>
-          <strong>area_sq_km</strong>: Town land area calculated from projected
-          geometry (<code>EPSG:5070</code>) and converted to square kilometers.
-        </li>
-        <li>
-          <strong>pct_river_corridor</strong>: Percentage of town area within
-          Vermont river corridor polygons.
-        </li>
-        <li>
-          <strong>pct_below_poverty</strong>: Percentage of population below the
-          federal poverty line.
-        </li>
-        <li>
-          <strong>percent_elderly</strong>: Percentage of population age 65 and
-          older.
-        </li>
-        <li>
-          <strong>pct_no_vehicle</strong>: Percentage of occupied households
-          without a vehicle available.
-        </li>
-        <li>
-          <strong>pct_renter_occupied</strong>: Percentage of occupied housing
-          units that are renter-occupied.
-        </li>
-        <li>
-          <strong>median_income</strong>: Median household income in
-          inflation-adjusted dollars.
-        </li>
-        <li>
-          <strong>IFLD_EALT_weighted</strong>: FEMA National Risk Index Expected
-          Annual Loss (EAL) estimate for flood risk, weighted and aggregated to
-          the town level.
-        </li>
-        <li>
-          <strong>EAL_per_capita</strong>: Expected annual flood loss divided by
-          town population (USD/person).
-        </li>
-      </ul>
-
-      <h4>Raw Index Variables</h4>
+      <h3>Vulnerability composite</h3>
       <p>
-        These variables are direct outputs of the ranking/index models prior to
-        additional scaling.
+        <code>vulnerability</code>, <code>vulnerability_rank</code>,
+        <code>vulnerability_rel</code> — composite (percentile‑rank mean of
+        poverty, elderly, no‑vehicle) used in the vulnerability choropleth and
+        as part of need.
       </p>
 
-      <h5>Risk Indices</h5>
-      <ul>
-        <li>
-          <strong>risk_eal</strong>: Flood risk index derived from FEMA Expected
-          Annual Loss (<strong>IFLD_EALT_weighted</strong>).
-        </li>
-        <li>
-          <strong>risk_eal_per_capita</strong>: Flood risk index derived from
-          Expected Annual Loss normalized by population.
-        </li>
-        <li>
-          <strong>risk_nri</strong>: Flood risk index derived from FEMA National
-          Risk Index composite risk score.
-        </li>
-      </ul>
-
-      <h5>Need Indices</h5>
-      <p>Combined measures of physical flood risk and social vulnerability.</p>
-      <ul>
-        <li>
-          <strong>need_eal</strong>: Need index combining EAL flood risk with
-          vulnerability indicators.
-        </li>
-        <li>
-          <strong>need_eal_per_capita</strong>: Need index combining per-capita
-          EAL risk with vulnerability indicators.
-        </li>
-        <li>
-          <strong>need_nri</strong>: Need index combining FEMA National Risk
-          Index risk score with vulnerability indicators.
-        </li>
-      </ul>
-
-      <h4>Funding Gap Indices</h4>
+      <h3>Modeled indices (per‑model naming convention)</h3>
       <p>
-        Positive values indicate towns receiving less funding relative to
-        modeled need; negative values indicate comparatively higher funding.
+        For each model suffix (examples used in export: <code>eal</code>,
+        <code>eal_per_capita</code>, <code>nri</code>) the dashboard expects the
+        following patterns:
       </p>
       <ul>
-        <li><strong>gap_eal</strong>: Funding gap based on the EAL model.</li>
+        <li><code>risk_{model}</code> — raw (0–1) risk index for the model.</li>
         <li>
-          <strong>gap_eal_per_capita</strong>: Funding gap based on the
-          per-capita EAL model.
+          <code>risk_rank_{model}</code> — percentile rank (0–1) of the risk
+          index.
         </li>
         <li>
-          <strong>gap_nri</strong>: Funding gap based on the FEMA National Risk
-          Index model.
+          <code>risk_{model}_rel</code> — relative-to-state risk (centered) used
+          to label “above/below state average.”
+        </li>
+        <li>
+          <code>need_{model}</code>, <code>need_rank_{model}</code>,
+          <code>need_{model}_rel</code> — need index, rank, and relative metric.
+        </li>
+        <li>
+          <code>gap_{model}</code>, <code>gap_rank_{model}</code>,
+          <code>gap_{model}_rel</code> — funding gap (need − funding), its rank,
+          and relative gap scaled to mean absolute gap.
+        </li>
+        <li>
+          <code>quadrant_{model}</code> — categorical quadrant for need vs
+          funding (<code>zero_funding</code>, <code>underfunded</code>,
+          <code>aligned</code>, <code>overfunded</code>,
+          <code>low_priority</code>).
         </li>
       </ul>
 
-      <h4>Funding and Claims Variables</h4>
+      <h3>Funding and NFIP fields</h3>
       <ul>
         <li>
-          <strong>funding_total</strong>: Total FEMA mitigation funding
-          obligated to the town (inflation-adjusted USD).
+          <code>funding_total</code>: Total FEMA mitigation funding obligated to
+          the town (inflation‑adjusted).
         </li>
         <li>
-          <strong>funding_per_capita</strong>: FEMA mitigation funding
-          normalized by population (USD/person).
+          <code>funding_per_capita</code>: Funding / population (USD/person).
         </li>
         <li>
-          <strong>claims_paid_per_capita</strong>: NFIP claims paid normalized
-          by population (USD/person).
+          <code>funding_rank</code>, <code>funding_rel</code>: Percentile rank
+          and log‑based relative funding metric.
+        </li>
+        <li>
+          <code>claims_paid_per_capita</code>, <code>claims_rank</code>,
+          <code>claims_rel</code>: NFIP claims per person plus rank and relative
+          metric.
         </li>
       </ul>
 
-      <h4>Vulnerability Index</h4>
-      <ul>
-        <li>
-          <strong>vulnerability</strong>: Composite social vulnerability index
-          derived from the percentile-ranked components:
-          <ul>
-            <li>poverty rate</li>
-            <li>elderly population share</li>
-            <li>households without vehicles</li>
-          </ul>
-        </li>
-      </ul>
-      <p>All component variables are percentile-ranked before averaging.</p>
-
-      <h4>Relative-to-State Metrics</h4>
+      <h3>State summary row</h3>
       <p>
-        These variables are scaled relative to the statewide average to support
-        choropleth visualization and intuitive interpretation in the dashboard.
-      </p>
-      <p>Values are centered around <strong>0</strong>:</p>
-      <ul>
-        <li><code>0</code> = approximately statewide average</li>
-        <li>positive values = above statewide average</li>
-        <li>negative values = below statewide average</li>
-      </ul>
-
-      <h5>Relative Risk Metrics</h5>
-      <ul>
-        <li><strong>risk_eal_rel</strong></li>
-        <li><strong>risk_eal_per_capita_rel</strong></li>
-        <li><strong>risk_nri_rel</strong></li>
-      </ul>
-
-      <h5>Relative Need Metrics</h5>
-      <ul>
-        <li><strong>need_eal_rel</strong></li>
-        <li><strong>need_eal_per_capita_rel</strong></li>
-        <li><strong>need_nri_rel</strong></li>
-      </ul>
-
-      <h5>Relative Funding Gap Metrics</h5>
-      <p>
-        Gap variables are scaled by mean absolute gap magnitude rather than
-        statewide mean because funding gaps are inherently zero-centered.
-      </p>
-      <ul>
-        <li><strong>gap_eal_rel</strong></li>
-        <li><strong>gap_eal_per_capita_rel</strong></li>
-        <li><strong>gap_nri_rel</strong></li>
-      </ul>
-      <p><strong>Interpretation:</strong></p>
-      <ul>
-        <li>positive values = more underfunded relative to modeled need</li>
-        <li>negative values = more funded relative to modeled need</li>
-        <li>magnitude reflects deviation from a “typical” funding mismatch</li>
-      </ul>
-
-      <h5>Relative Funding / Claims / Vulnerability Metrics</h5>
-      <ul>
-        <li>
-          <strong>funding_rel</strong>: Log-scaled funding relative to statewide
-          average funding.
-        </li>
-        <li>
-          <strong>claims_rel</strong>: Log-scaled NFIP claims relative to
-          statewide average claims.
-        </li>
-        <li>
-          <strong>vulnerability_rel</strong>: Vulnerability index relative to
-          statewide average vulnerability.
-        </li>
-      </ul>
-
-      <h4>Rank Variables</h4>
-      <p>All rank variables are percentile ranks scaled from 0–1.</p>
-      <p>General interpretation:</p>
-      <ul>
-        <li><code>1.0</code> = highest / worst / most extreme value</li>
-        <li><code>0.0</code> = lowest value</li>
-      </ul>
-
-      <h5>Funding and Claims Ranks</h5>
-      <ul>
-        <li>
-          <strong>funding_rank</strong>: Relative ranking of FEMA mitigation
-          funding per capita.
-        </li>
-        <li>
-          <strong>claims_rank</strong>: Relative ranking of NFIP claims paid per
-          capita.
-        </li>
-        <li>
-          <strong>vulnerability_rank</strong>: Relative ranking of composite
-          vulnerability.
-        </li>
-      </ul>
-
-      <h5>Risk Ranks</h5>
-      <ul>
-        <li><strong>risk_rank_eal</strong></li>
-        <li><strong>risk_rank_eal_per_capita</strong></li>
-        <li><strong>risk_rank_nri</strong></li>
-      </ul>
-
-      <h5>Need Ranks</h5>
-      <ul>
-        <li><strong>need_rank_eal</strong></li>
-        <li><strong>need_rank_eal_per_capita</strong></li>
-        <li><strong>need_rank_nri</strong></li>
-      </ul>
-
-      <h5>Funding Gap Ranks</h5>
-      <p>
-        Higher values indicate towns more underfunded relative to modeled need.
-      </p>
-      <ul>
-        <li><strong>gap_rank_eal</strong></li>
-        <li><strong>gap_rank_eal_per_capita</strong></li>
-        <li><strong>gap_rank_nri</strong></li>
-      </ul>
-
-      <h4>Quadrant Classification Variables</h4>
-      <p>
-        Categorical classifications assigning towns into need/funding
-        relationship groups for dashboard visualizations.
+        The export appends a synthetic
+        <code>town_name = "State of Vermont"</code> row populated with
+        population‑weighted averages (and totals where appropriate) so the
+        dashboard can show statewide comparisons without extra aggregation.
       </p>
 
-      <h5>Quadrant Categories</h5>
+      <h3>Provenance &amp; Notes</h3>
       <ul>
         <li>
-          <strong>zero_funding</strong>: Town received no FEMA mitigation
-          funding.
+          Export datasets, field definitions, and backend schemas are documented
+          in the
+          <a
+            href="https://github.com/johbry17/Floodlines"
+            target="_blank"
+            rel="noopener"
+            >project repository</a
+          >.
         </li>
         <li>
-          <strong>underfunded</strong>: High modeled need and comparatively low
-          funding.
+          Relative metrics are generally centered as
+          <code>(x / x̄) − 1</code>; gap metrics are scaled by mean absolute gap
+          to preserve sign and interpretability.
         </li>
         <li>
-          <strong>aligned</strong>: High modeled need and comparatively high
-          funding.
-        </li>
-        <li>
-          <strong>overfunded</strong>: Low modeled need and comparatively high
-          funding.
-        </li>
-        <li>
-          <strong>low_priority</strong>: Low modeled need and comparatively low
-          funding.
+          Percentile ranks (<code>rank(pct=True)</code>) are the canonical
+          comparison metric used throughout the dashboard.
         </li>
       </ul>
-
-      <h5>Model-Specific Quadrants</h5>
-      <ul>
-        <li>
-          <strong>quadrant_eal</strong>: Quadrant classification using the EAL
-          model.
-        </li>
-        <li>
-          <strong>quadrant_eal_per_capita</strong>: Quadrant classification
-          using the per-capita EAL model.
-        </li>
-        <li>
-          <strong>quadrant_nri</strong>: Quadrant classification using the FEMA
-          National Risk Index model.
-        </li>
-      </ul>
-
-      <h4>Statewide Summary Row</h4>
-      <p>The exported CSV includes an appended synthetic summary row:</p>
-      <ul>
-        <li><strong>town_name</strong> = "State of Vermont"</li>
-      </ul>
-      <p>
-        This row contains statewide aggregate metrics used as dashboard
-        reference values.
-      </p>
-
-      <h5>Statewide Calculations</h5>
-      <p>Population-weighted averages are used for:</p>
-      <ul>
-        <li>risk</li>
-        <li>need</li>
-        <li>vulnerability</li>
-        <li>demographic indicators</li>
-        <li>per-capita metrics</li>
-      </ul>
-      <p>Total sums are used for:</p>
-      <ul>
-        <li>population</li>
-        <li>FEMA funding</li>
-        <li>Expected Annual Loss</li>
-      </ul>
-      <p>
-        Rank values represent the percentile location of the statewide average
-        within the distribution of Vermont towns.
-      </p>
-
-      <h4>Index Construction Notes</h4>
-      <h5>Rank Normalization</h5>
-      <p>
-        All index components are normalized using percentile ranks prior to
-        aggregation:
-      </p>
-      <pre><code>rank(pct=True)</code></pre>
-      <p>This approach:</p>
-      <ul>
-        <li>reduces sensitivity to extreme outliers</li>
-        <li>preserves ordinal relationships</li>
-        <li>
-          allows variables with different units and distributions to be combined
-        </li>
-      </ul>
-
-      <h5>Need Index Formula</h5>
-      <p>Need indices combine normalized risk and vulnerability components:</p>
-      <pre><code>Need Index = (Risk Index + Vulnerability Index) / n_components</code></pre>
-      <p>
-        Where <code>n_components</code> is the count of components combined for
-        the model specification.
-      </p>
-
-      <h5>Funding Gap Formula</h5>
-      <p>Funding gaps compare modeled need against normalized funding:</p>
-      <pre><code>Gap Index = Need Index - Funding Rank</code></pre>
-      <p>Positive values indicate relative underfunding.</p>
-
-      <h5>Relative Scaling Formula</h5>
-      <p>Most “relative” variables are scaled around the statewide mean:</p>
-      <pre><code>Relative Value = (x / x̄) - 1</code></pre>
     </div>
 
     <!-- Footer -->
