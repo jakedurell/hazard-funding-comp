@@ -102,25 +102,25 @@ Key findings:
 
 ## Gallery
 
-![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png) 
+![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
 *All Vermont towns classified into funding quadrants (high/low funidng, high/low need, zero-funding)*  
 
-![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png) 
+![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
 *Rank-based composite of flood exposure and social vulnerability, with river corridor overlay*  
 
-![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita.png) 
+![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita.png)  
 *Towns where need substantially exceeds FEMA HMA investment, highlighting the most underserved communities*  
 
-![Scatter plot — Need vs. Funding](./resources/images/scatter_eal_per_capita.png) 
+![Scatter plot — Need vs. Funding](./resources/images/scatter_eal_per_capita.png)  
 *Loose cloud confirming weak alignment between structural need and federal mitigation dollars*  
 
-![Town detail panel](./resources/images/stats_card.png) 
+![Town detail panel](./resources/images/stats_card.png)  
 *Per-town statistics, percentile rankings, and quadrant classification for a selected community*  
 
-![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita.png) 
+![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita.png)  
 *Same map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank*  
 
-![NFIP claims overlay](./resources/images/choropleth_claims.png) 
+![NFIP claims overlay](./resources/images/choropleth_claims.png)  
 *Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest*  
 
 ## Data & Methodology
