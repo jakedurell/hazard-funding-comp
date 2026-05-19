@@ -39,7 +39,7 @@ Across Vermont, the pattern repeats.
 
 [PHOTO: Aerial damage from Hurricane Irene, 2011 — Vermont road washout or bridge collapse]
 
-On August 28, 2011, Hurricane Irene moved up the eastern seaboard and stalled over Vermont. That storm became the most destructive natural disaster in the state's modern history. Rivers jumped their banks across all fourteen counties. Roads dissolved. Bridges collapsed. Seven Vermonters died. Entire downtowns in Waterbury, Brattleboro, and Rochester went underwater. The state estimated damages at [nearly $750 million](https://vtdigger.org/2024/06/26/vermont-flood-anniversaries-once-brought-revelry-and-relief-this-summer-will-be-different/)].
+On August 28, 2011, Hurricane Irene moved up the eastern seaboard and stalled over Vermont. That storm became the most destructive natural disaster in the state's modern history. Rivers jumped their banks across all fourteen counties. Roads dissolved. Bridges collapsed. Seven Vermonters died. Entire downtowns in Waterbury, Brattleboro, and Rochester went underwater. The state estimated damages at [nearly $750 million](https://vtdigger.org/2024/06/26/vermont-flood-anniversaries-once-brought-revelry-and-relief-this-summer-will-be-different/).
 
 Recovery took years. Federal money eventually came, for infrastructure repairs, for buyouts of the most flood-prone properties, for the slow work of making communities more resilient.
 
