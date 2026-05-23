@@ -4,11 +4,13 @@ The way institutions measure risk determines who gets protection. Are simple mod
 
 ---
 
-Imagine a picturesque Vermont town with a river running through it, past the quaint shops, old mills, and covered bridges. A waterway that looks ordinary on a map but, in heavy rain, returns to familiar low yards and crossings. Bennington fits that pattern: its river corridors and built edges show up repeatedly in exposure datasets. Yet the federal Hazard Mitigation Assistance ledger records little or no HMA funding for the town.
+Imagine a picturesque Vermont town with a river running through it, past the quaint shops, old mills, and covered bridges. A waterway that looks ordinary on a map but, in heavy rain, returns to familiar low yards and crossings. Bennington fits that pattern: its river corridors and built edges show up repeatedly in exposure datasets. Yet the federal Hazard Mitigation Assistance (HMA) ledger records little or no HMA funding for the town.
 
 Picture the opposite corner of the state: Newport City, nestling the shore of Lake Memphremagog, with an older and poorer population and a high vulnerability score. Like Bennington, Newport’s record shows little mitigation funding. Real places where physical exposure meets social vulnerability, and where funding outcomes feel unexpectedly absent.
 
-This analysis is a prototype of a more statistically complex analysis, a compact, readable index designed to probe a policy question that stretches far beyond Vermont: how much precision do decision‑makers need to act? Not as much as you might think: you do not need perfect models to improve outcomes; you need usable indicators paired with smarter administration.
+This analysis is a prototype of a more statistically complex analysis, a compact, readable index designed to probe a policy question that stretches far beyond Vermont: how much precision do decision‑makers need to act? Not as much as you might think: you do not need perfect models to improve outcomes; you need usable indicators paired with smarter administration. In the Vermont case, funding tracks past loss more than forward-looking need; the index helps correct that.
+
+> Need = Risk + Vulnerability
 
 ---
 

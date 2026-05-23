@@ -154,7 +154,7 @@ body {
 }
 
 .dashboard-header h1 {
-  font-size: 2.1em;
+  font-size: 3.1em;
   font-weight: 700;
   color: #1a237e;
   margin-bottom: 0.15em;
@@ -162,7 +162,7 @@ body {
 }
 
 .dashboard-header h2 {
-  font-size: 1.35em;
+  font-size: 1.65em;
   font-weight: 500;
   color: #444;
   margin-bottom: 0.3em;
@@ -170,14 +170,14 @@ body {
 }
 
 .dashboard-subtitle {
-  font-size: 1em;
+  font-size: 1.2em;
   color: #666;
   margin-bottom: 0.4em;
   font-weight: 400;
 }
 
 .dashboard-date {
-  font-size: 0.9em;
+  font-size: 1em;
   color: #888;
   margin-bottom: 0.2em;
 }
@@ -192,7 +192,7 @@ body {
   padding: 8px 18px;
   border: 1.5px solid #222;
   border-radius: 999px;
-  font-size: 1.35rem;
+  font-size: 1.85rem;
   letter-spacing: 0.3px;
   text-decoration: none;
   color: #222;
@@ -1213,6 +1213,123 @@ body {
   line-height: 1.6;
 }
 
+.article {
+  max-width: 900px;
+  margin: 1.5rem auto 3rem;
+  padding: 0 12px;
+  color: #333333;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.article h2 {
+  font-size: 1.85rem;
+  font-weight: 600;
+  color: #444;
+  margin-top: 1.25rem;
+  margin-bottom: 0.6rem;
+}
+
+.article h3 {
+  font-size: 1.25rem;
+  color: #405d8c;
+  font-weight: 600;
+  margin-top: 0.9rem;
+}
+
+.article p {
+  color: #444;
+  margin-bottom: 0.9rem;
+}
+
+.article .indent-block {
+  /* Slight, responsive left indent for grouped headings + paragraphs */
+  padding-left: 1.25rem; /* ~20px */
+  margin-left: 0;
+  max-width: calc(100% - 1.25rem);
+}
+
+@media (max-width: 800px) {
+  .article .indent-block {
+    padding-left: 0.8rem; /* reduce indent on small screens */
+  }
+}
+.article hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.25rem 0;
+}
+
+.article blockquote {
+  margin: 1rem auto; /* centers the block */
+  max-width: 680px; /* limits width on wide screens */
+  width: 90%; /* responsive shrink on small screens */
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  border-left: 4px solid #b0b6c3;
+  background: #f7fafd;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+@media (min-width: 900px) {
+  .article blockquote {
+    width: 70%;
+  } /* narrower on large screens */
+}
+.article ul,
+.article ol {
+  margin-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0.85rem auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.article figure {
+  margin: 1rem 0;
+}
+
+.article figcaption {
+  font-size: 0.9rem;
+  color: #777;
+  text-align: center;
+  margin-top: 0.4rem;
+}
+
+.article .byline {
+  color: #666;
+  font-size: 0.95rem;
+  margin-top: 1.25rem;
+  text-align: center;
+  font-style: italic;
+}
+
+.article a {
+  color: #0085a1;
+  text-decoration: underline;
+}
+
+.article a:hover {
+  color: #00a8cc;
+  text-decoration: none;
+}
+
+@media (max-width: 800px) {
+  .article {
+    padding: 0 16px;
+  }
+  .article h1 {
+    font-size: 1.8rem;
+  }
+}
 /* Footer styles */
 .site-footer {
   margin-top: 2em;
