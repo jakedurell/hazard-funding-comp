@@ -672,6 +672,7 @@ body {
 }
 
 #model-selector-group,
+.model-selector-group,
 .model-selector-group-secondary {
   display: flex;
   justify-content: center;
@@ -685,6 +686,7 @@ body {
   gap: 0;
 }
 #model-selector-group label,
+.model-selector-group label,
 .model-selector-group-secondary label {
   margin: 0 1px;
   padding: 0;
@@ -697,21 +699,25 @@ body {
   padding: 4px 10px;
   min-width: 60px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, opacity 0.2s ease;
 }
 #model-selector-group label input[type=radio],
+.model-selector-group label input[type=radio],
 .model-selector-group-secondary label input[type=radio] {
   position: absolute;
   clip: rect(0, 0, 0, 0);
   pointer-events: none;
 }
 #model-selector-group label:hover, #model-selector-group label:focus,
+.model-selector-group label:hover,
+.model-selector-group label:focus,
 .model-selector-group-secondary label:hover,
 .model-selector-group-secondary label:focus {
   background: #e0e0e0;
   color: #333;
 }
 #model-selector-group label.active,
+.model-selector-group label.active,
 .model-selector-group-secondary label.active {
   background: #e0e0e0;
   color: #222;
@@ -1329,6 +1335,116 @@ body {
   }
   .article h1 {
     font-size: 1.8rem;
+  }
+}
+/* Article model image crossfade and inline control */
+.model-switcher {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin: 0 auto 0.6em auto;
+}
+
+.model-switcher .model-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 360ms ease;
+  pointer-events: none;
+}
+
+.model-switcher .model-img.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.article-model-control {
+  position: relative;
+  text-align: center;
+  margin: 1.2em auto;
+  max-width: 780px;
+  transition: transform 220ms ease, opacity 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+.article-model-control .model-controls-label {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+.article-model-control .btn-group .btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+}
+.article-model-control .btn-group .btn.active {
+  background: #e0e0e0;
+  border-bottom: 2px solid #0085a1;
+  font-weight: 600;
+}
+.article-model-control .mini-active-model {
+  display: none;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 0.95em;
+}
+.article-model-control.sticky {
+  position: fixed;
+  top: 70px;
+  right: 18px;
+  z-index: 1200;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  padding: 8px 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+@media (max-width: 900px) {
+  .article-model-control.sticky {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+  }
+}
+.article-model-control.sticky:hover, .article-model-control.sticky:focus-within {
+  transform: scale(1);
+  opacity: 1;
+}
+.article-model-control.sticky.condensed {
+  transform: scale(0.92);
+  opacity: 0.72;
+}
+.article-model-control.sticky.condensed .model-controls-label,
+.article-model-control.sticky.condensed .model-controls-sub {
+  display: none;
+}
+.article-model-control.sticky.condensed .btn-group .btn:not(.active) {
+  display: none;
+}
+.article-model-control.sticky.condensed .mini-active-model {
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .article-model-control.sticky.condensed {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .article-model-control.sticky.condensed .model-controls-label,
+  .article-model-control.sticky.condensed .model-controls-sub {
+    display: block !important;
+  }
+  .article-model-control.sticky.condensed .btn-group .btn:not(.active) {
+    display: inline-block !important;
+  }
+  .article-model-control.sticky.condensed .mini-active-model {
+    display: none !important;
   }
 }
 /* Footer styles */

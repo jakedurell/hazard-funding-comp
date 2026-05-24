@@ -301,16 +301,65 @@
       </p>
 
       <figure id="fig-need-choropleth" class="figure">
-        <img
-          src="./static/images/choropleth_need_eal_per_capita.png"
-          alt="Map of Vermont showing the need index by town, with hotspots in river corridors and the Northeast Kingdom"
-        />
+        <div class="model-switcher">
+          <img
+            class="model-img model-eal_per_capita visible"
+            src="./static/images/choropleth_need_eal_per_capita.png"
+            alt="Map of Vermont showing the need index by town, with hotspots in river corridors and the Northeast Kingdom"
+          />
+          <img
+            class="model-img model-eal"
+            src="./static/images/choropleth_need_eal.png"
+            alt="Map of Vermont showing the need index by town (total risk model)"
+          />
+          <img
+            class="model-img model-nri"
+            src="./static/images/choropleth_need_nri.png"
+            alt="Map of Vermont showing the need index by town (FEMA NRI model)"
+          />
+        </div>
         <figcaption>
           Need index (risk + vulnerability) by town, shown as percentile ranks;
           hotspots appear along river corridors, in town centers, and parts of
           the Northeast Kingdom. Source: Floodlines analysis.
         </figcaption>
       </figure>
+
+      <!-- Inline model control -->
+      <div class="article-model-control" id="article-model-control">
+        <div
+          id="article-mini-model"
+          class="mini-active-model"
+          aria-hidden="true"
+        ></div>
+        <!-- <div class="model-controls-label">Risk Model:</div> -->
+        <div class="model-controls-sub">
+          Switch models to see how the interpretation changes.
+        </div>
+        <div
+          id="article-model-selector"
+          class="btn-group btn-group-toggle model-selector-group"
+          role="radiogroup"
+        >
+          <label class="btn active" data-model="eal_per_capita">
+            <input
+              type="radio"
+              name="article-model"
+              autocomplete="off"
+              checked
+            />
+            Risk per Person
+          </label>
+          <label class="btn" data-model="eal">
+            <input type="radio" name="article-model" autocomplete="off" /> Total
+            Risk
+          </label>
+          <label class="btn" data-model="nri">
+            <input type="radio" name="article-model" autocomplete="off" /> FEMA
+            Risk Index
+          </label>
+        </div>
+      </div>
 
       <p>
         Now layer on funding. The maps diverge. Towns with large HMA sums often
@@ -321,10 +370,23 @@
       </p>
 
       <figure id="fig-funding-gap-choropleth" class="figure">
-        <img
-          src="./static/images/choropleth_gap_eal_per_capita_rel.png"
-          alt="Map of Vermont showing the gap between need and funding, with many high-need towns showing little or no funding"
-        />
+        <div class="model-switcher">
+          <img
+            class="model-img model-eal_per_capita visible"
+            src="./static/images/choropleth_gap_eal_per_capita_rel.png"
+            alt="Map of Vermont showing the gap between need and funding, with many high-need towns showing little or no funding"
+          />
+          <img
+            class="model-img model-eal"
+            src="./static/images/choropleth_gap_eal_rel.png"
+            alt="Map of Vermont showing the funding gap under the total risk model"
+          />
+          <img
+            class="model-img model-nri"
+            src="./static/images/choropleth_gap_nri_rel.png"
+            alt="Map of Vermont showing the funding gap under the FEMA NRI model"
+          />
+        </div>
         <figcaption>
           Funding gap map (need percentile minus funding percentile): areas with
           higher modeled need than funding are highlighted; many high-need towns
@@ -344,10 +406,37 @@
       </p>
 
       <figure id="fig-need-funding-scatter" class="figure">
-        <img
-          src="./static/images/scatter_eal_per_capita.png"
-          alt="Scatterplot showing the weak correlation between need rank and funding rank, with a dispersed cloud of points"
-        />
+        <div id="plot-title" class="plot-title" style="display: none">
+          Flood Mitigation Funding vs. Relative Need
+        </div>
+        <div id="plot-captions" class="plot-captions">
+          <div class="plot-caption" id="caption-eal">
+            <h3>Model: Total Risk (Expected Annual Loss)</h3>
+            <p>
+              Funding is only weakly correlated with total expected flood loss.
+              A few high-loss towns attract significant grants, but many
+              high-need towns receive little or nothing.
+            </p>
+          </div>
+          <div class="plot-caption" id="caption-eal-per-capita">
+            <h3>Model: Risk per Person (Expected Annual Loss per Capita)</h3>
+            <p>
+              Adjusting for population reshuffles the map. Smaller,
+              high-exposure towns rise in need, but their funding levels rarely
+              follow. Switching to this view is where priorities diverge most
+              sharply.
+            </p>
+          </div>
+          <div class="plot-caption" id="caption-nri">
+            <h3>FEMA National Risk Index</h3>
+            <p>
+              FEMA's own composite risk benchmark shows similar patterns.
+              Funding appears driven more by where damage has already occurred
+              than by where risk is currently greatest.
+            </p>
+          </div>
+        </div>
+        <div id="plot-container"></div>
         <figcaption>
           Scatterplot of town-level need rank (x) versus funding rank (y); the
           points form a dispersed cloud without an obvious linear relationship.
@@ -365,10 +454,23 @@
       </p>
 
       <figure id="fig-quadrant-choropleth" class="figure">
-        <img
-          src="./static/images/choropleth_quadrant_eal_per_capita.png"
-          alt="Quadrant chart categorizing towns by need and funding, with many high-need towns in the underfunded and zero-funded quadrants"
-        />
+        <div class="model-switcher">
+          <img
+            class="model-img model-eal_per_capita visible"
+            src="./static/images/choropleth_quadrant_eal_per_capita.png"
+            alt="Quadrant chart categorizing towns by need and funding, with many high-need towns in the underfunded and zero-funded quadrants"
+          />
+          <img
+            class="model-img model-eal"
+            src="./static/images/choropleth_quadrant_eal.png"
+            alt="Quadrant chart categorizing towns by need and funding (total risk model)"
+          />
+          <img
+            class="model-img model-nri"
+            src="./static/images/choropleth_quadrant_nri.png"
+            alt="Quadrant chart categorizing towns by need and funding (FEMA NRI model)"
+          />
+        </div>
         <figcaption>
           Quadrant classification of towns by need and funding (aligned,
           underfunded, overfunded, low priority, zero-funded); many high-need
@@ -560,6 +662,13 @@
         yearElement.textContent = new Date().getFullYear();
       }
     </script>
+
+    <!-- Article-specific scripts: D3, config, colors, plots, and article glue -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./static/js/config.js"></script>
+    <script src="./static/js/colors.js"></script>
+    <script src="./static/js/plots.js"></script>
+    <script src="./static/js/article.js"></script>
 
     <script src="./static/js/hamburger.js"></script>
   </body>
