@@ -86,3 +86,4 @@ const quadrantSummaries = {
 
 // default map view for Vermont
 const vtDefaultView = { center: [43.75, -72.7], zoom: 8 };
+// const vtDefaultView = { center: [43.9, -72.7], zoom: 8.5 };

@@ -48,11 +48,49 @@ let _lockedPopupTown = null; // tracks open town popup across overlay switches
 
 //////////////////////////////////////////////////////////
 
-// map creation
-function createMap() {
-  mapState.map = initializeMap();
+// // map creation
+// function createMap() {
+//   mapState.map = initializeMap();
 
-  // addBaseLayerControl();
+//   // initialize dropdown and choropleth layer
+//   initializeTownsDropdown();
+
+//   // event listeners for resizing
+//   window.addEventListener("resize", () => {
+//     mapState.map.invalidateSize();
+//   });
+
+//   // resize map to ensure it loads correctly
+//   mapState.map.invalidateSize();
+
+//   // set model scheme to none initially
+//   mapState.model = "eal_per_capita";
+
+//   // add river corridors tier 1 before choropleth so it renders beneath it
+//   mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
+//     riverCorridors,
+//     1,
+//   );
+//   mapState.riverCorridorsLayer.addTo(mapState.map);
+
+//   // set initial choropleth metric, add layer to map, update dashboard components
+//   metricEngine.baseMetric = "gap";
+//   metricEngine.model = "eal_per_capita";
+//   mapState.choroplethLayer.addTo(mapState.map);
+//   updateDashboard();
+
+//   // activate quadrant view as the default overlay
+//   toggleQuadrantLayer();
+
+//   // setup UI control event listeners
+//   initializeUIControls();
+// }
+
+// map creation - with technical debt from adding export mode on top of existing interactive mode —
+// export mode checks for window.__EXPORT_CONFIG to override defaults and skip UI setup
+function createMap() {
+  ///////// CORE INITIALIZATION /////////
+  mapState.map = initializeMap();
 
   // initialize dropdown and choropleth layer
   initializeTownsDropdown();
@@ -65,27 +103,86 @@ function createMap() {
   // resize map to ensure it loads correctly
   mapState.map.invalidateSize();
 
-  // set model scheme to none initially
-  mapState.model = "eal_per_capita";
+  ////////// STATE CONFIGURATION /////////
+
+  // allow map_export_template.html to override defaults via window.__EXPORT_CONFIG
+  const exportConfig = window.__EXPORT_CONFIG || {};
+
+  // if export requests a specific center/zoom, apply it (overrides vtDefaultView)
+  if (exportConfig.center) {
+    if (exportConfig.zoom)
+      mapState.map.setView(exportConfig.center, exportConfig.zoom);
+    else mapState.map.setView(exportConfig.center);
+  } else if (exportConfig.zoom) {
+    mapState.map.setZoom(exportConfig.zoom);
+  }
+
+  // set model scheme (respect export config if present)
+  mapState.model = exportConfig.model || "eal_per_capita";
 
   // add river corridors tier 1 before choropleth so it renders beneath it
-  mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
-    riverCorridors,
-    1,
-  );
-  mapState.riverCorridorsLayer.addTo(mapState.map);
+  // skip when exporting and the export requests no river corridors
+  if (!exportConfig.noRiverCorridors) {
+    mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
+      riverCorridors,
+      1,
+    );
+    mapState.riverCorridorsLayer.addTo(mapState.map);
+  }
 
-  // set initial choropleth metric, add layer to map, update dashboard components
-  metricEngine.baseMetric = "gap";
-  metricEngine.model = "eal_per_capita";
+  // set initial choropleth metric/model (use export config when provided)
+  metricEngine.baseMetric = exportConfig.baseMetric || "gap";
+  metricEngine.model = exportConfig.model || "eal_per_capita";
+
+  // when exporting, set relative mode if requested
+  if (exportConfig.isRelative) {
+    mapState.isRelative = true;
+    metricEngine.isRelative = true;
+  }
+
+  // add choropleth layer to map
   mapState.choroplethLayer.addTo(mapState.map);
+
+  // set exportConfig (overlay or choropleth baseMetric) or default to quadrant view as the overlay
+  const startOverlay =
+    exportConfig.overlay ||
+    baseToOverlay[metricEngine.baseMetric] ||
+    "Quadrants";
+  mapState._activeOverlay = startOverlay;
+  // activate overlay (default to quadrant view)
+  handleOverlaySelection(startOverlay);
+
+  // update dashboard components
   updateDashboard();
 
-  // activate quadrant view as the default overlay
-  toggleQuadrantLayer();
+  ////////// RUNTIME MODE (or export mode) /////////
 
-  // setup UI control event listeners
-  initializeUIControls();
+  // default mode: setup UI control event listeners
+  if (!exportConfig.exportMode) {
+    initializeUIControls();
+  } else {
+    // export mode: wait for tiles/legend to render then signal readiness
+    try {
+      let pendingTiles = 0;
+      const baseTile = baseLayers.Satellite;
+      if (baseTile && baseTile.on) {
+        baseTile.on("tileloadstart", () => {
+          pendingTiles++;
+        });
+        baseTile.on("tileload tileerror", () => {
+          pendingTiles = Math.max(0, pendingTiles - 1);
+          if (pendingTiles === 0)
+            setTimeout(() => (window.__EXPORT_READY = true), 300);
+        });
+      }
+      // fallback safety timeout
+      setTimeout(() => {
+        if (!window.__EXPORT_READY) window.__EXPORT_READY = true;
+      }, 15000);
+    } catch (e) {
+      window.__EXPORT_READY = true;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////
@@ -95,6 +192,7 @@ function initializeMap() {
   mapState.map = L.map("map-id", {
     center: vtDefaultView.center,
     zoom: vtDefaultView.zoom,
+    zoomSnap: 0, // enable fractional zoom levels for smoother zooming (and export_maps.js zoom override uses 8.5)
     layers: [baseLayers.Satellite],
   });
 

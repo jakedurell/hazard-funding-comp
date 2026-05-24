@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Floodlines — Export Template</title>
+
+    <!-- Styles (match dashboard) -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="./static/css/styles.css" />
+
+    <style>
+      /* Export-specific layout: fixed map size to produce reproducible screenshots */
+      body { margin: 0; padding: 0; background: #fff; }
+      .map-container { width: 1200px; height: 800px; margin: 0; }
+      #map-id { width: 1200px; height: 800px; }
+      /* hide nav and controls if present */
+      .navbar, .dashboard-header, .lede, .context-band { display: none !important; }
+      /* hide any UI controls that might be added by map code */
+      #towns-control, #choropleth-control, #choropleth-control-secondary, #choropleth-control-special, #context-controls, #model-selector-group { display: none; }
+    </style>
+  </head>
+  <body>
+
+    <!-- Export config: read query params and expose window.__EXPORT_CONFIG before map scripts run -->
+    <script>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const base = params.get("base");
+        const model = params.get("model");
+        const overlay = params.get("overlay");
+        const noRiver = params.get("noRiver") === "true" || params.get("noRiver") === "1";
+        const relative = params.get("relative") === "1" || params.get("relative") === "true";
+        const centerParam = params.get("center");
+        const zoomParam = params.get("zoom");
+        let center = null;
+        let zoom = null;
+        if (centerParam) {
+          const parts = centerParam.split(",");
+          if (parts.length === 2) {
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+            if (!isNaN(lat) && !isNaN(lng)) center = [lat, lng];
+          }
+        }
+        if (zoomParam) {
+          // allow fractional zoom (e.g., 8.5) so exporters can use decimal zooms
+          const z = Number(zoomParam);
+          if (!isNaN(z)) zoom = z;
+        }
+        window.__EXPORT_CONFIG = {
+          baseMetric: base || null,
+          model: model || null,
+          overlay: overlay || null,
+          noRiverCorridors: !!noRiver,
+          exportMode: true,
+          isRelative: !!relative,
+          center: center,
+          zoom: zoom,
+        };
+      })();
+    </script>
+
+    <div class="map-container">
+      <div id="map-id" role="application" aria-label="Map for export"></div>
+    </div>
+
+    <!-- Minimal placeholders so map code can find expected DOM nodes (hidden via CSS) -->
+    <div id="towns-control" style="display:none"></div>
+    <div id="choropleth-control" style="display:none"></div>
+    <div id="choropleth-control-secondary" style="display:none"></div>
+    <div id="choropleth-control-special" style="display:none"></div>
+    <div id="context-controls" style="display:none"></div>
+    <div id="model-selector-group" style="display:none"></div>
+
+    <!-- JavaScript: load same libraries and map code as the dashboard -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/esri-leaflet@2.3.3/dist/esri-leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+
+    <!-- Project JS (must match dashboard load order) -->
+    <script src="./static/js/config.js"></script>
+    <script src="./static/js/colors.js"></script>
+    <script src="./static/js/rankings.js"></script>
+    <script src="./static/js/plots.js"></script>
+    <script src="./static/js/statsCard.js"></script>
+    <script src="./static/js/mapLayers.js"></script>
+    <script src="./static/js/map.js"></script>
+    <script src="./static/js/app.js"></script>
+    <!-- Wait for map rendering (choropleth SVG paths + legend) and then set __EXPORT_READY -->
+    <script>
+      (function waitForMapReady() {
+        const start = Date.now();
+        const timeout = 45000; // 45s
+        const check = () => {
+          try {
+            // prefer direct DOM signal: choropleth SVG paths + legend DOM node
+            const svgPaths = document.querySelectorAll('#map-id svg path');
+            const legend = document.querySelector('.legend');
+            if (svgPaths && svgPaths.length > 8 && legend) {
+              window.__EXPORT_READY = true;
+              return;
+            }
+          } catch (e) {
+            // ignore
+          }
+          if (Date.now() - start > timeout) {
+            // fallback: give up and signal ready so exporter proceeds
+            window.__EXPORT_READY = true;
+            return;
+          }
+          setTimeout(check, 250);
+        };
+        setTimeout(check, 500);
+      })();
+    </script>
+
+    <!-- small safety note for manual use -->
+    <noscript>
+      <div style="padding:1em;font-family:sans-serif">JavaScript required to render export.</div>
+    </noscript>
+  </body>
+</html>
