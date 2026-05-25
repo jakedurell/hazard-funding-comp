@@ -144,10 +144,15 @@ function createMap() {
   mapState.choroplethLayer.addTo(mapState.map);
 
   // set exportConfig (overlay or choropleth baseMetric) or default to quadrant view as the overlay
+  // const startOverlay =
+  //   exportConfig.overlay ||
+  //   baseToOverlay[metricEngine.baseMetric] ||
+  //   "Quadrants";
   const startOverlay =
-    exportConfig.overlay ||
-    baseToOverlay[metricEngine.baseMetric] ||
-    "Quadrants";
+  exportConfig.overlay ||
+  (!exportConfig.exportMode
+    ? "Quadrants"
+    : baseToOverlay[metricEngine.baseMetric] || "Quadrants");
   mapState._activeOverlay = startOverlay;
   // activate overlay (default to quadrant view)
   handleOverlaySelection(startOverlay);
