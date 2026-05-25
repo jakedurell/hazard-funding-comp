@@ -16,17 +16,39 @@
 
     <style>
       /* Export-specific layout: fixed map size to produce reproducible screenshots */
-      body { margin: 0; padding: 0; background: #fff; }
-      .map-container { width: 1200px; height: 800px; margin: 0; }
-      #map-id { width: 1200px; height: 800px; }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #fff;
+      }
+      .map-container {
+        width: 1200px;
+        height: 800px;
+        margin: 0;
+      }
+      #map-id {
+        width: 1200px;
+        height: 800px;
+      }
       /* hide nav and controls if present */
-      .navbar, .dashboard-header, .lede, .context-band { display: none !important; }
+      .navbar,
+      .dashboard-header,
+      .lede,
+      .context-band {
+        display: none !important;
+      }
       /* hide any UI controls that might be added by map code */
-      #towns-control, #choropleth-control, #choropleth-control-secondary, #choropleth-control-special, #context-controls, #model-selector-group { display: none; }
+      #towns-control,
+      #choropleth-control,
+      #choropleth-control-secondary,
+      #choropleth-control-special,
+      #context-controls,
+      #model-selector-group {
+        display: none;
+      }
     </style>
   </head>
   <body>
-
     <!-- Export config: read query params and expose window.__EXPORT_CONFIG before map scripts run -->
     <script>
       (function () {
@@ -34,8 +56,10 @@
         const base = params.get("base");
         const model = params.get("model");
         const overlay = params.get("overlay");
-        const noRiver = params.get("noRiver") === "true" || params.get("noRiver") === "1";
-        const relative = params.get("relative") === "1" || params.get("relative") === "true";
+        const noRiver =
+          params.get("noRiver") === "true" || params.get("noRiver") === "1";
+        const relative =
+          params.get("relative") === "1" || params.get("relative") === "true";
         const centerParam = params.get("center");
         const zoomParam = params.get("zoom");
         let center = null;
@@ -71,12 +95,12 @@
     </div>
 
     <!-- Minimal placeholders so map code can find expected DOM nodes (hidden via CSS) -->
-    <div id="towns-control" style="display:none"></div>
-    <div id="choropleth-control" style="display:none"></div>
-    <div id="choropleth-control-secondary" style="display:none"></div>
-    <div id="choropleth-control-special" style="display:none"></div>
-    <div id="context-controls" style="display:none"></div>
-    <div id="model-selector-group" style="display:none"></div>
+    <div id="towns-control" style="display: none"></div>
+    <div id="choropleth-control" style="display: none"></div>
+    <div id="choropleth-control-secondary" style="display: none"></div>
+    <div id="choropleth-control-special" style="display: none"></div>
+    <div id="context-controls" style="display: none"></div>
+    <div id="model-selector-group" style="display: none"></div>
 
     <!-- JavaScript: load same libraries and map code as the dashboard -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -109,8 +133,8 @@
         const check = () => {
           try {
             // prefer direct DOM signal: choropleth SVG paths + legend DOM node
-            const svgPaths = document.querySelectorAll('#map-id svg path');
-            const legend = document.querySelector('.legend');
+            const svgPaths = document.querySelectorAll("#map-id svg path");
+            const legend = document.querySelector(".legend");
             if (svgPaths && svgPaths.length > 8 && legend) {
               window.__EXPORT_READY = true;
               return;
@@ -131,7 +155,9 @@
 
     <!-- small safety note for manual use -->
     <noscript>
-      <div style="padding:1em;font-family:sans-serif">JavaScript required to render export.</div>
+      <div style="padding: 1em; font-family: sans-serif">
+        JavaScript required to render export.
+      </div>
     </noscript>
   </body>
 </html>

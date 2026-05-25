@@ -30,10 +30,14 @@
       },
       format(metric, value) {
         if (!metric || value == null || isNaN(value)) return "";
-        if (metric.includes("funding_total")) return `$${d3.format(",.0f")(value)}`;
-        if (metric.includes("funding_per_capita")) return `$${d3.format(",.0f")(value)} pp`;
-        if (metric.includes("claims_paid_per_capita")) return `$${d3.format(",.0f")(value)} pp`;
-        if (metric.includes("_rel")) return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
+        if (metric.includes("funding_total"))
+          return `$${d3.format(",.0f")(value)}`;
+        if (metric.includes("funding_per_capita"))
+          return `$${d3.format(",.0f")(value)} pp`;
+        if (metric.includes("claims_paid_per_capita"))
+          return `$${d3.format(",.0f")(value)} pp`;
+        if (metric.includes("_rel"))
+          return `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
         if (metric.includes("rank")) return `${Math.round(value * 100)}%`;
         return d3.format(".2f")(value);
       },
@@ -47,32 +51,41 @@
     metricEngine.model = model;
     if (!metricEngine.baseMetric) metricEngine.baseMetric = "need";
 
-    // toggle stacked model images
-    document.querySelectorAll(".model-switcher .model-img").forEach((img) => {
-      if (img.classList.contains(`model-${model}`)) img.classList.add("visible");
-      else img.classList.remove("visible");
+    // toggle stacked model images per container
+    document.querySelectorAll(".model-switcher").forEach((container) => {
+      const imgs = Array.from(container.querySelectorAll(".model-img"));
+      if (!imgs.length) return;
+      // find the target image for this model and the currently visible one
+      const target = imgs.find((i) => i.classList.contains(`model-${model}`));
+      const current = imgs.find((i) => i.classList.contains("visible"));
+
+      // if target already visible, nothing to do
+      if (target && target === current) return;
+
+      // make the target visible first so it can fade in
+      if (target) target.classList.add("visible");
+
+      // remove visibility from other images on the next frame so the two overlap
+      // Use a per-container rAF handle so different model-switcher containers
+      // don't cancel each other's cleanup when toggling rapidly.
+      if (container._articleImageCleanup)
+        cancelAnimationFrame(container._articleImageCleanup);
+      container._articleImageCleanup = requestAnimationFrame(() => {
+        imgs.forEach((img) => {
+          if (img !== target) img.classList.remove("visible");
+        });
+        container._articleImageCleanup = null;
+      });
     });
 
     // update selector active state
-    document.querySelectorAll("#article-model-selector label").forEach((lbl) => {
-      if (lbl.dataset && lbl.dataset.model === model) lbl.classList.add("active");
-      else lbl.classList.remove("active");
-    });
-
-    // update small mini label for condensed sticky state
-    const mini = document.getElementById('article-mini-model');
-    if (mini) {
-      const label = (window.modelKeyToLabel && window.modelKeyToLabel[model])
-        ? window.modelKeyToLabel[model]
-        : model === 'eal_per_capita'
-        ? 'Risk per Person'
-        : model === 'eal'
-        ? 'Total Risk'
-        : model === 'nri'
-        ? 'FEMA Risk Index'
-        : model;
-      mini.textContent = `Model: ${label}`;
-    }
+    document
+      .querySelectorAll("#article-model-selector label")
+      .forEach((lbl) => {
+        if (lbl.dataset && lbl.dataset.model === model)
+          lbl.classList.add("active");
+        else lbl.classList.remove("active");
+      });
 
     if (persist) localStorage.setItem(STORAGE_KEY, model);
 
@@ -80,7 +93,7 @@
     if (typeof renderPlot === "function") {
       try {
         // use 'top' so article scatter shows full-bright dots (dashboard default)
-        renderPlot(metricEngine.baseMetric, 'top');
+        renderPlot(metricEngine.baseMetric, "top");
       } catch (e) {
         // graceful: do nothing if plots not ready
         console.warn("renderPlot failed:", e);
@@ -151,7 +164,9 @@
     if (!ctrl) return;
     _stickyControl.ctrl = ctrl;
     const sentinel = document.getElementById("fig-need-choropleth");
-    const navbar = document.querySelector('.navbar-fixed-top') || document.querySelector('.navbar');
+    const navbar =
+      document.querySelector(".navbar-fixed-top") ||
+      document.querySelector(".navbar");
 
     function computeOffsets() {
       // ensure image sizing/layout settled
@@ -159,20 +174,27 @@
         positionModelSwitchers();
       } catch (e) {}
 
-      _stickyControl.navHeight = navbar ? navbar.getBoundingClientRect().height : 0;
+      _stickyControl.navHeight = navbar
+        ? navbar.getBoundingClientRect().height
+        : 0;
 
       if (sentinel) {
         const sRect = sentinel.getBoundingClientRect();
-        _stickyControl.triggerY = sRect.top + (window.scrollY || window.pageYOffset) + sRect.height + STICKY_THRESHOLD;
+        _stickyControl.triggerY =
+          sRect.top +
+          (window.scrollY || window.pageYOffset) +
+          sRect.height +
+          STICKY_THRESHOLD;
       } else {
         const rect = ctrl.getBoundingClientRect();
-        _stickyControl.triggerY = rect.top + (window.scrollY || window.pageYOffset) + STICKY_THRESHOLD;
+        _stickyControl.triggerY =
+          rect.top + (window.scrollY || window.pageYOffset) + STICKY_THRESHOLD;
       }
     }
 
     computeOffsets();
 
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       clearTimeout(window._article_sticky_resize);
       window._article_sticky_resize = setTimeout(() => {
         computeOffsets();
@@ -180,7 +202,7 @@
       }, 160);
     });
 
-    window.addEventListener('scroll', () => {
+    window.addEventListener("scroll", () => {
       if (!_stickyControl.ticking) {
         window.requestAnimationFrame(() => {
           updateStickyState();
@@ -191,20 +213,22 @@
     });
 
     // pointer and focus interactions
-    ctrl.addEventListener('pointerenter', () => ctrl.classList.remove('condensed'));
-    ctrl.addEventListener('pointerleave', () => {
-      if (ctrl.classList.contains('sticky') && window.innerWidth > 720) ctrl.classList.add('condensed');
+    ctrl.addEventListener("pointerenter", () =>
+      ctrl.classList.remove("condensed"),
+    );
+    ctrl.addEventListener("pointerleave", () => {
+      if (ctrl.classList.contains("sticky") && window.innerWidth > 720)
+        ctrl.classList.add("condensed");
     });
-    ctrl.addEventListener('focusin', () => ctrl.classList.remove('condensed'));
-    ctrl.addEventListener('focusout', () => {
-      if (ctrl.classList.contains('sticky') && window.innerWidth > 720) ctrl.classList.add('condensed');
+    ctrl.addEventListener("focusin", () => ctrl.classList.remove("condensed"));
+    ctrl.addEventListener("focusout", () => {
+      if (ctrl.classList.contains("sticky") && window.innerWidth > 720)
+        ctrl.classList.add("condensed");
     });
 
     // touch-friendly: expand immediately on pointerdown (works for touch and mouse)
-    ctrl.addEventListener('pointerdown', () => {
-      ctrl.classList.remove('condensed');
-      const mini = document.getElementById('article-mini-model');
-      if (mini) mini.setAttribute('aria-hidden', 'true');
+    ctrl.addEventListener("pointerdown", () => {
+      ctrl.classList.remove("condensed");
     });
 
     // initial state
@@ -216,47 +240,50 @@
     if (!ctrl) return;
     const scrollY = window.scrollY || window.pageYOffset;
     const triggerY = _stickyControl.triggerY || 0;
+
     if (scrollY > triggerY) {
-      // ensure the sticky class is present
-      if (!ctrl.classList.contains('sticky')) ctrl.classList.add('sticky');
-
-      // On narrow screens we center the control using left:50% + translateX(-50%),
-      // on wider screens anchor to the right. This prevents the translate from
-      // shifting a right-anchored element half offscreen.
-      if (window.innerWidth > 720) {
-        ctrl.classList.add('condensed');
-        ctrl.style.left = 'auto';
-        ctrl.style.right = '18px';
-        ctrl.style.transform = '';
-        ctrl.style.width = '';
-      } else {
-        ctrl.classList.remove('condensed');
-        ctrl.style.left = '50%';
-        ctrl.style.right = 'auto';
-        ctrl.style.transform = 'translateX(-50%)';
-        ctrl.style.width = 'calc(100% - 40px)';
-      }
-
       // compute a safe top so the control is visible and not offscreen
-      const ctrlHeight = ctrl.offsetHeight || ctrl.getBoundingClientRect().height || 48;
+      const ctrlHeight =
+        ctrl.offsetHeight || ctrl.getBoundingClientRect().height || 48;
       const desiredTop = Math.max(8, (_stickyControl.navHeight || 0) + 8);
       const maxTop = Math.max(8, window.innerHeight - ctrlHeight - 8);
       const topPx = Math.min(desiredTop, maxTop);
-      ctrl.style.top = topPx + 'px';
+
+      // set positioning values immediately so layout is ready
+      if (window.innerWidth > 720) {
+        ctrl.style.left = "auto";
+        ctrl.style.right = "18px";
+        ctrl.style.transform = "";
+        ctrl.style.width = "";
+      } else {
+        ctrl.style.left = "50%";
+        ctrl.style.right = "auto";
+        ctrl.style.transform = "translateX(-50%)";
+        ctrl.style.width = "calc(100% - 40px)";
+      }
+      ctrl.style.top = topPx + "px";
+
+      // add sticky classes in the next frame so CSS transitions can settle-in
+      if (!ctrl.classList.contains("sticky")) {
+        requestAnimationFrame(() => {
+          ctrl.classList.add("sticky");
+          if (window.innerWidth > 720) ctrl.classList.add("condensed");
+        });
+      } else {
+        // already sticky: ensure condensed state matches viewport
+        if (window.innerWidth > 720) ctrl.classList.add("condensed");
+        else ctrl.classList.remove("condensed");
+      }
     } else {
-      if (ctrl.classList.contains('sticky')) {
-        ctrl.classList.remove('sticky', 'condensed');
-        ctrl.style.top = '';
-        ctrl.style.right = '';
-        ctrl.style.left = '';
-        ctrl.style.transform = '';
-        ctrl.style.width = '';
+      if (ctrl.classList.contains("sticky")) {
+        ctrl.classList.remove("sticky", "condensed");
+        ctrl.style.top = "";
+        ctrl.style.right = "";
+        ctrl.style.left = "";
+        ctrl.style.transform = "";
+        ctrl.style.width = "";
       }
     }
-
-    // update mini label aria state for accessibility
-    const mini = document.getElementById('article-mini-model');
-    if (mini) mini.setAttribute('aria-hidden', ctrl.classList.contains('condensed') ? 'false' : 'true');
   }
 
   // bootstrap: load town stats (if not present) then initialize visuals
@@ -264,7 +291,9 @@
     const initialModel = localStorage.getItem(STORAGE_KEY) || DEFAULT_MODEL;
 
     // preload model images then size switchers
-    const imgs = Array.from(document.querySelectorAll(".model-switcher .model-img"));
+    const imgs = Array.from(
+      document.querySelectorAll(".model-switcher .model-img"),
+    );
     if (imgs.length > 0) {
       let loaded = 0;
       imgs.forEach((img) => {

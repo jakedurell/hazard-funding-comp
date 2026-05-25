@@ -1403,7 +1403,6 @@ body {
   }
 }
 
-
 /* Article model image crossfade and inline control */
 .model-switcher {
   position: relative;
@@ -1420,6 +1419,10 @@ body {
   object-fit: contain;
   opacity: 0;
   transition: opacity 360ms ease;
+  will-change: opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
   pointer-events: none;
 }
 .model-switcher .model-img.visible {
@@ -1431,7 +1434,12 @@ body {
   text-align: center;
   margin: 1.2em auto;
   max-width: 780px;
-  transition: transform 220ms ease, opacity 220ms ease, box-shadow 220ms ease, background 220ms ease;
+  transition:
+    transform 220ms ease,
+    opacity 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+  will-change: transform, opacity;
 
   .model-controls-label {
     font-weight: 600;
@@ -1455,13 +1463,6 @@ body {
     }
   }
 
-  .mini-active-model {
-    display: none;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 6px;
-    font-size: 0.95em;
-  }
 
   &.sticky {
     position: fixed;
@@ -1469,19 +1470,29 @@ body {
     right: 18px;
     z-index: 1200;
 
-    background: rgba(255,255,255,0.92);
+    /* narrow utility width to feel like a compact control */
+    max-width: 420px;
+    width: fit-content;
+
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     backdrop-filter: blur(6px);
 
     padding: 8px 10px;
     border-radius: 10px;
 
-    box-shadow: 0 4px 18px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
+    box-shadow:
+      0 4px 18px rgba(0, 0, 0, 0.08),
+      0 1px 4px rgba(0, 0, 0, 0.06);
 
     @media (max-width: 900px) {
       left: 50%;
       right: auto;
       transform: translateX(-50%);
-      width: calc(100% - 40px);
+      /* shrink-to-fit but never exceed viewport (fallback) */
+      width: fit-content !important;
+      max-width: 90%;
+      display: inline-block;
     }
 
     &:hover,
@@ -1493,20 +1504,19 @@ body {
     &.condensed {
       transform: scale(0.92);
       opacity: 0.72;
-
       .model-controls-label,
       .model-controls-sub {
-        display: none;
+        display: block;
       }
 
       .btn-group {
         .btn:not(.active) {
-          display: none;
+          display: inline-block !important;
         }
       }
 
       .mini-active-model {
-        display: block;
+        display: none !important;
       }
     }
   }
@@ -1521,20 +1531,8 @@ body {
     .model-controls-sub {
       display: block !important;
     }
-
-    .btn-group {
-      .btn:not(.active) {
-        display: inline-block !important;
-      }
-    }
-
-    .mini-active-model {
-      display: none !important;
-    }
   }
 }
-
-
 
 /* Footer styles */
 .site-footer {

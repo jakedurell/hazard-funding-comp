@@ -1354,6 +1354,10 @@ body {
   object-fit: contain;
   opacity: 0;
   transition: opacity 360ms ease;
+  will-change: opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
   pointer-events: none;
 }
 
@@ -1368,6 +1372,7 @@ body {
   margin: 1.2em auto;
   max-width: 780px;
   transition: transform 220ms ease, opacity 220ms ease, box-shadow 220ms ease, background 220ms ease;
+  will-change: transform, opacity;
 }
 .article-model-control .model-controls-label {
   font-weight: 600;
@@ -1386,19 +1391,16 @@ body {
   border-bottom: 2px solid #0085a1;
   font-weight: 600;
 }
-.article-model-control .mini-active-model {
-  display: none;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 6px;
-  font-size: 0.95em;
-}
 .article-model-control.sticky {
   position: fixed;
   top: 70px;
   right: 18px;
   z-index: 1200;
+  /* narrow utility width to feel like a compact control */
+  max-width: 420px;
+  width: fit-content;
   background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(6px);
   padding: 8px 10px;
   border-radius: 10px;
@@ -1409,7 +1411,10 @@ body {
     left: 50%;
     right: auto;
     transform: translateX(-50%);
-    width: calc(100% - 40px);
+    /* shrink-to-fit but never exceed viewport (fallback) */
+    width: fit-content !important;
+    max-width: 90%;
+    display: inline-block;
   }
 }
 .article-model-control.sticky:hover, .article-model-control.sticky:focus-within {
@@ -1422,13 +1427,13 @@ body {
 }
 .article-model-control.sticky.condensed .model-controls-label,
 .article-model-control.sticky.condensed .model-controls-sub {
-  display: none;
+  display: block;
 }
 .article-model-control.sticky.condensed .btn-group .btn:not(.active) {
-  display: none;
+  display: inline-block !important;
 }
 .article-model-control.sticky.condensed .mini-active-model {
-  display: block;
+  display: none !important;
 }
 
 @media (max-width: 720px) {
@@ -1439,12 +1444,6 @@ body {
   .article-model-control.sticky.condensed .model-controls-label,
   .article-model-control.sticky.condensed .model-controls-sub {
     display: block !important;
-  }
-  .article-model-control.sticky.condensed .btn-group .btn:not(.active) {
-    display: inline-block !important;
-  }
-  .article-model-control.sticky.condensed .mini-active-model {
-    display: none !important;
   }
 }
 /* Footer styles */
