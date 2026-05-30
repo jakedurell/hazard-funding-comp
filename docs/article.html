@@ -325,8 +325,11 @@
         </figcaption>
       </figure>
 
-      <!-- Inline model control -->
-      <div class="article-model-control" id="article-model-control">
+      <!-- Model interactive zone: start sentinel + control -->
+      <div class="article-model-zone">
+        <div id="article-model-start-anchor" aria-hidden="true"></div>
+        <!-- Inline model control -->
+        <div class="article-model-control" id="article-model-control">
         <!-- <div class="model-controls-label">Risk Model:</div> -->
         <div class="model-controls-sub">
           Switch models to see how the interpretation changes.
@@ -473,6 +476,12 @@
           Floodlines analysis.
         </figcaption>
       </figure>
+
+      <!-- Dock placeholder for model control (visual placeholder) -->
+      <div id="article-model-dock" aria-hidden="true"></div>
+      <!-- End anchor for sticky release -->
+      <div id="article-model-end-anchor" aria-hidden="true"></div>
+      </div><!-- /.article-model-zone -->
 
       <p>
         The signal is not regionally narrow. It cuts across rural and small

@@ -78,14 +78,18 @@
       });
     });
 
-    // update selector active state
-    document
-      .querySelectorAll("#article-model-selector label")
-      .forEach((lbl) => {
-        if (lbl.dataset && lbl.dataset.model === model)
-          lbl.classList.add("active");
-        else lbl.classList.remove("active");
-      });
+    // update selector active state and sync radio inputs across any control instances
+    const selectorLabels = document.querySelectorAll(".article-model-control label[data-model]");
+    selectorLabels.forEach((lbl) => {
+      const input = lbl.querySelector("input[type=radio]");
+      if (lbl.dataset && lbl.dataset.model === model) {
+        lbl.classList.add("active");
+        if (input) input.checked = true;
+      } else {
+        lbl.classList.remove("active");
+        if (input) input.checked = false;
+      }
+    });
 
     if (persist) localStorage.setItem(STORAGE_KEY, model);
 
@@ -128,6 +132,78 @@
     });
   }
 
+  // create a non-interactive ghost of the control in the dock placeholder
+  function populateDockGhost() {
+    const dock = document.getElementById("article-model-dock");
+    const ctrl = document.getElementById("article-model-control");
+    if (!dock || !ctrl) return;
+    if (dock.dataset.populated) return;
+    try {
+      // clone inner markup but keep inputs non-interactive
+        dock.innerHTML = '<div class="article-model-control article-model-control-ghost">' + ctrl.innerHTML + "</div>";
+        // sanitize duplicate ids in the ghost and make it interactive
+        const clonedSelector = dock.querySelector('#article-model-selector');
+        if (clonedSelector) clonedSelector.id = 'article-model-selector-dock';
+    } catch (e) {
+      // fallback: simple cloneNode without events
+      const clone = ctrl.cloneNode(true);
+      dock.appendChild(clone);
+    }
+    // make ghost inputs independent and interactive, and sync their checked state
+    const model = metricEngine && metricEngine.model ? metricEngine.model : null;
+    dock.querySelectorAll('input[type=radio]').forEach((i) => {
+      // avoid native browser grouping between main control and ghost
+      i.name = 'article-model-dock';
+      i.disabled = false;
+      i.removeAttribute('aria-hidden');
+      i.tabIndex = 0;
+      // ensure label reflect current model state
+      const lbl = i.closest('label[data-model]');
+      if (lbl) {
+        if (model && lbl.dataset.model === model) {
+          lbl.classList.add('active');
+          i.checked = true;
+        } else {
+          lbl.classList.remove('active');
+          i.checked = false;
+        }
+      }
+    });
+    // make dock visible to assistive tech now that it's interactive
+    dock.removeAttribute('aria-hidden');
+    // wire up event handlers for the dock selector so it controls the article
+    const dockSelector = dock.querySelector('#article-model-selector-dock');
+    if (dockSelector) wireSelector(dockSelector);
+    dock.dataset.populated = "1";
+  }
+
+  // helper to wire a selector element with click/change handlers (idempotent)
+  function wireSelector(selectorEl) {
+    if (!selectorEl) return;
+    if (selectorEl.dataset && selectorEl.dataset.wired) return;
+    selectorEl.dataset.wired = "1";
+
+    selectorEl.addEventListener('click', (ev) => {
+      const lbl = ev.target.closest('label[data-model]');
+      if (!lbl) return;
+      const model = lbl.dataset.model;
+      setArticleModel(model, true);
+    });
+
+    selectorEl.querySelectorAll && selectorEl.querySelectorAll('input[type=radio]').forEach((inp) => {
+      inp.addEventListener('change', (ev) => {
+        const lbl = ev.target.closest('label[data-model]');
+        if (!lbl) return;
+        setArticleModel(lbl.dataset.model, true);
+      });
+    });
+  }
+
+  // helper to find the article container used for page padding
+  function getArticleElement() {
+    return document.getElementById("article-content") || document.querySelector(".article");
+  }
+
   // wire UI controls
   function wireControls() {
     const selector = document.getElementById("article-model-selector");
@@ -149,140 +225,74 @@
     });
   }
 
-  // Sticky/condensed behavior for the in-article model control
-  const _stickyControl = {
-    ctrl: null,
-    triggerY: 0,
-    navHeight: 0,
-    ticking: false,
-  };
-
-  const STICKY_THRESHOLD = 120; // px after sentinel before sticky engages
-
+  // Sticky behavior using CSS `position: sticky` plus lightweight observers
   function initStickyModelControl() {
     const ctrl = document.getElementById("article-model-control");
     if (!ctrl) return;
-    _stickyControl.ctrl = ctrl;
-    const sentinel = document.getElementById("fig-need-choropleth");
-    const navbar =
-      document.querySelector(".navbar-fixed-top") ||
-      document.querySelector(".navbar");
 
-    function computeOffsets() {
-      // ensure image sizing/layout settled
-      try {
-        positionModelSwitchers();
-      } catch (e) {}
+    const startAnchor =
+      document.getElementById("article-model-start-anchor") ||
+      document.getElementById("fig-need-choropleth");
+    const endAnchor = document.getElementById("article-model-end-anchor");
 
-      _stickyControl.navHeight = navbar
-        ? navbar.getBoundingClientRect().height
-        : 0;
+    // disconnect previous observers if present
+    if (ctrl._stickyObservers) {
+      ctrl._stickyObservers.forEach((o) => o.disconnect());
+    }
+    ctrl._stickyObservers = [];
 
-      if (sentinel) {
-        const sRect = sentinel.getBoundingClientRect();
-        _stickyControl.triggerY =
-          sRect.top +
-          (window.scrollY || window.pageYOffset) +
-          sRect.height +
-          STICKY_THRESHOLD;
+    function setFloating(on) {
+      if (on) {
+        ctrl.classList.add("is-floating");
+        // mobile padding
+        if (window.innerWidth <= 720) getArticleElement()?.classList.add("has-sticky-model");
+        getArticleElement()?.classList.add("has-floating-model");
       } else {
-        const rect = ctrl.getBoundingClientRect();
-        _stickyControl.triggerY =
-          rect.top + (window.scrollY || window.pageYOffset) + STICKY_THRESHOLD;
+        ctrl.classList.remove("is-floating");
+        getArticleElement()?.classList.remove("has-sticky-model");
+        getArticleElement()?.classList.remove("has-floating-model");
       }
     }
 
-    computeOffsets();
+    // Observe the start anchor: when it leaves the viewport, the control should float
+    if (startAnchor) {
+      const startObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+              // start anchor scrolled past -> float
+              setFloating(true);
+              ctrl.classList.remove("is-settled");
+            } else {
+              setFloating(false);
+              ctrl.classList.remove("is-settled");
+            }
+          });
+        },
+        { threshold: 0 },
+      );
+      startObs.observe(startAnchor);
+      ctrl._stickyObservers.push(startObs);
+    }
 
-    window.addEventListener("resize", () => {
-      clearTimeout(window._article_sticky_resize);
-      window._article_sticky_resize = setTimeout(() => {
-        computeOffsets();
-        updateStickyState();
-      }, 160);
-    });
-
-    window.addEventListener("scroll", () => {
-      if (!_stickyControl.ticking) {
-        window.requestAnimationFrame(() => {
-          updateStickyState();
-          _stickyControl.ticking = false;
-        });
-        _stickyControl.ticking = true;
-      }
-    });
-
-    // pointer and focus interactions
-    ctrl.addEventListener("pointerenter", () =>
-      ctrl.classList.remove("condensed"),
-    );
-    ctrl.addEventListener("pointerleave", () => {
-      if (ctrl.classList.contains("sticky") && window.innerWidth > 720)
-        ctrl.classList.add("condensed");
-    });
-    ctrl.addEventListener("focusin", () => ctrl.classList.remove("condensed"));
-    ctrl.addEventListener("focusout", () => {
-      if (ctrl.classList.contains("sticky") && window.innerWidth > 720)
-        ctrl.classList.add("condensed");
-    });
-
-    // touch-friendly: expand immediately on pointerdown (works for touch and mouse)
-    ctrl.addEventListener("pointerdown", () => {
-      ctrl.classList.remove("condensed");
-    });
-
-    // initial state
-    updateStickyState();
-  }
-
-  function updateStickyState() {
-    const ctrl = _stickyControl.ctrl;
-    if (!ctrl) return;
-    const scrollY = window.scrollY || window.pageYOffset;
-    const triggerY = _stickyControl.triggerY || 0;
-
-    if (scrollY > triggerY) {
-      // compute a safe top so the control is visible and not offscreen
-      const ctrlHeight =
-        ctrl.offsetHeight || ctrl.getBoundingClientRect().height || 48;
-      const desiredTop = Math.max(8, (_stickyControl.navHeight || 0) + 8);
-      const maxTop = Math.max(8, window.innerHeight - ctrlHeight - 8);
-      const topPx = Math.min(desiredTop, maxTop);
-
-      // set positioning values immediately so layout is ready
-      if (window.innerWidth > 720) {
-        ctrl.style.left = "auto";
-        ctrl.style.right = "18px";
-        ctrl.style.transform = "";
-        ctrl.style.width = "";
-      } else {
-        ctrl.style.left = "50%";
-        ctrl.style.right = "auto";
-        ctrl.style.transform = "translateX(-50%)";
-        ctrl.style.width = "calc(100% - 40px)";
-      }
-      ctrl.style.top = topPx + "px";
-
-      // add sticky classes in the next frame so CSS transitions can settle-in
-      if (!ctrl.classList.contains("sticky")) {
-        requestAnimationFrame(() => {
-          ctrl.classList.add("sticky");
-          if (window.innerWidth > 720) ctrl.classList.add("condensed");
-        });
-      } else {
-        // already sticky: ensure condensed state matches viewport
-        if (window.innerWidth > 720) ctrl.classList.add("condensed");
-        else ctrl.classList.remove("condensed");
-      }
-    } else {
-      if (ctrl.classList.contains("sticky")) {
-        ctrl.classList.remove("sticky", "condensed");
-        ctrl.style.top = "";
-        ctrl.style.right = "";
-        ctrl.style.left = "";
-        ctrl.style.transform = "";
-        ctrl.style.width = "";
-      }
+    // Observe the end anchor: when it intersects viewport, the control should settle
+    if (endAnchor) {
+      const endObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // reached the end anchor -> settle
+              setFloating(false);
+              ctrl.classList.add("is-settled");
+            } else {
+              ctrl.classList.remove("is-settled");
+            }
+          });
+        },
+        { threshold: 0 },
+      );
+      endObs.observe(endAnchor);
+      ctrl._stickyObservers.push(endObs);
     }
   }
 
@@ -330,15 +340,18 @@
         d3.csv("./static/resources/town_stats.csv").then((ts) => {
           window.statsRaw = ts;
           setArticleModel(initialModel, false);
+          populateDockGhost();
           initStickyModelControl();
         });
       } else {
         // no d3 available; still set model so images/captions update
         setArticleModel(initialModel, false);
+        populateDockGhost();
         initStickyModelControl();
       }
     } else {
       setArticleModel(initialModel, false);
+      populateDockGhost();
       initStickyModelControl();
     }
   }

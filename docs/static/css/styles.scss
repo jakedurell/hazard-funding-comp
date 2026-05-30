@@ -1429,8 +1429,16 @@ body {
   opacity: 1;
   pointer-events: auto;
 }
-.article-model-control {
+/* Scope for the region where the model control should stick */
+.article-model-zone {
   position: relative;
+}
+
+.article-model-control {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 72px; /* default desktop offset below navbar */
+  z-index: 1100;
   text-align: center;
   margin: 1.2em auto;
   max-width: 780px;
@@ -1440,6 +1448,12 @@ body {
     box-shadow 220ms ease,
     background 220ms ease;
   will-change: transform, opacity;
+
+  /* Inline appearance is minimal; visual 'lift' is controlled by .is-floating */
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
 
   .model-controls-label {
     font-weight: 600;
@@ -1462,68 +1476,43 @@ body {
       }
     }
   }
+}
 
+/* Floating visual state applied when the control is 'stuck' */
+.article-model-control.is-floating {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(6px);
+  padding: 8px 10px;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+}
 
-  &.sticky {
-    position: fixed;
-    top: 70px;
-    right: 18px;
-    z-index: 1200;
+/* Settled state (after the zone ends) - keep inline appearance */
+.article-model-control.is-settled {
+  background: transparent;
+  border: none;
+  padding: 0;
+  transform: none;
+  opacity: 1;
+}
 
-    /* narrow utility width to feel like a compact control */
-    max-width: 420px;
-    width: fit-content;
+/* Dock ghost styling: keep the ghost static and dim when floating */
+#article-model-dock .article-model-control {
+  position: static !important;
+  opacity: 1;
+}
 
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    backdrop-filter: blur(6px);
-
-    padding: 8px 10px;
-    border-radius: 10px;
-
-    box-shadow:
-      0 4px 18px rgba(0, 0, 0, 0.08),
-      0 1px 4px rgba(0, 0, 0, 0.06);
-
-    @media (max-width: 900px) {
-      left: 50%;
-      right: auto;
-      transform: translateX(-50%);
-      /* shrink-to-fit but never exceed viewport (fallback) */
-      width: fit-content !important;
-      max-width: 90%;
-      display: inline-block;
-    }
-
-    &:hover,
-    &:focus-within {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    &.condensed {
-      transform: scale(0.92);
-      opacity: 0.72;
-      .model-controls-label,
-      .model-controls-sub {
-        display: block;
-      }
-
-      .btn-group {
-        .btn:not(.active) {
-          display: inline-block !important;
-        }
-      }
-
-      .mini-active-model {
-        display: none !important;
-      }
-    }
-  }
+.article.has-floating-model #article-model-dock {
+  opacity: 0.45;
+  filter: grayscale(40%);
+  pointer-events: none;
 }
 
 @media (max-width: 720px) {
-  .article-model-control.sticky.condensed {
+  .article-model-control.is-floating {
     transform: none !important;
     opacity: 1 !important;
 
@@ -1531,6 +1520,40 @@ body {
     .model-controls-sub {
       display: block !important;
     }
+  }
+
+  /* Mobile adjustments: bottom-floating sticky control and page padding */
+  .article.has-sticky-model {
+    padding-bottom: 90px;
+  }
+
+  .article-model-control {
+    top: auto;
+    bottom: 12px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+    max-width: 520px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+
+  .article-model-control .btn-group .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 0.78rem;
+    line-height: 1.2;
+    padding: 8px 6px;
+    white-space: normal;
+  }
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .article-model-control,
+  .article-model-control * {
+    transition: none !important;
   }
 }
 
