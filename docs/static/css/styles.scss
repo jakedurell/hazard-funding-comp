@@ -1523,16 +1523,17 @@ body {
   }
 
   /* Mobile adjustments: bottom-floating sticky control and page padding */
+  /* Mobile adjustments: top-floating sticky control and page padding */
   .article.has-sticky-model {
-    padding-bottom: 90px;
+    padding-top: 90px;
   }
 
-    /* When floating on small screens, use fixed positioning so the control
-       stays docked to the viewport bottom and centers reliably across
-       devices (avoids position:sticky inconsistencies). */
+    /* When floating on small screens, pin the control to the viewport top
+       below the navbar so the float appears at the top (simpler and more
+       robust than bottom-floating across mobile browsers). */
     .article-model-control.is-floating {
       position: fixed;
-      bottom: 12px;
+      top: 72px;
       left: 12px;
       right: 12px;
       width: auto;

@@ -273,8 +273,8 @@
       }
       const startRect = startAnchor.getBoundingClientRect();
       const endRect = endAnchor ? endAnchor.getBoundingClientRect() : { top: Infinity, bottom: Infinity };
-      // trigger offset: account for desktop navbar height, but use 0 on small screens
-      const triggerTop = window.innerWidth <= 720 ? 0 : 72;
+      // trigger offset: use a stable offset below the navbar for all viewports
+      const triggerTop = 72;
       const startPassed = startRect.top <= triggerTop;
       const endPassed = endAnchor ? endRect.top <= triggerTop : false;
       const shouldFloat = startPassed && !endPassed;
