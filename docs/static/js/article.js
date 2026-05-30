@@ -229,17 +229,25 @@
   function initStickyModelControl() {
     const ctrl = document.getElementById("article-model-control");
     if (!ctrl) return;
-
     const startAnchor =
       document.getElementById("article-model-start-anchor") ||
       document.getElementById("fig-need-choropleth");
     const endAnchor = document.getElementById("article-model-end-anchor");
 
-    // disconnect previous observers if present
+    // Clean up previous handlers/observers if any
     if (ctrl._stickyObservers) {
       ctrl._stickyObservers.forEach((o) => o.disconnect());
+      ctrl._stickyObservers = null;
     }
-    ctrl._stickyObservers = [];
+    if (ctrl._stickyHandlers) {
+      window.removeEventListener('scroll', ctrl._stickyHandlers.scroll, { passive: true });
+      window.removeEventListener('resize', ctrl._stickyHandlers.resize);
+      ctrl._stickyHandlers = null;
+    }
+    if (ctrl._stickyRAF) {
+      cancelAnimationFrame(ctrl._stickyRAF);
+      ctrl._stickyRAF = null;
+    }
 
     function setFloating(on) {
       if (on) {
@@ -254,46 +262,46 @@
       }
     }
 
-    // Observe the start anchor: when it leaves the viewport, the control should float
-    if (startAnchor) {
-      const startObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-              // start anchor scrolled past -> float
-              setFloating(true);
-              ctrl.classList.remove("is-settled");
-            } else {
-              setFloating(false);
-              ctrl.classList.remove("is-settled");
-            }
-          });
-        },
-        { threshold: 0 },
-      );
-      startObs.observe(startAnchor);
-      ctrl._stickyObservers.push(startObs);
+    // Use a scroll-based rAF update to reliably detect when the viewport is
+    // between the start and end anchors. This avoids odd IntersectionObserver
+    // toggles on mobile address-bar show/hide and keeps the control floating
+    // strictly between the two anchors.
+    function updateFloating() {
+      if (!startAnchor) {
+        setFloating(false);
+        return;
+      }
+      const startRect = startAnchor.getBoundingClientRect();
+      const endRect = endAnchor ? endAnchor.getBoundingClientRect() : { top: Infinity, bottom: Infinity };
+      // trigger offset: account for desktop navbar height, but use 0 on small screens
+      const triggerTop = window.innerWidth <= 720 ? 0 : 72;
+      const startPassed = startRect.top <= triggerTop;
+      const endPassed = endAnchor ? endRect.top <= triggerTop : false;
+      const shouldFloat = startPassed && !endPassed;
+
+      setFloating(shouldFloat);
+
+      if (endPassed) {
+        ctrl.classList.add('is-settled');
+      } else {
+        ctrl.classList.remove('is-settled');
+      }
     }
 
-    // Observe the end anchor: when it intersects viewport, the control should settle
-    if (endAnchor) {
-      const endObs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              // reached the end anchor -> settle
-              setFloating(false);
-              ctrl.classList.add("is-settled");
-            } else {
-              ctrl.classList.remove("is-settled");
-            }
-          });
-        },
-        { threshold: 0 },
-      );
-      endObs.observe(endAnchor);
-      ctrl._stickyObservers.push(endObs);
-    }
+    const onScroll = () => {
+      if (ctrl._stickyRAF) return;
+      ctrl._stickyRAF = requestAnimationFrame(() => {
+        updateFloating();
+        ctrl._stickyRAF = null;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    ctrl._stickyHandlers = { scroll: onScroll, resize: onScroll };
+
+    // initial check
+    updateFloating();
   }
 
   // bootstrap: load town stats (if not present) then initialize visuals
