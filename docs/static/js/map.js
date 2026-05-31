@@ -86,109 +86,244 @@ let _lockedPopupTown = null; // tracks open town popup across overlay switches
 //   initializeUIControls();
 // }
 
-// map creation - with technical debt from adding export mode on top of existing interactive mode —
-// export mode checks for window.__EXPORT_CONFIG to override defaults and skip UI setup
 function createMap() {
-  ///////// CORE INITIALIZATION /////////
+  const config = buildRuntimeConfig(window.__EXPORT_CONFIG);
+
+  // Core bootstrap
+  initializeCoreMap();
+
+  // Apply initial state (view, model, base metric, layers)
+  applyInitialMapState(config);
+
+  // Activate the desired starting overlay (choropleth/quadrant/etc)
+  activateInitialOverlay(config);
+
+  // Update dashboard/UI to reflect the chosen initial state
+  updateDashboard();
+
+  // Start either interactive runtime or export synchronization
+  initializeRuntimeMode(config);
+}
+
+// ----- runtime/export orchestration helpers -----
+
+function buildRuntimeConfig(raw) {
+  const exportConfig = raw || window.__EXPORT_CONFIG || {};
+  const baseMetric = exportConfig.baseMetric || "gap";
+  return {
+    exportMode: !!exportConfig.exportMode,
+    center:
+      Array.isArray(exportConfig.center) && exportConfig.center.length === 2
+        ? exportConfig.center
+        : null,
+    zoom: typeof exportConfig.zoom === "number" ? exportConfig.zoom : null,
+    model: exportConfig.model || "eal_per_capita",
+    baseMetric,
+    overlay: resolveInitialOverlay(exportConfig, baseMetric),
+    isRelative: !!exportConfig.isRelative,
+    noRiverCorridors: !!exportConfig.noRiverCorridors,
+  };
+}
+
+function resolveInitialOverlay(exportConfig, baseMetric) {
+  if (exportConfig && exportConfig.overlay) return exportConfig.overlay;
+  if (!exportConfig || !exportConfig.exportMode) return "Quadrants";
+  return baseToOverlay[baseMetric] || "Quadrants";
+}
+
+function initializeCoreMap() {
+  // core DOM + map bootstrap
   mapState.map = initializeMap();
-
-  // initialize dropdown and choropleth layer
   initializeTownsDropdown();
-
-  // event listeners for resizing
-  window.addEventListener("resize", () => {
-    mapState.map.invalidateSize();
-  });
-
-  // resize map to ensure it loads correctly
+  window.addEventListener("resize", () => mapState.map.invalidateSize());
   mapState.map.invalidateSize();
+}
 
-  ////////// STATE CONFIGURATION /////////
-
-  // allow map_export_template.html to override defaults via window.__EXPORT_CONFIG
-  const exportConfig = window.__EXPORT_CONFIG || {};
-
-  // if export requests a specific center/zoom, apply it (overrides vtDefaultView)
-  if (exportConfig.center) {
-    if (exportConfig.zoom)
-      mapState.map.setView(exportConfig.center, exportConfig.zoom);
-    else mapState.map.setView(exportConfig.center);
-  } else if (exportConfig.zoom) {
-    mapState.map.setZoom(exportConfig.zoom);
+function applyInitialMapState(config) {
+  // view
+  if (config.center) {
+    if (config.zoom) mapState.map.setView(config.center, config.zoom);
+    else mapState.map.setView(config.center);
+  } else if (config.zoom) {
+    mapState.map.setZoom(config.zoom);
   }
 
-  // set model scheme (respect export config if present)
-  mapState.model = exportConfig.model || "eal_per_capita";
+  // state & metric engine
+  mapState.model = config.model;
+  metricEngine.baseMetric = config.baseMetric;
+  metricEngine.model = config.model;
+  metricEngine.isRelative = !!config.isRelative;
+  mapState.isRelative = !!config.isRelative;
 
-  // add river corridors tier 1 before choropleth so it renders beneath it
-  // skip when exporting and the export requests no river corridors
-  if (!exportConfig.noRiverCorridors) {
+  // river corridors + choropleth
+  initializeRiverCorridors(config);
+  if (mapState.choroplethLayer) mapState.choroplethLayer.addTo(mapState.map);
+}
+
+function initializeRiverCorridors(config) {
+  if (config.noRiverCorridors) return;
+  if (!mapState.riverCorridorsLayer) {
     mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
       riverCorridors,
       1,
     );
+  }
+  if (!mapState.map.hasLayer(mapState.riverCorridorsLayer)) {
     mapState.riverCorridorsLayer.addTo(mapState.map);
   }
+}
 
-  // set initial choropleth metric/model (use export config when provided)
-  metricEngine.baseMetric = exportConfig.baseMetric || "gap";
-  metricEngine.model = exportConfig.model || "eal_per_capita";
+function activateInitialOverlay(config) {
+  mapState._activeOverlay = config.overlay;
+  handleOverlaySelection(config.overlay);
+}
 
-  // when exporting, set relative mode if requested
-  if (exportConfig.isRelative) {
-    mapState.isRelative = true;
-    metricEngine.isRelative = true;
-  }
+function initializeRuntimeMode(config) {
+  if (config.exportMode) initializeExportMode(config);
+  else initializeInteractiveMode(config);
+}
 
-  // add choropleth layer to map
-  mapState.choroplethLayer.addTo(mapState.map);
+function initializeInteractiveMode() {
+  initializeUIControls();
+}
 
-  // set exportConfig (overlay or choropleth baseMetric) or default to quadrant view as the overlay
-  // const startOverlay =
-  //   exportConfig.overlay ||
-  //   baseToOverlay[metricEngine.baseMetric] ||
-  //   "Quadrants";
-  const startOverlay =
-  exportConfig.overlay ||
-  (!exportConfig.exportMode
-    ? "Quadrants"
-    : baseToOverlay[metricEngine.baseMetric] || "Quadrants");
-  mapState._activeOverlay = startOverlay;
-  // activate overlay (default to quadrant view)
-  handleOverlaySelection(startOverlay);
-
-  // update dashboard components
-  updateDashboard();
-
-  ////////// RUNTIME MODE (or export mode) /////////
-
-  // default mode: setup UI control event listeners
-  if (!exportConfig.exportMode) {
-    initializeUIControls();
-  } else {
-    // export mode: wait for tiles/legend to render then signal readiness
-    try {
-      let pendingTiles = 0;
-      const baseTile = baseLayers.Satellite;
-      if (baseTile && baseTile.on) {
-        baseTile.on("tileloadstart", () => {
-          pendingTiles++;
-        });
-        baseTile.on("tileload tileerror", () => {
-          pendingTiles = Math.max(0, pendingTiles - 1);
-          if (pendingTiles === 0)
-            setTimeout(() => (window.__EXPORT_READY = true), 300);
-        });
-      }
-      // fallback safety timeout
-      setTimeout(() => {
-        if (!window.__EXPORT_READY) window.__EXPORT_READY = true;
-      }, 15000);
-    } catch (e) {
-      window.__EXPORT_READY = true;
-    }
+function initializeExportMode(/*config*/) {
+  try {
+    waitForExportRender();
+  } catch (e) {
+    window.__EXPORT_READY = true;
   }
 }
+
+function waitForExportRender() {
+  let pendingTiles = 0;
+  const baseTile = baseLayers.Satellite;
+  if (baseTile && baseTile.on) {
+    const onStart = () => {
+      pendingTiles++;
+    };
+    const onDone = () => {
+      pendingTiles = Math.max(0, pendingTiles - 1);
+      if (pendingTiles === 0) {
+        setTimeout(() => (window.__EXPORT_READY = true), 300);
+      }
+    };
+    baseTile.on("tileloadstart", onStart);
+    baseTile.on("tileload", onDone);
+    baseTile.on("tileerror", onDone);
+    // fallback safety timeout
+    setTimeout(() => {
+      if (!window.__EXPORT_READY) window.__EXPORT_READY = true;
+    }, 15000);
+  } else {
+    // no events available — mark ready shortly
+    setTimeout(() => (window.__EXPORT_READY = true), 500);
+  }
+}
+
+// // map creation - with technical debt from adding export mode on top of existing interactive mode —
+// // export mode checks for window.__EXPORT_CONFIG to override defaults and skip UI setup
+// function createMap() {
+//   ///////// CORE INITIALIZATION /////////
+//   mapState.map = initializeMap();
+
+//   // initialize dropdown and choropleth layer
+//   initializeTownsDropdown();
+
+//   // event listeners for resizing
+//   window.addEventListener("resize", () => {
+//     mapState.map.invalidateSize();
+//   });
+
+//   // resize map to ensure it loads correctly
+//   mapState.map.invalidateSize();
+
+//   ////////// STATE CONFIGURATION /////////
+
+//   // allow map_export_template.html to override defaults via window.__EXPORT_CONFIG
+//   const exportConfig = window.__EXPORT_CONFIG || {};
+
+//   // if export requests a specific center/zoom, apply it (overrides vtDefaultView)
+//   if (exportConfig.center) {
+//     if (exportConfig.zoom)
+//       mapState.map.setView(exportConfig.center, exportConfig.zoom);
+//     else mapState.map.setView(exportConfig.center);
+//   } else if (exportConfig.zoom) {
+//     mapState.map.setZoom(exportConfig.zoom);
+//   }
+
+//   // set model scheme (respect export config if present)
+//   mapState.model = exportConfig.model || "eal_per_capita";
+
+//   // add river corridors tier 1 before choropleth so it renders beneath it
+//   // skip when exporting and the export requests no river corridors
+//   if (!exportConfig.noRiverCorridors) {
+//     mapState.riverCorridorsLayer = initializeRiverCorridorsLayer(
+//       riverCorridors,
+//       1,
+//     );
+//     mapState.riverCorridorsLayer.addTo(mapState.map);
+//   }
+
+//   // set initial choropleth metric/model (use export config when provided)
+//   metricEngine.baseMetric = exportConfig.baseMetric || "gap";
+//   metricEngine.model = exportConfig.model || "eal_per_capita";
+
+//   // when exporting, set relative mode if requested
+//   if (exportConfig.isRelative) {
+//     mapState.isRelative = true;
+//     metricEngine.isRelative = true;
+//   }
+
+//   // add choropleth layer to map
+//   mapState.choroplethLayer.addTo(mapState.map);
+
+//   // set exportConfig (overlay or choropleth baseMetric) or default to quadrant view as the overlay
+//   // const startOverlay =
+//   //   exportConfig.overlay ||
+//   //   baseToOverlay[metricEngine.baseMetric] ||
+//   //   "Quadrants";
+//   const startOverlay =
+//   exportConfig.overlay ||
+//   (!exportConfig.exportMode
+//     ? "Quadrants"
+//     : baseToOverlay[metricEngine.baseMetric] || "Quadrants");
+//   mapState._activeOverlay = startOverlay;
+//   // activate overlay (default to quadrant view)
+//   handleOverlaySelection(startOverlay);
+
+//   // update dashboard components
+//   updateDashboard();
+
+//   ////////// RUNTIME MODE (or export mode) /////////
+
+//   // default mode: setup UI control event listeners
+//   if (!exportConfig.exportMode) {
+//     initializeUIControls();
+//   } else {
+//     // export mode: wait for tiles/legend to render then signal readiness
+//     try {
+//       let pendingTiles = 0;
+//       const baseTile = baseLayers.Satellite;
+//       if (baseTile && baseTile.on) {
+//         baseTile.on("tileloadstart", () => {
+//           pendingTiles++;
+//         });
+//         baseTile.on("tileload tileerror", () => {
+//           pendingTiles = Math.max(0, pendingTiles - 1);
+//           if (pendingTiles === 0)
+//             setTimeout(() => (window.__EXPORT_READY = true), 300);
+//         });
+//       }
+//       // fallback safety timeout
+//       setTimeout(() => {
+//         if (!window.__EXPORT_READY) window.__EXPORT_READY = true;
+//       }, 15000);
+//     } catch (e) {
+//       window.__EXPORT_READY = true;
+//     }
+//   }
+// }
 
 //////////////////////////////////////////////////////////
 
