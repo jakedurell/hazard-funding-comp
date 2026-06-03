@@ -108,7 +108,7 @@ Key findings:
 ![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
 *Measuring Need: A rank-based composite of flood exposure and social vulnerability*  
 
-![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita.png)  
+![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita_rel.png)  
 *Towns where need substantially exceeds FEMA HMA investment, highlighting the most underserved communities*  
 
 ![Scatter plot — Need vs. Funding](./resources/images/scatter_eal_per_capita.png)  
@@ -117,10 +117,10 @@ Key findings:
 ![Town detail panel](./resources/images/stats_card.png)  
 *Per-town statistics, percentile rankings, and quadrant classification for a selected community*  
 
-![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita.png)  
+![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita_rel.png)  
 *Risk map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank*  
 
-![NFIP claims overlay](./resources/images/choropleth_claims.png)  
+![NFIP claims overlay](./resources/images/choropleth_claims_eal_per_capita.png)  
 *Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest*  
 
 ## Data & Methodology
