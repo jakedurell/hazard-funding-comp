@@ -111,8 +111,8 @@ Key findings:
 ![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita_rel.png)  
 *Towns where need substantially exceeds FEMA HMA investment, highlighting the most underserved communities*  
 
-![Scatter plot — Need vs. Funding](./resources/images/scatter_eal_per_capita.png)  
-*Loose cloud confirming weak alignment between structural need and federal mitigation dollars*  
+![Scatter plot — Need vs. Funding](./resources/images/scatterplot_model_change.webp)  
+*Loose cloud confirming weak alignment between structural need and federal mitigation dollars, showing impace of different definitions of need*  
 
 ![Town detail panel](./resources/images/stats_card.png)  
 *Per-town statistics, percentile rankings, and quadrant classification for a selected community*  
