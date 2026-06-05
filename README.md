@@ -105,6 +105,9 @@ Key findings:
 ![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
 *All Vermont towns classified into funding quadrants (high/low funidng, high/low need, zero-funding)*  
 
+![ETL Infographic](./resources/images/etl_graphic.png)  
+*Visual representation of data extraction process*
+
 ![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
 *Measuring Need: A rank-based composite of flood exposure and social vulnerability*  
 
