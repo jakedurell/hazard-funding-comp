@@ -93,50 +93,86 @@
       >
         <h3>Contents</h3>
         <ul>
+          <li><a href="#executive-summary">Executive Summary</a></li>
           <li>
-            <a href="#technical-methodology">Methodology</a>
             <ul>
-              <li>
-                <a href="#data-sources">Data Sources</a>
-              </li>
+              <li><a href="#technical-methodology">Research Question</a></li>
+              <li><a href="#data-sources">Data Sources</a></li>
               <li>
                 <a href="#data-processing">Data Processing &amp; Integration</a>
               </li>
-              <li><a href="#need-index">Construction of the Need Index</a></li>
-              <li>
-                <a href="#model-eval">Model Evaluation &amp; Validation</a>
-              </li>
+              <li><a href="#need-index">Need Index Construction</a></li>
+              <li><a href="#model-eval">Model Evaluation</a></li>
               <li>
                 <a href="#funding-alignment">Funding Alignment Analysis</a>
               </li>
               <li><a href="#spatial-analysis">Spatial Analysis</a></li>
-              <li><a href="#quadrant-analysis">Quadrant Analysis</a></li>
-              <li><a href="#model-selection">Model Selection</a></li>
-              <li><a href="#normalization-choice">Normalization Choice</a></li>
+              <li><a href="#key-findings">Key Findings</a></li>
               <li><a href="#limitations">Key Limitations</a></li>
-              <li><a href="#summary">Summary</a></li>
+              <li><a href="#reproducibility">Reproducibility</a></li>
             </ul>
           </li>
           <li>
             <a href="#data-dictionary">Data Dictionary</a>
-            <!-- <ul>
-              <li>
-                <a href="#town-boundaries-geojson">town_boundaries.geojson</a>
-              </li>
-              <li><a href="#town-stats-csv">town_stats.csv</a></li>
-            </ul> -->
           </li>
         </ul>
       </nav>
 
-      <h2 id="technical-methodology">Methodology</h2>
+      <h2 id="executive-summary">Executive Summary</h2>
+
+      <p>
+        Floodlines integrates FEMA, Census, NFIP, and Vermont geospatial
+        datasets to estimate relative flood mitigation need across Vermont
+        municipalities. Need is modeled as a combination of flood exposure and
+        social vulnerability. Funding alignment is evaluated by comparing FEMA
+        mitigation investments against modeled need. The analysis finds that
+        funding is only weakly associated with modeled structural need and more
+        strongly associated with historical flood losses, suggesting a
+        predominantly reactive allocation pattern.
+      </p>
+
+      <h3>Key Findings</h3>
+
+      <ul>
+        <li>Need and funding exhibit weak correlation.</li>
+        <li>NFIP claims are substantially more predictive of funding.</li>
+        <li>
+          Roughly half of Vermont municipalities received no FEMA mitigation
+          funding.
+        </li>
+        <li>
+          Findings are stable across normalization methods and model
+          specifications.
+        </li>
+      </ul>
+
+      <!-- Insert etl-graphic.png here -->
+      <figure style="margin: 2em 0; text-align: center">
+        <img
+          src="./static/images/etl_graphic.png"
+          alt="Schematic of data processing and modeling workflow"
+          style="
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            padding: 0.5em;
+          "
+        />
+        <figcaption style="font-size: 0.9em; color: #666; margin-top: 0.5em">
+          Data sources and analytical workflow used in this study. Federal
+          hazard, insurance, demographic, and mitigation datasets are integrated
+          at the municipal level and transformed into comparative measures of
+          need, funding, and funding alignment. Source: AI-generated.
+        </figcaption>
+      </figure>
+
+      <h3 id="technical-methodology">Research Question</h3>
 
       <p>
         This analysis evaluates whether flood mitigation funding in Vermont
         aligns with underlying need. “Need” is treated as a normative construct
         (what funding should target), while observed funding patterns reflect
-        real‑world allocation dynamics. Models are used as validation tools, not
-        as ends in themselves.
+        real‑world allocation dynamics.
       </p>
 
       <h3 id="data-sources">Data Sources</h3>
@@ -151,6 +187,17 @@
             ></strong
           >
           – project‑level mitigation funding data
+        </li>
+        <li>
+          <strong
+            ><a
+              href="https://www.fema.gov/flood-insurance"
+              target="_blank"
+              rel="noopener"
+              >National Flood Insurance Program (NFIP)</a
+            ></strong
+          >
+          – claims and policy data
         </li>
         <li>
           <strong
@@ -171,17 +218,6 @@
             ></strong
           >
           – demographic and socioeconomic variables
-        </li>
-        <li>
-          <strong
-            ><a
-              href="https://www.fema.gov/flood-insurance"
-              target="_blank"
-              rel="noopener"
-              >National Flood Insurance Program (NFIP)</a
-            ></strong
-          >
-          – claims and policy data
         </li>
         <li>
           <strong
@@ -311,7 +347,7 @@
         </li>
       </ul>
 
-      <h3 id="need-index">Construction of the Need Index</h3>
+      <h3 id="need-index">Need Index Construction</h3>
       <p>
         A composite need index was developed to estimate relative flood
         mitigation need across towns.
@@ -332,8 +368,9 @@
       <h4 id="method">Method</h4>
       <ul>
         <li>
-          Variables were normalized using z‑score standardization and rank‑based
-          scaling.
+          Variables were evaluated using both z-score and rank-based
+          normalization; rank-based normalization was selected for all published
+          indices.
         </li>
         <li>
           Risk and vulnerability composites were combined with equal weighting
@@ -348,7 +385,7 @@
         interpretability while retaining signal.
       </p>
 
-      <h3 id="model-eval">Model Evaluation and Validation</h3>
+      <h3 id="model-eval">Model Evaluation</h3>
       <h4 id="robustness">Robustness Checks</h4>
       <ul>
         <li>
@@ -386,12 +423,59 @@
         </li>
       </ul>
 
+      <h4 id="normalization-choice">Normalization Choice</h4>
+      <p>
+        Rank-based normalization was used for all published indices rather than
+        z-scores.
+      </p>
+      <ul>
+        <li>
+          Vermont flood and funding data are highly skewed, with extreme
+          outliers compressing z-score distributions.
+        </li>
+        <li>
+          Rank normalization produces bounded, interpretable values relative to
+          peer towns.
+        </li>
+        <li>
+          Variables with different units and distributions (EAL, flood exposure,
+          socioeconomic indicators) can be compared on a common scale without
+          distributional assumptions.
+        </li>
+        <li>
+          Sensitivity testing showed minimal substantive difference between
+          rank-normalized and z-score models; town rankings remained highly
+          consistent across methods.
+        </li>
+      </ul>
+
+      <h4 id="model-selection">Model Selection</h4>
+      <p>
+        Three models were selected for the web analysis based on complementary
+        strengths in predictive signal, stability, and external
+        benchmarkability:
+      </p>
+      <ul>
+        <li>
+          <strong>EAL-based model</strong> – primary analytical model; strongest
+          ability to predict funding access.
+        </li>
+        <li>
+          <strong>EAL per capita model</strong> – robustness check; most stable
+          across normalization methods.
+        </li>
+        <li>
+          <strong>FEMA NRI model</strong> – external benchmark using FEMA’s own
+          composite risk framework.
+        </li>
+      </ul>
+
       <h3 id="funding-alignment">Funding Alignment Analysis</h3>
       <h4 id="gap-index">Gap Index</h4>
       <p>
-        Gap = normalized need − normalized funding (log-scaled funding per
-        capita). Positive values indicate underfunding relative to need;
-        negative values indicate overfunding.
+        Gap = normalized need − normalized funding per capita (log-scaled).
+        Positive values indicate underfunding relative to need; negative values
+        indicate overfunding.
       </p>
       <p>
         Observed: moderate positive correlation with need (~+0.32 to +0.49),
@@ -433,7 +517,7 @@
         </li>
       </ul>
 
-      <h3 id="quadrant-analysis">Quadrant Analysis</h3>
+      <h4 id="quadrant-analysis">Quadrant Analysis</h4>
       <p>
         Towns were categorized by need and funding into zero funding,
         underfunded (high need, low funding), aligned, overfunded, and low
@@ -448,50 +532,25 @@
         </li>
       </ul>
 
-      <h3 id="model-selection">Model Selection Rationale</h3>
-      <p>
-        Three models were selected for the web analysis based on complementary
-        strengths in predictive signal, stability, and external
-        benchmarkability:
-      </p>
+      <h3 id="key-findings">Key Findings</h3>
       <ul>
         <li>
-          <strong>EAL-based model</strong> – primary analytical model; strongest
-          ability to predict funding access.
+          Flood mitigation funding exhibits weak alignment with modeled
+          structural need across Vermont municipalities.
         </li>
         <li>
-          <strong>EAL per capita model</strong> – robustness check; most stable
-          across normalization methods.
+          Historical flood losses, as measured through NFIP claims, are
+          substantially more predictive of funding allocation than
+          forward-looking risk and vulnerability indicators.
         </li>
         <li>
-          <strong>FEMA NRI model</strong> – external benchmark using FEMA’s own
-          composite risk framework.
-        </li>
-      </ul>
-
-      <h3 id="normalization-choice">Normalization Choice</h3>
-      <p>
-        Rank-based normalization was used for all published indices rather than
-        z-scores.
-      </p>
-      <ul>
-        <li>
-          Vermont flood and funding data are highly skewed, with extreme
-          outliers compressing z-score distributions.
+          Approximately half of Vermont towns received no FEMA Hazard Mitigation
+          Assistance funding, including numerous communities identified as
+          high-need under multiple model specifications.
         </li>
         <li>
-          Rank normalization produces bounded, interpretable values relative to
-          peer towns.
-        </li>
-        <li>
-          Variables with different units and distributions (EAL, flood exposure,
-          socioeconomic indicators) can be compared on a common scale without
-          distributional assumptions.
-        </li>
-        <li>
-          Sensitivity testing showed minimal substantive difference between
-          rank-normalized and z-score models; town rankings remained highly
-          consistent across methods.
+          The observed patterns are robust across alternative definitions of
+          need, normalization approaches, and sensitivity analyses.
         </li>
       </ul>
 
@@ -515,27 +574,19 @@
           Funding reflects only the federal share obligated under FEMA Hazard
           Mitigation Assistance (HMA) localizable to a specific town.
         </li>
+        <li>
+          County-wide, regional, and statewide mitigation projects could not be
+          reliably attributed to individual municipalities and were excluded
+          from town-level funding totals.
+        </li>
       </ul>
 
-      <h3 id="summary">Summary</h3>
-      <ul>
-        <li>
-          The need index is methodologically robust and stable across
-          specifications.
-        </li>
-        <li>
-          Funding is weakly aligned with structural need and more strongly
-          aligned with past damages.
-        </li>
-        <li>
-          Results suggest a reactive funding system rather than a proactive,
-          risk‑based allocation model.
-        </li>
-        <li>
-          The framework reliably identifies systemic patterns; precise town
-          rankings should be interpreted with caution.
-        </li>
-      </ul>
+      <h3 id="reproducibility">Reproducibility</h3>
+      <p>
+        All data sources used in this analysis are publicly available. Data
+        processing, model construction, sensitivity testing, and dashboard
+        generation scripts are available in the project repository.
+      </p>
     </div>
 
     <div
@@ -548,8 +599,8 @@
       <p>
         The interactive dashboard uses a flat town table
         (<code>town_stats.csv</code>) and a simplified town GeoJSON to power
-        choropleths, charts, rankings, and town-level summaries. Detailed data
-        dictionary available in the
+        choropleths, charts, rankings, and town-level summaries. A complete
+        field-level data dictionary is available in the
         <a
           href="https://github.com/johbry17/Floodlines"
           target="_blank"
