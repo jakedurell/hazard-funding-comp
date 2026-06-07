@@ -74,16 +74,16 @@
       <h1>Floodlines</h1>
       <!-- <h2>Mapping the gap between flood risk and flood funding</h2> -->
       <h2>
-        Risk is not equally distributed. Neither is the money to address it
+        Risk is not equally distributed. Neither is the money to address it.
       </h2>
       <div class="dashboard-subtitle">
-        Vermont has been hit by two catastrophic floods in twelve years. The
-        money meant to prepare for the next one isn't going where the risk is
-        greatest.
+        This dashboard compares flood risk, social vulnerability, and FEMA
+        mitigation funding across Vermont's towns to explore whether funding
+        aligns with need.
       </div>
       <div class="analysis-link">
         <a href="article.html" class="analysis-button">
-          Read the Full Story
+          Read the accompanying analysis:<br><i>The Geography of Institutional Memory</i>
           <span class="arrow">→</span>
         </a>
       </div>
@@ -91,31 +91,23 @@
 
     <!-- Lede -->
     <div class="lede">
-      More than half of Vermont towns have never received a dollar in federal
-      flood mitigation funding, including many of the state's highest-need
-      communities. Federal money tends to follow where damage has already
-      happened, not where future risk is greatest.
-    </div>
-    <div class="why-brief">
-      This dashboard maps flood risk, social vulnerability, and FEMA mitigation
-      funding across Vermont's 250+ towns. The central question: does the money
-      go where it's needed most? Explore how the answer changes depending on how
-      you define need.
+      More than half of Vermont towns have never received FEMA Hazard Mitigation
+      Assistance funding. Many rank among the state's highest-need communities.
     </div>
 
     <!-- Context Band -->
     <div class="context-band">
       <div class="context-title">How to Read This Map</div>
       <div class="context-body">
-        The default view places each town into a funding quadrant based on two
-        questions:
-        <strong>How high is the need?</strong> and
-        <strong>How much funding has been received?</strong> <br /><br />
-        Use the model selector to compare different ways of measuring risk:
-        total expected losses, risk per resident, and FEMA's National Risk
-        Index. Across all three models, roughly half of Vermont towns have
-        received no federal flood mitigation funding &mdash; including many in
-        the highest-need quartile.
+        The default view compares flood need against mitigation funding
+        received. Towns are grouped into quadrants showing whether funding and
+        need are broadly aligned or out of balance.
+
+        <br /><br />
+
+        Use the model selector to compare three different measures of risk:
+        total expected loss, expected loss per resident, and FEMA's National
+        Risk Index. The overall pattern remains similar across all three.
       </div>
     </div>
 
@@ -201,7 +193,7 @@
       <!-- Special Overlay Buttons (Quadrants) — primary dashboard view -->
       <div class="col-md-12 text-center">
         <div class="special-overlay-label">
-          Start here:<br />Compare flood risk against funding received
+          Start here:<br />Compare modeled need against mitigation funding
         </div>
         <div
           id="choropleth-control-special"
@@ -302,7 +294,7 @@
           </label>
         </div>
         <div class="model-controls-sub">
-          How risk is measured changes which towns appear most vulnerable
+          Measurement choices reshape the geography of need.
         </div>
         <!-- NRI note: shown when NRI model is active -->
         <div
@@ -336,25 +328,18 @@
     <div id="map-metric-definitions" class="metric-definitions">
       <div class="metric-definition" id="def-risk">
         <strong>Flood Risk</strong><br />
-        <!-- Estimated flood exposure based on expected annual losses from flooding.
-        Higher values indicate greater projected damage risk. -->
         Expected annual flood loss — a dollar estimate of damage per year based
         on local hazard intensity and property exposure. Higher rank = greater
         expected damage.
       </div>
       <div class="metric-definition" id="def-vulnerability">
         <strong>Vulnerability</strong><br />
-        <!-- Measures how difficult a community may find it to prepare for, respond
-        to, and recover from flooding. Based on social, economic, and
-        demographic factors. Higher values indicate greater vulnerability. -->
         A composite of demographics that shape recovery capacity: poverty, age,
         and access to transportation. Higher rank = harder to bounce back after
         a flood.
       </div>
       <div class="metric-definition" id="def-need">
         <strong>Combined Need</strong><br />
-        <!-- A blended measure of flood exposure and social vulnerability. Higher
-        values suggest greater overall need for mitigation support. -->
         A combined measure of flood risk and social vulnerability. Towns with
         high need face both significant exposure and limited capacity to recover
         without outside support.
@@ -367,12 +352,9 @@
       </div>
       <div class="metric-definition" id="def-gap">
         <strong>Funding Gap</strong><br />
-        <!-- Compares measured need against funding received. Red indicates towns
-        receiving less funding relative to need; blue indicates comparatively
-        higher funding levels. -->
-        The gap between a town's need rank and its funding rank. The wider the
-        gap, the greater the disparity. This is the dashboard's central
-        argument.
+        The difference between a town's need rank and its funding rank. Larger
+        gaps indicate communities whose measured need exceeds the mitigation
+        funding they have received.
       </div>
       <div class="metric-definition" id="def-claims">
         <strong>NFIP Claims per Capita</strong><br />
@@ -384,9 +366,9 @@
       </div>
       <div class="metric-definition" id="def-quadrants">
         <strong>Quadrants</strong><br />
-        Each town is placed based on its flood need rank and total funding
-        received. Quadrant Analysis is the dashboard's default view — it encodes
-        the central question directly.
+        Each town is categorized by its relative need and mitigation funding.
+        The quadrant view categorizes where funding and measured need appear
+        aligned and where they diverge.
       </div>
       <div class="metric-definition" id="def-population">
         <strong>Town Population</strong><br />
@@ -442,8 +424,7 @@
           The map shows statewide comparisons. This panel shows detailed local
           values.
           <br />
-          N.b., Risk and funding rankings change depending on how flood risk is
-          defined.
+          N.b., Rankings change when different measures of flood risk are used.
         </p>
         <p
           id="stats-zero-pop-note"
@@ -527,25 +508,25 @@
       <div class="plot-caption" id="caption-eal">
         <h3>Model: Total Risk (Expected Annual Loss)</h3>
         <p>
-          Funding is only weakly correlated with total expected flood loss. A
-          few high-loss towns attract significant grants, but many high-need
-          towns receive little or nothing.
+          Funding shows only a weak relationship with total expected flood loss.
+          A handful of high-loss communities receive substantial grants, but
+          many similarly exposed towns do not.
         </p>
       </div>
       <div class="plot-caption" id="caption-eal-per-capita">
         <h3>Model: Risk per Person (Expected Annual Loss per Capita)</h3>
         <p>
-          Adjusting for population reshuffles the map. Smaller, high-exposure
-          towns rise in need, but their funding levels rarely follow. Switching
-          to this view is where priorities diverge most sharply.
+          Adjusting for population reshuffles the geography of need. Smaller,
+          highly exposed communities rise in the rankings, yet funding patterns
+          change relatively little.
         </p>
       </div>
       <div class="plot-caption" id="caption-nri">
         <h3>FEMA National Risk Index</h3>
         <p>
-          FEMA's own composite risk benchmark shows similar patterns. Funding
-          appears driven more by where damage has already occurred than by where
-          risk is currently greatest.
+          FEMA's own composite risk benchmark produces a similar pattern.
+          Funding remains only weakly aligned with measured risk across
+          municipalities.
         </p>
       </div>
     </div>
@@ -553,7 +534,9 @@
     <div id="plot-container"></div>
     <div class="stats-note">
       Axes show percentile rankings relative to other Vermont towns, not raw
-      dollar values or FEMA scores.
+      dollar values or FEMA scores; bubble size represents population. If
+      funding closely tracked measured need, points would cluster along a
+      diagonal.
     </div>
 
     <!-- Secondary Controls (Muted Version) -->
@@ -759,8 +742,8 @@
           underrepresents flood exposure statewide.
         </li>
         <li>
-          Risk scores (EAL, NRI) are modeled annualized estimates, not
-          cumulative observed damage.
+          Risk metrics (EAL and NRI) are modeled estimates of expected future
+          loss and exposure, not measures of cumulative historical damage.
         </li>
       </ul>
     </div>
@@ -853,5 +836,6 @@
     <script src="./static/js/map.js"></script>
     <script src="./static/js/app.js"></script>
     <script src="./static/js/hamburger.js"></script>
+    <!-- <script src="./static/js/tour.js"></script> -->
   </body>
 </html>
