@@ -79,13 +79,6 @@
       </div>
     </div>
 
-    <!-- <div class="lede">
-      The way institutions define and measure flood risk determines who gets
-      protection. Change the metric, and different communities rise to the top.
-      Also, are simple models sufficient to act upon? And why prior disaster
-      experience often trumps future vulnerability in mitigation funding.
-    </div> -->
-
     <main class="article container" id="article-content">
       <hr />
 
@@ -130,7 +123,7 @@
 
       <p>
         Neither town is a curiosity; roughly half of Vermont's municipalities
-        have no recorded HMA awards. They are examples of a pattern the data
+        have no recorded HMA funding. They are examples of a pattern the data
         reveal clearly: places where physical exposure meets social
         vulnerability often sit at the back of the funding queue. Not because
         they are overlooked by any single person's bad intent, but because the
@@ -403,6 +396,14 @@
             role="radiogroup"
           >
             <label
+              class="btn"
+              data-model="eal"
+              title="Uses total expected annual flood loss. Larger towns and infrastructure-heavy communities tend to rank higher."
+            >
+              <input type="radio" name="article-model" autocomplete="off" />
+              Total Risk
+            </label>
+            <label
               class="btn active"
               data-model="eal_per_capita"
               title="Adjusts expected annual flood loss by population to highlight smaller but highly exposed communities."
@@ -414,14 +415,6 @@
                 checked
               />
               Risk per Person
-            </label>
-            <label
-              class="btn"
-              data-model="eal"
-              title="Uses total expected annual flood loss. Larger towns and infrastructure-heavy communities tend to rank higher."
-            >
-              <input type="radio" name="article-model" autocomplete="off" />
-              Total Risk
             </label>
             <label
               class="btn"
@@ -494,7 +487,7 @@
 
         <figure id="fig-need-funding-scatter" class="figure">
           <div id="plot-title" class="plot-title" style="display: none">
-            Flood Mitigation Funding vs. Relative Need
+            FEMA HMA Funding vs. Relative Need
           </div>
           <div id="plot-captions" class="plot-captions">
             <div class="plot-caption" id="caption-eal">
@@ -543,11 +536,11 @@
 
         <p>
           A quadrant framework brings this into operational focus. Towns fall
-          into five categories: aligned (high need, high funding), underfunded
+          into five categories: aligned (high need, high funding), underfunded`
           (high need, low funding), overfunded (low need, high funding),
-          low-priority (low need, low funding), and zero-funded (no HMA record
+          low-priority (low need, low funding), and zero-funded (no HMA awards
           at all). That last category is striking: roughly half of Vermont's
-          municipalities have no recorded HMA awards. Among high-need towns by
+          municipalities have no recorded HMA funding. Among high-need towns by
           the composite index, zero-funded is disproportionately common. These
           are not small-funding communities; they are no-funding communities.
         </p>
@@ -603,8 +596,8 @@
 
       <p>
         <strong>Disaster-triggered allocation.</strong> The largest
-        concentrations of mitigation funding follow declared disasters. This is
-        both understandable and limiting. Declarations create political will and
+        concentrations of HMA funding follow declared disasters. This is both
+        understandable and limiting. Declarations create political will and
         administrative bandwidth. But they also mean that the system is most
         generous precisely where recent damage has already been most visible,
         not necessarily where future damage is most likely. Communities that
@@ -748,6 +741,20 @@
       </p>
 
       <ul>
+        <li>
+          <b>Funding coverage is incomplete.</b> The analysis includes FEMA
+          Hazard Mitigation Assistance (HMA) grants only. Other funding
+          streams—including USDA programs, HUD/CDBG-DR funding, state grants,
+          FEMA Individual Assistance, and local investments—are not captured.
+        </li>
+        <li>
+          <b
+            >Some mitigation spending cannot be assigned to individual towns.</b
+          >
+          County-wide, regional, and statewide projects were excluded because
+          they cannot be reliably attributed to specific municipalities. The
+          analysis focuses only on projects that can be localized to a town.
+        </li>
         <li>
           <b>Town-level aggregation.</b> A high composite score for a
           municipality doesn't mean uniform exposure across every neighborhood.
