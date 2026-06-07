@@ -2,11 +2,12 @@
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/johbry17/Floodlines)
 
-_Risk is not equally distributed. Neither is the money to address it._
+_Risk is not equally distributed. Neither is the money to address it._  
+An independent analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont municipalities.
 
-<!-- _Mapping the gap between flood risk and flood funding in Vermont._ -->
-
-🔗 [Live Dashboard](https://johbry17.github.io/Floodlines/)
+🔗 [Live Dashboard](https://johbry17.github.io/Floodlines/)  
+📖 [Analysis Article](https://johbry17.github.io/Floodlines/article.html)  
+🔬 [Technical Appendix](https://johbry17.github.io/Floodlines/appendix.html)  
 
 ⚠️ This project is under active development.
 
@@ -25,7 +26,7 @@ _Risk is not equally distributed. Neither is the money to address it._
 
 ## Project Overview
 
-**Floodlines** is an index-based spatial analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont's 250+ towns. The central question: _who bears the most risk, who receives the least help, and where is the mismatch greatest?_
+**Floodlines** is an index-based spatial analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont's 250+ towns. The central question: _does mitigation funding align with flood risk and community need?_
 
 Vermont has experienced repeated, severe flood events, most notably Hurricane Irene (2011) and the historic flooding of 2023. Yet federal mitigation funding has not flowed evenly. Some high-risk, high-vulnerability towns have received little to nothing. Others have received substantial investment. This project builds a reproducible, methodologically transparent framework to measure that gap.
 
@@ -41,10 +42,16 @@ The analysis combines:
 
 Key findings:
 
-- Flood mitigation funding is only weakly correlated with structural need (Spearman ~0.10–0.30 for most models)
+## Key Findings
+
+- More than half of Vermont municipalities received no FEMA Hazard Mitigation Assistance funding.
+- Funding shows only weak alignment with forward-looking measures of flood risk and vulnerability.
+- Funding is more strongly associated with past insured flood losses than with modeled future risk.
+- The pattern persists across multiple risk models, normalization methods, and sensitivity tests.
+<!-- - Flood mitigation funding is only weakly correlated with structural need (Spearman ~0.10–0.30 for most models)
 - Past insurance claims are a far stronger predictor of funding (Spearman ~0.55), suggesting a reactive rather than proactive allocation pattern
 - ~55–60% of Vermont towns are underfunded relative to their measured need
-- The index framework is robust to normalization method choice (need-index Spearman z vs. rank: 0.89–1.00)
+- The index framework is robust to normalization method choice (need-index Spearman z vs. rank: 0.89–1.00) -->
 
 ## Features
 
@@ -103,28 +110,28 @@ Key findings:
 ## Gallery
 
 ![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
-*All Vermont towns classified into funding quadrants (high/low funidng, high/low need, zero-funding)*  
+_All Vermont towns classified into funding quadrants (high/low funding, high/low need, zero-funding)_
 
 ![ETL Infographic](./resources/images/etl_graphic.png)  
-*Visual representation of data extraction process*
+_Visual representation of data extraction process_
 
 ![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
-*Measuring Need: A rank-based composite of flood exposure and social vulnerability*  
+_Measuring Need: A rank-based composite of flood exposure and social vulnerability_
 
 ![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita_rel.png)  
-*Towns where need substantially exceeds FEMA HMA investment, highlighting the most underserved communities*  
+_Towns where need substantially exceeds FEMA HMA investment, highlighting the most underserved communities_
 
 ![Scatter plot — Need vs. Funding](./resources/images/scatterplot_model_change.webp)  
-*Loose cloud confirming weak alignment between structural need and federal mitigation dollars, showing impace of different definitions of need*  
+_Loose cloud confirming weak alignment between structural need and federal mitigation dollars, showing impact of different definitions of need_
 
 ![Town detail panel](./resources/images/stats_card.png)  
-*Per-town statistics, percentile rankings, and quadrant classification for a selected community*  
+_Per-town statistics, percentile rankings, and quadrant classification for a selected community_
 
 ![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita_rel.png)  
-*Risk map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank*  
+_Risk map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank_
 
 ![NFIP claims overlay](./resources/images/choropleth_claims_eal_per_capita.png)  
-*Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest*  
+_Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest_
 
 ## Data & Methodology
 
@@ -132,11 +139,11 @@ Key findings:
 The need index combines a flood risk component (FEMA EAL or river corridor exposure) and a social vulnerability component (poverty rate, percent elderly, percent households without a vehicle), normalized using percentile ranks across all Vermont towns. The gap index is defined as need minus scaled funding — positive values indicate towns receiving less mitigation investment than their need would predict.
 
 **Model selection:**  
-Three models were carried forward for the dashboard: `core_EAL_model` (primary — highest logit AUC at 0.70), `eal_per_capita_model` (robustness — most normalization-stable at Spearman 0.97), and `fema_national_risk_index` (benchmark — FEMA's own composite for external validity).  
+Three models were carried forward for the dashboard: `core_EAL_model` (primary — highest logit AUC at 0.70), `eal_per_capita_model` (robustness — most normalization-stable at Spearman 0.97), and `fema_national_risk_index` (benchmark — FEMA's own composite for external validity).
 
-Claims-based models were excluded because their high need–funding correlation (~0.55) reflects a reactive rather than proactive pattern; their near-zero gap meaningfulness (~0.04) confirms the gap index adds no independent signal when claims drive the need score. Expanded vulnerability specifications (adding housing tenure, disability, mobile homes) were also excluded: increasing the variable count raised normalization sensitivity (mean rank difference 19–21 vs. 13–15 for core models) without improving logit AUC, violating the parsimony criterion. Similarly, simple spatial exposure metrics — river corridor percentage and NFHL flood zone coverage — were replaced by FEMA Expected Annual Loss, which captures both hazard intensity and asset exposure rather than treating all land within a flood polygon as equally at risk.  
+Claims-based models were excluded because their high need–funding correlation (~0.55) reflects a reactive rather than proactive pattern; their near-zero gap meaningfulness (~0.04) confirms the gap index adds no independent signal when claims drive the need score. Expanded vulnerability specifications (adding housing tenure, disability, mobile homes) were also excluded: increasing the variable count raised normalization sensitivity (mean rank difference 19–21 vs. 13–15 for core models) without improving logit AUC, violating the parsimony criterion. Similarly, simple spatial exposure metrics — river corridor percentage and NFHL flood zone coverage — were replaced by FEMA Expected Annual Loss, which captures both hazard intensity and asset exposure rather than treating all land within a flood polygon as equally at risk.
 
-The implicit selection principle: parsimony + predictive signal + normalization stability + external benchmarkability.
+Models were selected based on predictive performance, stability across normalization methods, interpretability, and comparability to established FEMA benchmarks.
 
 **Normalization:**  
 Rank-based (percentile) normalization was chosen over z-scores for four reasons: robustness to extreme outliers in Vermont flood data, bounded [0,1] output interpretable to general audiences, comparability across variables with incompatible units and distributions, and confirmation from sensitivity analysis that the substantive findings are stable across both methods (need-index Spearman z vs. rank: 0.89–1.00).
