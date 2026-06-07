@@ -1,0 +1,59 @@
+/* Minimal CSS hooks for Floodlines Shepherd tour
+   This file is optional — the tour script injects minimal styles automatically.
+   Include this file in index.html if you prefer static CSS instead of injected styles.
+*/
+.tour-open {
+  outline: 2px solid rgba(0, 123, 255, 0.12);
+}
+
+/* Floating highlight overlay */
+#floodlines-tour-overlay {
+  position: absolute;
+  pointer-events: none;
+  /* box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  border: 2px solid rgba(255,165,0,0.95); */
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.45),
+    0 8px 32px rgba(0, 0, 0, 0.28);
+  border-radius: 6px;
+  transition: all 180ms ease;
+  z-index: 5000;
+  display: none;
+}
+
+/* Blocking welcome modal */
+#floodlines-tour-welcome-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6000;
+}
+.tour-welcome-card {
+  background: #fff;
+  padding: 18px;
+  border-radius: 6px;
+  max-width: 720px;
+  width: calc(100% - 40px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+.tour-welcome-card h3 {
+  margin: 0 0 6px 0;
+}
+.tour-welcome-card p {
+  margin: 0;
+  color: #333;
+}
+.floodlines-tour-restart {
+  margin-left: 0.6rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .tour-welcome-card {
+    padding: 14px;
+  }
+}
