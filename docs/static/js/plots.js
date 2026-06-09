@@ -350,7 +350,8 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
     },
   ];
 
-  // add labels to plot with styling and positioning
+  // add labels to plot with halo effect for legibility over colored circles
+  // paint-order:stroke fill renders the white stroke behind the dark fill — no double-render needed
   svg
     .append("g")
     .attr("class", "quadrant-labels")
@@ -359,8 +360,13 @@ function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
     .join("text")
     .attr("x", (d) => x(d.x))
     .attr("y", (d) => y(d.y))
-    .attr("font-size", "11px")
-    .attr("fill", "#555")
+    .attr("font-size", "11.5px")
+    .attr("font-weight", "600")
+    .attr("fill", "#222")
+    .attr("stroke", "rgba(255,255,255,0.88)")
+    .attr("stroke-width", "3.5px")
+    .attr("stroke-linejoin", "round")
+    .style("paint-order", "stroke fill")
     .attr("text-anchor", "middle")
     .text((d) => d.text);
 }
