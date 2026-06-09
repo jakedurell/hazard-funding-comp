@@ -1,57 +1,59 @@
-/* Floodlines guided tour (production-ready):
-   - Stable restart and idempotent start
-   - Timestamped prompt window (30 days)
+/* =============================================================================
+   Floodlines Guided Tour
+   -----------------------------------------------------------------------------
+   A ProPublica-style data story tour using Shepherd.js.
+
+   Architecture:
+   - Timestamped 30-day localStorage prompt window
    - Blocking welcome modal (accept / decline)
-   - Single overlay highlight (no layout shifts)
-   - Guarded town selection (doesn't override user choice)
-   - Uses Shepherd.js, with local vendor + CDN fallback
-*/
+   - Floating overlay highlight element (no layout shifts, no z-index conflicts)
+   - Idempotent start/restart with in-flight guards
+   - Full cleanup on cancel, complete, or restart
+   - Dashboard state is reset before the final step and on cleanup
+   - Local vendor CSS/JS preferred; CDN fallback with visible error banner
+   ============================================================================= */
+
 (function () {
-  const SEEN_KEY = 'floodlines_tour_seen_at_v1';
-  const PROMPT_KEY = 'floodlines_tour_prompted_at_v1';
+  'use strict';
+
+  const SEEN_KEY    = 'floodlines_tour_seen_at_v1';
+  const PROMPT_KEY  = 'floodlines_tour_prompted_at_v1';
   const EXPIRY_DAYS = 30;
-  const DEFAULT_TOWN = 'Newport';
+  const DEFAULT_TOWN = 'Newport city';
 
   let tour = null;
   const state = {
-    starting: false,
-    active: false,
+    starting:         false,
+    active:           false,
     requestedRestart: false,
-    overlayEl: null,
-    repositionHandler: null
+    overlayEl:        null,
+    repositionFn:     null
   };
 
-  let originalSelect = null;
-  let originalSelectValue = null;
+  let savedSelectEl    = null;
+  let savedSelectValue = null;
 
-  /* Utilities */
-  const nowMs = () => Date.now();
-  const daysToMs = d => d * 24 * 60 * 60 * 1000;
-
+  /* ── time utilities ──────────────────────────────────────────────────────── */
+  const msNow  = () => Date.now();
+  const dayMs  = d => d * 86400000;
   function hasPromptExpired() {
     const t = localStorage.getItem(PROMPT_KEY);
-    if (!t) return true;
-    return nowMs() - parseInt(t, 10) > daysToMs(EXPIRY_DAYS);
+    return !t || (msNow() - parseInt(t, 10) > dayMs(EXPIRY_DAYS));
   }
-  function markPrompted() { localStorage.setItem(PROMPT_KEY, String(nowMs())); }
-  function markTourSeen() { localStorage.setItem(SEEN_KEY, String(nowMs())); }
+  function markPrompted() { localStorage.setItem(PROMPT_KEY, String(msNow())); }
+  function markSeen()     { localStorage.setItem(SEEN_KEY,   String(msNow())); }
 
-  /* --- asset loaders --- */
+  /* ── asset loaders ───────────────────────────────────────────────────────── */
   function loadCss(href) {
     return new Promise((resolve, reject) => {
-      if (document.querySelector(`link[href="${href}"]`)) return resolve();
-      const l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = href;
-      let timedOut = false;
-      const timeout = setTimeout(() => {
-        timedOut = true;
-        l.onerror = null;
-        l.onload = null;
-        reject(new Error('timeout loading CSS ' + href));
-      }, 8000);
-      l.onload = () => { if (!timedOut) { clearTimeout(timeout); resolve(); } };
-      l.onerror = () => { if (!timedOut) { clearTimeout(timeout); reject(new Error('failed to load ' + href)); } };
+      if (document.querySelector('link[href="' + href + '"]')) return resolve();
+      const l   = document.createElement('link');
+      l.rel     = 'stylesheet';
+      l.href    = href;
+      let done  = false;
+      const tid = setTimeout(() => { done = true; reject(new Error('CSS timeout: ' + href)); }, 8000);
+      l.onload  = () => { if (!done) { clearTimeout(tid); resolve(); } };
+      l.onerror = () => { if (!done) { clearTimeout(tid); reject(new Error('CSS failed: ' + href)); } };
       document.head.appendChild(l);
     });
   }
@@ -59,484 +61,620 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       if (window.Shepherd) return resolve();
-      const s = document.createElement('script');
-      s.src = src;
-      s.async = true;
-      let timedOut = false;
-      const timeout = setTimeout(() => {
-        timedOut = true;
-        s.onload = null;
-        s.onerror = null;
-        reject(new Error('timeout loading script ' + src));
-      }, 10000);
-      s.onload = () => { if (!timedOut) { clearTimeout(timeout); resolve(); } };
-      s.onerror = () => { if (!timedOut) { clearTimeout(timeout); reject(new Error('failed to load ' + src)); } };
+      const s   = document.createElement('script');
+      s.src     = src;
+      s.async   = true;
+      let done  = false;
+      const tid = setTimeout(() => { done = true; reject(new Error('JS timeout: ' + src)); }, 10000);
+      s.onload  = () => { if (!done) { clearTimeout(tid); resolve(); } };
+      s.onerror = () => { if (!done) { clearTimeout(tid); reject(new Error('JS failed: ' + src)); } };
       document.head.appendChild(s);
     });
   }
 
-  function injectLocalStyle(css) {
-    if (document.getElementById('floodlines-tour-style')) return;
+  function injectStyle(id, css) {
+    if (document.getElementById(id)) return;
     const s = document.createElement('style');
-    s.id = 'floodlines-tour-style';
+    s.id = id;
     s.textContent = css;
     document.head.appendChild(s);
   }
 
-  function waitFor(selector, timeout = 3000) {
-    return new Promise((resolve) => {
-      const el = document.querySelector(selector);
+  /* ── DOM utilities ───────────────────────────────────────────────────────── */
+  function waitFor(selector, ms) {
+    ms = ms || 3000;
+    return new Promise(function (resolve) {
+      var el = document.querySelector(selector);
       if (el) return resolve(el);
-      const mo = new MutationObserver(() => {
-        const e = document.querySelector(selector);
-        if (e) {
-          mo.disconnect();
-          resolve(e);
-        }
+      var mo = new MutationObserver(function () {
+        var e = document.querySelector(selector);
+        if (e) { mo.disconnect(); resolve(e); }
       });
-      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
-      setTimeout(() => {
-        mo.disconnect();
-        resolve(document.querySelector(selector));
-      }, timeout);
+      mo.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(function () { mo.disconnect(); resolve(document.querySelector(selector)); }, ms);
     });
   }
 
-  /* --- single overlay highlight (no layout shifts) --- */
-  function createOverlay() {
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  function scrollTo(el) {
+    if (!el) return;
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+  }
+
+  /* ── floating highlight overlay ──────────────────────────────────────────── */
+  function ensureOverlay() {
     if (state.overlayEl) return state.overlayEl;
-    const o = document.createElement('div');
-    o.id = 'floodlines-tour-overlay';
-    o.style.position = 'absolute';
-    o.style.pointerEvents = 'none';
-    o.style.border = '2px solid rgba(255,165,0,0.95)';
-    o.style.borderRadius = '6px';
-    o.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-    o.style.transition = 'all 180ms ease';
-    o.style.zIndex = '5000';
-    o.style.display = 'none';
+    var o = document.createElement('div');
+    o.id = 'fl-tour-highlight';
     document.body.appendChild(o);
     state.overlayEl = o;
     return o;
   }
 
-  function positionOverlay(overlay, el) {
-    if (!el || !overlay) return;
-    const r = el.getBoundingClientRect();
-    const pad = 6;
-    overlay.style.left = (r.left + window.scrollX - pad) + 'px';
-    overlay.style.top = (r.top + window.scrollY - pad) + 'px';
-    overlay.style.width = (Math.max(8, r.width) + pad * 2) + 'px';
-    overlay.style.height = (Math.max(8, r.height) + pad * 2) + 'px';
-    overlay.style.display = 'block';
+  function positionOverlay(el) {
+    var o = ensureOverlay();
+    if (!el) { o.style.display = 'none'; return; }
+    var r   = el.getBoundingClientRect();
+    var pad = 7;
+    o.style.left    = (r.left + window.scrollX - pad) + 'px';
+    o.style.top     = (r.top  + window.scrollY - pad) + 'px';
+    o.style.width   = (Math.max(4, r.width)  + pad * 2) + 'px';
+    o.style.height  = (Math.max(4, r.height) + pad * 2) + 'px';
+    o.style.display = 'block';
   }
 
-  function setHighlightElement(el) {
+  function setHighlight(el) {
     clearHighlight();
     if (!el) return;
-    const overlay = createOverlay();
-    positionOverlay(overlay, el);
-    state.repositionHandler = () => positionOverlay(overlay, el);
-    window.addEventListener('scroll', state.repositionHandler, true);
-    window.addEventListener('resize', state.repositionHandler);
+    positionOverlay(el);
+    state.repositionFn = function () { positionOverlay(el); };
+    window.addEventListener('scroll', state.repositionFn, true);
+    window.addEventListener('resize', state.repositionFn);
   }
 
   function clearHighlight() {
-    if (!state.overlayEl) return;
-    state.overlayEl.style.display = 'none';
-    if (state.repositionHandler) {
-      window.removeEventListener('scroll', state.repositionHandler, true);
-      window.removeEventListener('resize', state.repositionHandler);
-      state.repositionHandler = null;
+    if (state.overlayEl) state.overlayEl.style.display = 'none';
+    if (state.repositionFn) {
+      window.removeEventListener('scroll', state.repositionFn, true);
+      window.removeEventListener('resize', state.repositionFn);
+      state.repositionFn = null;
     }
   }
 
-  /* --- guarded town selection --- */
-  function selectTownForTour(townName = DEFAULT_TOWN) {
-    const possible = ['#towns-dropdown', '#towns-control select', 'select[name="town"]', 'select[name="towns"]', 'select'];
-    let sel = null;
-    for (const s of possible) {
-      sel = document.querySelector(s);
+  /* ── dashboard interaction helpers ──────────────────────────────────────── */
+
+  /* Switch the primary model selector above the map.
+     overlayValue: 'Total Risk' | 'Risk per Person' | 'FEMA Risk Index' */
+  function switchPrimaryModel(overlayValue) {
+    var group = document.querySelector('#model-selector-group');
+    if (!group) return Promise.resolve();
+    var input   = group.querySelector('input[data-overlay="' + overlayValue + '"]');
+    if (!input) return Promise.resolve();
+    var current = group.querySelector('input:checked');
+    if (current === input) return Promise.resolve();
+    input.checked = true;
+    group.querySelectorAll('label').forEach(function (l) { l.classList.remove('active'); });
+    var lbl = input.closest('label');
+    if (lbl) lbl.classList.add('active');
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    input.dispatchEvent(new Event('input',  { bubbles: true }));
+    return delay(800);
+  }
+
+  /* Switch the secondary model selector below the scatterplot. */
+  function switchSecondaryModel(overlayValue) {
+    var group = document.querySelector('#model-selector-group-secondary');
+    if (!group) return Promise.resolve();
+    var input   = group.querySelector('input[data-overlay="' + overlayValue + '"]');
+    if (!input) return Promise.resolve();
+    var current = group.querySelector('input:checked');
+    if (current === input) return Promise.resolve();
+    input.checked = true;
+    group.querySelectorAll('label').forEach(function (l) { l.classList.remove('active'); });
+    var lbl = input.closest('label');
+    if (lbl) lbl.classList.add('active');
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    input.dispatchEvent(new Event('input',  { bubbles: true }));
+    return delay(800);
+  }
+
+  /* Activate a choropleth button by its data-overlay value. */
+  function switchChoropleth(overlayValue) {
+    var btn = document.querySelector(
+      '#choropleth-control button[data-overlay="' + overlayValue + '"],' +
+      '#choropleth-control-special button[data-overlay="' + overlayValue + '"]'
+    );
+    if (!btn) return Promise.resolve();
+    btn.click();
+    return delay(700);
+  }
+
+  /* Set the Statewide Percentile / VT Avg toggle.
+     relative = true => "Compared to VT Avg" */
+  function setRelativeToggle(relative) {
+    var toggle = document.querySelector('#toggle-relative');
+    if (!toggle) return Promise.resolve();
+    if (toggle.checked === relative) return Promise.resolve();
+    toggle.checked = relative;
+    toggle.dispatchEvent(new Event('change', { bubbles: true }));
+    return delay(600);
+  }
+
+  /* Activate a context layer button by its data-overlay value. */
+  function activateContextLayer(overlayValue) {
+    var btn = document.querySelector('#context-controls button[data-overlay="' + overlayValue + '"]');
+    if (!btn) return Promise.resolve();
+    if (!btn.classList.contains('active')) btn.click();
+    return delay(700);
+  }
+
+  /* Deactivate a context layer button if active. */
+  function deactivateContextLayer(overlayValue) {
+    var btn = document.querySelector('#context-controls button[data-overlay="' + overlayValue + '"]');
+    if (!btn) return Promise.resolve();
+    if (btn.classList.contains('active')) btn.click();
+    return delay(400);
+  }
+
+  /* Select a town only when none is currently selected. */
+  function selectTown(townName) {
+    var selectors = ['#towns-dropdown', '#towns-control select', 'select[name="town"]', 'select'];
+    var sel = null;
+    for (var i = 0; i < selectors.length; i++) {
+      sel = document.querySelector(selectors[i]);
       if (sel) break;
     }
-
-    // guard: don't override if user already has a selection or stats panel populated
-    const statsNameEl = document.getElementById('stats-town-name');
-    const statsName = statsNameEl && statsNameEl.textContent ? statsNameEl.textContent.trim() : '';
-    const statsPopulated = statsName && statsName.toLowerCase() !== 'town snapshot';
-    const selectHasValue = sel && sel.value && sel.value !== '';
-    if (statsPopulated || selectHasValue) return Promise.resolve(false);
-
     if (!sel) return Promise.resolve(false);
 
-    originalSelect = sel;
-    originalSelectValue = sel.value;
+    var statsNameEl = document.getElementById('stats-town-name');
+    var statsText   = statsNameEl ? statsNameEl.textContent.trim().toLowerCase() : '';
+    var alreadySet  = statsText && statsText !== 'town snapshot';
+    if (alreadySet || (sel.value && sel.value !== '')) return Promise.resolve(false);
 
-    const optArray = Array.from(sel.options || []);
-    let target = optArray.find(o => o.text && o.text.trim().toLowerCase() === townName.toLowerCase());
-    if (!target) target = optArray.find(o => o.value && o.value.trim().toLowerCase() === townName.toLowerCase());
-    if (!target) target = optArray.find(o => o.text && o.text.trim().length > 0);
-    if (!target) return Promise.resolve(false);
+    savedSelectEl    = sel;
+    savedSelectValue = sel.value;
 
-    sel.value = target.value;
-    sel.dispatchEvent(new Event('input', { bubbles: true }));
+    var opts = Array.from(sel.options || []);
+    var opt  = opts.find(function (o) { return o.text.trim().toLowerCase() === townName.toLowerCase(); });
+    if (!opt) opt = opts.find(function (o) { return o.value.toLowerCase() === townName.toLowerCase(); });
+    if (!opt) opt = opts.find(function (o) { return o.text.trim().length > 0; });
+    if (!opt) return Promise.resolve(false);
+
+    sel.value = opt.value;
+    sel.dispatchEvent(new Event('input',  { bubbles: true }));
     sel.dispatchEvent(new Event('change', { bubbles: true }));
 
-    const stats = document.getElementById('stats-card');
-    if (stats) {
-      try { stats.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-    }
+    var statsCard = document.getElementById('stats-card');
+    if (statsCard) scrollTo(statsCard);
 
-    return new Promise((res) => setTimeout(res, 600));
+    return delay(800).then(function () { return true; });
   }
 
-  function restoreTownSelection() {
-    if (!originalSelect) return;
+  function restoreSelectEl() {
+    if (!savedSelectEl) return;
     try {
-      originalSelect.value = originalSelectValue;
-      originalSelect.dispatchEvent(new Event('input', { bubbles: true }));
-      originalSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    } catch (e) {}
-    originalSelect = null;
-    originalSelectValue = null;
+      savedSelectEl.value = savedSelectValue;
+      savedSelectEl.dispatchEvent(new Event('input',  { bubbles: true }));
+      savedSelectEl.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (_) {}
+    savedSelectEl    = null;
+    savedSelectValue = null;
   }
 
-  /* --- cleanup: idempotent and safe --- */
+  /* Reset the dashboard to its default post-load state:
+     Quadrants active, Risk per Person, Statewide Percentile, context layers off. */
+  function resetDashboard() {
+    return switchChoropleth('Quadrants')
+      .then(function () { return switchPrimaryModel('Risk per Person'); })
+      .then(function () { return setRelativeToggle(false); })
+      .then(function () { return deactivateContextLayer('Population'); })
+      .then(function () { return deactivateContextLayer('Funding Bubble'); })
+      .then(function () { return deactivateContextLayer('River Corridors'); })
+      .then(function () { restoreSelectEl(); });
+  }
+
+  /* ── cleanup ─────────────────────────────────────────────────────────────── */
   function cleanup() {
-    try { if (tour && typeof tour.hide === 'function') tour.hide(); } catch (e) {}
+    try { if (tour && typeof tour.hide === 'function') tour.hide(); } catch (_) {}
     tour = null;
     clearHighlight();
-    restoreTownSelection();
-    const modal = document.getElementById('floodlines-tour-welcome-modal');
+    var o = document.getElementById('fl-tour-highlight');
+    if (o) o.remove();
+    state.overlayEl = null;
+    var modal = document.getElementById('fl-tour-welcome-modal');
     if (modal) modal.remove();
-    const err = document.getElementById('floodlines-tour-error');
+    var err = document.getElementById('fl-tour-error');
     if (err) err.remove();
-    state.active = false;
+    state.active   = false;
     state.starting = false;
+    return resetDashboard();
   }
 
-  /* --- Shepherd loader with local vendor + CDN fallback --- */
-  async function ensureShepherd() {
-    if (window.Shepherd) return;
-    const localCss = './static/vendor/css/shepherd.min.css';
-    const localJs = './static/vendor/js/shepherd.v7.1.2.min.js';
-    try {
-      await loadCss(localCss);
-      await loadScript(localJs);
-      if (window.Shepherd) return;
-    } catch (e) {
-      // try CDN fallback
-    }
-    const cdnCss = 'https://cdn.jsdelivr.net/npm/shepherd.js@8.1.2/dist/css/shepherd.css';
-    const cdnJs = 'https://cdn.jsdelivr.net/npm/shepherd.js@8.1.2/dist/js/shepherd.min.js';
-    try {
-      await loadCss(cdnCss);
-      await loadScript(cdnJs);
-      return;
-    } catch (err) {
-      showTourLoadError(err);
-    }
+  /* ── Shepherd loader ─────────────────────────────────────────────────────── */
+  function ensureShepherd() {
+    if (window.Shepherd) return Promise.resolve();
+    var localCss = './static/vendor/shepherd/shepherd.min.css';
+    var localJs  = './static/vendor/shepherd/shepherd.v7.1.2.min.js';
+    return loadCss(localCss)
+      .then(function () { return loadScript(localJs); })
+      .then(function () { if (window.Shepherd) return; throw new Error('local vendor missing'); })
+      .catch(function () {
+        return loadCss('https://cdn.jsdelivr.net/npm/shepherd.js@8.1.2/dist/css/shepherd.css')
+          .then(function () { return loadScript('https://cdn.jsdelivr.net/npm/shepherd.js@8.1.2/dist/js/shepherd.min.js'); })
+          .catch(function (err) { showLoadError(err); throw err; });
+      });
   }
 
-  function showTourLoadError(err) {
-    if (document.getElementById('floodlines-tour-error')) return;
-    const container = document.createElement('div');
-    container.id = 'floodlines-tour-error';
-    container.style.margin = '12px';
-    container.style.padding = '10px 12px';
-    container.style.background = 'rgba(255,245,240,0.98)';
-    container.style.border = '1px solid #e6b8b8';
-    container.style.borderRadius = '6px';
-    container.style.fontSize = '13px';
-    container.innerHTML = `
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;">Tour unavailable: Shepherd assets could not be loaded (cross-origin or offline). To fix, place <strong>shepherd.css</strong> and <strong>shepherd.min.js</strong> into <code>./static/vendor/shepherd/</code>.</div>
-        <div style="white-space:nowrap">
-          <button id="floodlines-tour-retry-local" class="btn btn-primary btn-sm">Retry</button>
-          <button id="floodlines-tour-show-ids" class="btn btn-link btn-sm">Show files</button>
-        </div>
-      </div>
-      <div id="floodlines-tour-instructions" style="display:none;margin-top:8px;font-family:monospace;font-size:12px;">
-        Expected files:\n./static/vendor/shepherd/shepherd.css\n./static/vendor/shepherd/shepherd.min.js\nCDN: https://cdn.jsdelivr.net/npm/shepherd.js@8.1.2/
-      </div>
-    `;
-    const attach = document.querySelector('.dashboard-header') || document.body;
-    attach.appendChild(container);
-    document.getElementById('floodlines-tour-retry-local').addEventListener('click', () => {
-      container.remove();
-      ensureShepherd().then(() => { if (tour) tour.start(); });
+  function showLoadError(err) {
+    if (document.getElementById('fl-tour-error')) return;
+    var d = document.createElement('div');
+    d.id = 'fl-tour-error';
+    d.innerHTML =
+      '<div class="fl-tour-error-inner">' +
+        '<strong>Tour unavailable.</strong> Shepherd assets could not load. ' +
+        'Place shepherd.css and shepherd.min.js in ./static/vendor/shepherd/, then ' +
+        '<button id="fl-tour-retry">Retry</button>' +
+      '</div>';
+    (document.querySelector('.dashboard-header') || document.body).appendChild(d);
+    document.getElementById('fl-tour-retry').addEventListener('click', function () {
+      d.remove();
+      ensureShepherd().then(function () { if (tour) tour.start(); });
     });
-    document.getElementById('floodlines-tour-show-ids').addEventListener('click', () => {
-      const ins = document.getElementById('floodlines-tour-instructions');
-      ins.style.display = (ins.style.display === 'none') ? 'block' : 'none';
-    });
-    console.error('Floodlines tour: Shepherd load error', err);
+    console.error('Floodlines tour asset error:', err);
   }
 
-  /* --- Welcome modal (blocking) --- */
-  function createWelcomeModal() {
-    if (document.getElementById('floodlines-tour-welcome-modal')) return;
-    const overlay = document.createElement('div');
-    overlay.id = 'floodlines-tour-welcome-modal';
+  /* ── welcome modal ───────────────────────────────────────────────────────── */
+  function showWelcomeModal() {
+    if (document.getElementById('fl-tour-welcome-modal')) return;
+    var overlay = document.createElement('div');
+    overlay.id = 'fl-tour-welcome-modal';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.background = 'rgba(0,0,0,0.45)';
-    overlay.style.zIndex = '6000';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-
-    const card = document.createElement('div');
-    card.className = 'tour-welcome-card';
-    card.style.background = '#fff';
-    card.style.padding = '18px';
-    card.style.borderRadius = '6px';
-    card.style.maxWidth = '720px';
-    card.style.width = 'calc(100% - 40px)';
-    card.style.boxShadow = '0 10px 30px rgba(0,0,0,0.12)';
-    card.innerHTML = `
-      <h3 style="margin-top:0;margin-bottom:6px;">New here? Take a quick tour</h3>
-      <p style="margin:0 0 12px 0;color:#333;">A short, focused tour (about one minute) shows the dashboard’s central question and the main interactions for interpreting the map, models, and rankings.</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
-        <button id="floodlines-tour-decline" class="btn btn-link">Not now</button>
-        <button id="floodlines-tour-accept" class="btn btn-primary">Take the tour</button>
-      </div>
-    `;
-    overlay.appendChild(card);
+    overlay.setAttribute('aria-labelledby', 'fl-tour-modal-title');
+    overlay.innerHTML =
+      '<div class="fl-tour-modal-card">' +
+        '<div class="fl-tour-modal-header">' +
+          '<h2 id="fl-tour-modal-title">First time here?</h2>' +
+        '</div>' +
+        '<div class="fl-tour-modal-body">' +
+          '<p>Floodlines maps flood risk, social vulnerability, and FEMA mitigation funding across Vermont — and asks whether the money goes where it&rsquo;s needed most.</p>' +
+          '<p>A short guided tour (about one minute) explains how to read the map, what the models mean, and how to interpret the charts and rankings.</p>' +
+        '</div>' +
+        '<div class="fl-tour-modal-footer">' +
+          '<button id="fl-tour-modal-decline" class="fl-tour-btn fl-tour-btn-ghost">Not now</button>' +
+          '<button id="fl-tour-modal-accept"  class="fl-tour-btn fl-tour-btn-primary">Take the tour</button>' +
+        '</div>' +
+      '</div>';
     document.body.appendChild(overlay);
-
-    const accept = document.getElementById('floodlines-tour-accept');
-    const decline = document.getElementById('floodlines-tour-decline');
+    var accept  = document.getElementById('fl-tour-modal-accept');
+    var decline = document.getElementById('fl-tour-modal-decline');
     accept.focus();
-    accept.addEventListener('click', () => {
+    accept.addEventListener('click', function () {
       markPrompted();
-      // do not mark seen yet — mark on complete
       overlay.remove();
       startTour();
     });
-    decline.addEventListener('click', () => {
+    decline.addEventListener('click', function () {
       markPrompted();
       overlay.remove();
     });
   }
 
-  function showWelcomeIfNeeded() {
-    if (!hasPromptExpired()) return;
-    createWelcomeModal();
-  }
+  /* ── build tour ──────────────────────────────────────────────────────────── */
+  function buildTour() {
+    if (!window.Shepherd) return Promise.resolve(null);
 
-  /* --- Build the tour steps (async) --- */
-  async function buildTour() {
-    if (!window.Shepherd) return null;
+    return Promise.all([
+      waitFor('#map-id',                         5000),
+      waitFor('#quadrants-button',               4000),
+      waitFor('#model-selector-group',           4000),
+      waitFor('#model-selector-group-secondary', 2000),
+      waitFor('#choropleth-control',             2000),
+      waitFor('#plot-container',                 4000),
+      waitFor('#rankings-container',             4000),
+      waitFor('#stats-card',                     4000),
+      waitFor('#context-controls',               2000)
+    ]).then(function (els) {
+      var mapEl                = els[0];
+      var quadrantsBtn         = els[1];
+      var modelGroup           = els[2];
+      var modelGroupSecondary  = els[3];
+      var choroplethCtrl       = els[4];
+      var plotContainer        = els[5];
+      var rankingsContainer    = els[6];
+      var statsCard            = els[7];
+      var contextControls      = els[8];
 
-    // wait for important elements; tolerate missing ones
-    const quadrantsBtn = await waitFor('#quadrants-button', 4000);
-    const modelGroup = await waitFor('#model-selector-group', 4000);
-    const modelGroupSecondary = await waitFor('#model-selector-group-secondary', 2000);
-    const choroplethCtrl = await waitFor('#choropleth-control', 2000);
-    const plotContainer = await waitFor('#plot-container', 4000);
-
-    // create fresh tour instance
-    tour = new Shepherd.Tour({
-      defaultStepOptions: {
-        cancelIcon: { enabled: true },
-        classes: 'shepherd-theme-arrows shepherd-floodlines',
-        scrollTo: { behavior: 'smooth', block: 'center' }
-      },
-      useModalOverlay: true
-    });
-
-    function safeSelectRadio(container, overlayLabel) {
-      return new Promise((resolve) => {
-        try {
-          const cont = (typeof container === 'string') ? document.querySelector(container) : container;
-          if (!cont) return resolve(false);
-          const target = cont.querySelector(`input[data-overlay="${overlayLabel}"]`) || cont.querySelector('input');
-          const current = cont.querySelector('input:checked');
-          if (!target) return resolve(false);
-          if (current === target) return resolve(true);
-          try { target.checked = true; } catch (e) {}
-          target.dispatchEvent(new Event('input', { bubbles: true }));
-          target.dispatchEvent(new Event('change', { bubbles: true }));
-          // update label active classes
-          const labels = cont.querySelectorAll('label');
-          labels.forEach(l => l.classList.remove('active'));
-          const parentLabel = target.closest('label');
-          if (parentLabel) parentLabel.classList.add('active');
-          setTimeout(() => resolve(true), 500);
-        } catch (e) { resolve(false); }
+      tour = new Shepherd.Tour({
+        useModalOverlay: true,
+        defaultStepOptions: {
+          cancelIcon: { enabled: true },
+          classes:    'shepherd-floodlines',
+          scrollTo:   false
+        }
       });
-    }
 
-    // STEP 1: Intro / Thesis
-    tour.addStep({
-      id: 'intro',
-      title: 'Does funding follow risk?',
-      text: 'This dashboard compares modeled flood need against FEMA mitigation funding. Rankings change depending on how risk is defined; the next steps show what to look for.',
-      buttons: [
-        { text: 'Skip', action: () => { markPrompted(); tour.cancel(); } },
-        { text: 'Next', action: () => tour.next() }
-      ]
-    });
+      function s(opts) { tour.addStep(opts); }
+      var nav = [
+        { text: '&larr; Back', classes: 'shepherd-button-secondary', action: function () { tour.back(); } },
+        { text: 'Next &rarr;', classes: 'shepherd-button-primary',   action: function () { tour.next(); } }
+      ];
 
-    // STEP 2: Quadrant analysis
-    tour.addStep({
-      id: 'quadrants',
-      text: 'Quadrant Analysis groups towns by measured need and funding received. Look for upper-left (high-need, low-funding) and lower-right patterns.',
-      attachTo: quadrantsBtn ? { element: quadrantsBtn, on: 'bottom' } : undefined,
-      when: {
-        show: () => setHighlightElement(quadrantsBtn || document.body),
-        hide: () => clearHighlight()
-      },
-      buttons: [
-        { text: 'Back', action: () => tour.back() },
-        { text: 'Next', action: () => tour.next() }
-      ]
-    });
+      /* STEP 1 — Introduction */
+      s({
+        id:    'intro',
+        title: 'Does mitigation funding reach the towns that need it most?',
+        text:
+          '<p>Floodlines compares modeled flood need against FEMA mitigation funding across Vermont&rsquo;s 250+ towns.</p>' +
+          '<p>Different definitions of risk produce different rankings &mdash; and different answers to that question.</p>' +
+          '<p>This short tour explains how to read the dashboard. You can also <a href="article.html" target="_blank" rel="noopener">read the full story</a> for the complete analysis.</p>',
+        buttons: [
+          { text: 'Skip tour',    classes: 'shepherd-button-secondary', action: function () { markPrompted(); tour.cancel(); } },
+          { text: 'Start tour &rarr;', classes: 'shepherd-button-primary', action: function () { tour.next(); } }
+        ]
+      });
 
-    // STEP 3: Primary model selector (simulate change)
-    tour.addStep({
-      id: 'primary-model',
-      text: 'Changing the primary model reshuffles which towns appear most vulnerable: per-capita risk surfaces small exposed towns; total loss emphasizes larger towns.',
-      attachTo: modelGroup ? { element: modelGroup, on: 'top' } : undefined,
-      beforeShowPromise: () => safeSelectRadio(modelGroup, 'Total Risk'),
-      when: {
-        show: () => setHighlightElement(modelGroup || document.body),
-        hide: () => clearHighlight()
-      },
-      buttons: [
-        { text: 'Back', action: () => tour.back() },
-        { text: 'Next', action: () => tour.next() }
-      ]
-    });
+      /* STEP 2 — Quadrant view on map */
+      s({
+        id:    'quadrant-map',
+        text:
+          '<p>This is the default view: <strong>Quadrant Analysis</strong>.</p>' +
+          '<p>Each town is placed by two questions: <em>How high is the need?</em> and <em>How much funding has been received?</em> The upper-left quadrant &mdash; high need, low funding &mdash; is where disparities are sharpest.</p>',
+        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+        beforeShowPromise: function () {
+          return switchChoropleth('Quadrants')
+            .then(function () { return switchPrimaryModel('Risk per Person'); })
+            .then(function () { return setRelativeToggle(false); })
+            .then(function () { scrollTo(mapEl); return delay(400); })
+            .then(function () { setHighlight(mapEl); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
 
-    // STEP 4: Secondary model / scatterplot
-    tour.addStep({
-      id: 'secondary-model',
-      text: 'The scatterplot and rankings reveal statewide patterns; correlation is imperfect and some high-need towns receive little funding.',
-      attachTo: modelGroupSecondary ? { element: modelGroupSecondary, on: 'top' } : (plotContainer ? { element: plotContainer, on: 'top' } : undefined),
-      beforeShowPromise: () => (modelGroupSecondary ? safeSelectRadio(modelGroupSecondary, 'Total Risk') : new Promise(r => setTimeout(r, 300))),
-      when: {
-        show: () => setHighlightElement(modelGroupSecondary || plotContainer || document.body),
-        hide: () => clearHighlight()
-      },
-      buttons: [
-        { text: 'Back', action: () => tour.back() },
-        { text: 'Next', action: () => tour.next() }
-      ]
-    });
+      /* STEP 3 — Quadrant button */
+      s({
+        id:    'quadrant-button',
+        text:
+          '<p>This button returns to the primary view at any time. When you&rsquo;ve been exploring other overlays, click <strong>Quadrant Analysis</strong> to reset to the central framing.</p>',
+        attachTo: quadrantsBtn ? { element: quadrantsBtn, on: 'bottom' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(quadrantsBtn);
+          return delay(300).then(function () { setHighlight(quadrantsBtn); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
 
-    // STEP 5: Map exploration / context
-    const mapAttach = choroplethCtrl || await waitFor('#toggle-relative-secondary', 1000);
-    tour.addStep({
-      id: 'map-context',
-      text: 'Try different choropleth metrics, the relative vs percentile toggle, context layers, and the town dropdown to test patterns and drill into local snapshots.',
-      attachTo: mapAttach ? { element: mapAttach, on: 'top' } : undefined,
-      when: {
-        show: () => setHighlightElement(mapAttach || document.body),
-        hide: () => clearHighlight()
-      },
-      buttons: [
-        { text: 'Back', action: () => tour.back() },
-        { text: 'Next', action: () => tour.next() }
-      ]
-    });
+      /* STEP 4 — Model change on map */
+      s({
+        id:    'model-change',
+        text:
+          '<p>Watch the map change.</p>' +
+          '<p><strong>Total Risk</strong> (now active) tends to elevate larger towns with more infrastructure. <strong>Risk per Person</strong> surfaces smaller communities with concentrated exposure.</p>' +
+          '<p>The model you choose changes which towns appear most vulnerable.</p>',
+        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(mapEl);
+          return delay(400)
+            .then(function () { setHighlight(mapEl); })
+            .then(function () { return switchPrimaryModel('Total Risk'); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
 
-    // STEP 6: End
-    tour.addStep({
-      id: 'end',
-      title: 'You’re ready to explore',
-      text: 'Explore the map and models. You can restart this tour anytime from the header.',
-      buttons: [
-        { text: 'Restart tour', action: () => { state.requestedRestart = true; tour.cancel(); } },
-        { text: 'Done', action: () => { markPrompted(); tour.complete(); } }
-      ]
-    });
+      /* STEP 5 — Funding Gap overlay */
+      s({
+        id:    'funding-gap',
+        text:
+          '<p>Watch the map change again.</p>' +
+          '<p><strong>Funding Gap</strong> compares measured need against mitigation funding received. The wider the gap, the greater the disparity &mdash; towns in red are receiving far less funding relative to their risk.</p>',
+        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(mapEl);
+          return delay(400)
+            .then(function () { setHighlight(mapEl); })
+            .then(function () { return switchChoropleth('Funding Gap'); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
 
-    // teardown handling
-    tour.on('cancel', () => {
-      state.active = false;
-      cleanup();
-      if (state.requestedRestart) {
-        state.requestedRestart = false;
-        setTimeout(() => startTour(), 80);
+      /* STEP 6 — Relative toggle */
+      s({
+        id:    'relative-toggle',
+        text:
+          '<p>Watch the map update.</p>' +
+          '<p>The map can show <strong>statewide percentile ranks</strong> or comparisons <strong>against the Vermont average</strong>. Switching perspectives can make disparities appear more or less extreme depending on which towns you&rsquo;re comparing.</p>',
+        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(mapEl);
+          return delay(400)
+            .then(function () { setHighlight(mapEl); })
+            .then(function () { return setRelativeToggle(true); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 7 — Scatterplot model change */
+      s({
+        id:    'scatterplot',
+        text:
+          '<p>Watch the dots move.</p>' +
+          '<p>The scatterplot reveals how closely funding follows need across the entire state. Switching the model reshuffles the rankings &mdash; the scatter around a perfect diagonal is the story.</p>',
+        attachTo: plotContainer ? { element: plotContainer, on: 'top' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(plotContainer);
+          return delay(500)
+            .then(function () { setHighlight(plotContainer); })
+            .then(function () { return switchSecondaryModel('Risk per Person'); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 8 — Rankings table */
+      s({
+        id:    'rankings',
+        text:
+          '<p>The rankings table shows the same underlying data sorted by the current model.</p>' +
+          '<p>Use the jump buttons to navigate to the highest-need towns, the Vermont average, or your own town once you&rsquo;ve selected one.</p>',
+        attachTo: rankingsContainer ? { element: rankingsContainer, on: 'top' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(rankingsContainer);
+          return delay(400).then(function () {
+            setHighlight(rankingsContainer);
+            var jumpTop = document.getElementById('jump-top');
+            if (jumpTop) jumpTop.click();
+            return delay(400);
+          });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 9 — Town snapshot */
+      s({
+        id:    'town-snapshot',
+        text:
+          '<p>Select any town from the dropdown to open a local snapshot.</p>' +
+          '<p>Here&rsquo;s <strong>Newport</strong> &mdash; risk, vulnerability, funding, and funding alignment are all shown here. Rankings shift depending on the active model.</p>',
+        attachTo: statsCard ? { element: statsCard, on: 'left' } : undefined,
+        beforeShowPromise: function () {
+          return switchChoropleth('Quadrants')
+            .then(function () { return switchPrimaryModel('Risk per Person'); })
+            .then(function () { return setRelativeToggle(false); })
+            .then(function () { scrollTo(mapEl); return delay(500); })
+            .then(function () { return selectTown(DEFAULT_TOWN); })
+            .then(function () { setHighlight(statsCard); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 10 — Context layers */
+      s({
+        id:    'context-layers',
+        text:
+          '<p>Context layers add geographic perspective without changing the underlying analysis.</p>' +
+          '<p><strong>Town Population</strong> and <strong>Flood Corridors</strong> help explain why certain towns appear vulnerable &mdash; a small town sitting in a mapped river corridor may face concentrated risk that aggregate models underweight.</p>',
+        attachTo: contextControls ? { element: contextControls, on: 'top' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(mapEl);
+          return delay(400)
+            .then(function () { setHighlight(contextControls); })
+            .then(function () { return activateContextLayer('Population'); })
+            .then(function () { return activateContextLayer('River Corridors'); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 11 — Conclusion */
+      s({
+        id:    'conclusion',
+        title: "You're ready to explore.",
+        text:
+          '<p>Try switching models, comparing towns, and testing different perspectives.</p>' +
+          '<p>One of this dashboard&rsquo;s central themes: <em>conclusions change depending on how flood risk is defined</em>. That ambiguity is not a flaw &mdash; it&rsquo;s part of the story.</p>' +
+          '<p>You can restart this tour anytime using the header button.</p>',
+        beforeShowPromise: function () {
+          return resetDashboard()
+            .then(function () { scrollTo(mapEl); clearHighlight(); });
+        },
+        buttons: [
+          { text: 'Restart tour', classes: 'shepherd-button-secondary', action: function () { state.requestedRestart = true; tour.cancel(); } },
+          { text: 'Done',         classes: 'shepherd-button-primary',   action: function () { markSeen(); tour.complete(); } }
+        ]
+      });
+
+      /* lifecycle: both cancel and complete trigger cleanup and optional restart */
+      function onTeardown() {
+        state.active = false;
+        cleanup().then(function () {
+          if (state.requestedRestart) {
+            state.requestedRestart = false;
+            setTimeout(function () { startTour(); }, 80);
+          }
+        });
       }
-    });
-    tour.on('complete', () => {
-      state.active = false;
-      markTourSeen();
-      cleanup();
-      if (state.requestedRestart) {
-        state.requestedRestart = false;
-        setTimeout(() => startTour(), 80);
-      }
-    });
+      tour.on('cancel',   onTeardown);
+      tour.on('complete', onTeardown);
 
-    return tour;
+      return tour;
+    });
   }
 
-  /* --- start / restart logic (idempotent) --- */
-  async function startTour() {
+  /* ── startTour (idempotent) ──────────────────────────────────────────────── */
+  function startTour() {
     if (state.starting || state.active) return;
     state.starting = true;
-    try {
-      await ensureShepherd();
-      if (!tour) await buildTour();
-      if (tour) {
-        tour.start();
-        state.active = true;
-      }
-    } catch (e) {
-      console.warn('Floodlines tour start failed', e);
-    } finally {
-      state.starting = false;
-    }
+    ensureShepherd()
+      .then(function () { return buildTour(); })
+      .then(function () {
+        if (tour) {
+          state.active = true;
+          tour.start();
+        }
+      })
+      .catch(function (err) {
+        console.warn('Floodlines tour start failed:', err);
+        state.active = false;
+      })
+      .finally(function () {
+        state.starting = false;
+      });
   }
 
+  /* ── restartTour (safe) ──────────────────────────────────────────────────── */
   function restartTour() {
     if (state.starting) { state.requestedRestart = true; return; }
     if (state.active && tour) { state.requestedRestart = true; tour.cancel(); return; }
-    cleanup();
-    startTour();
+    cleanup().then(function () { startTour(); });
   }
 
-  /* --- welcome modal and auto-prompting --- */
-  function showWelcomeIfNeeded() {
-    if (!hasPromptExpired()) return;
-    createWelcomeModal();
-  }
+  /* ── auto-prompt on load ─────────────────────────────────────────────────── */
+  window.addEventListener('load', function () {
+    if (hasPromptExpired()) showWelcomeModal();
 
-  /* --- minimal CSS injected for overlay and modal --- */
-  injectLocalStyle(`
-    #floodlines-tour-overlay { transition: all 180ms ease; pointer-events: none; }
-    #floodlines-tour-welcome-modal { font-family: inherit; }
-    .tour-welcome-card h3 { margin: 0 0 6px 0; }
-    .tour-welcome-card p { margin: 0; color: #333; }
-    @media (max-width:720px){ .tour-welcome-card{ padding:14px; } }
-  `);
-
-  // expose API
-  window.restartTour = restartTour;
-  window.FloodlinesTour = {
-    start: startTour,
-    restart: restartTour,
-    isSeen: () => !!localStorage.getItem(SEEN_KEY)
-  };
-
-  // auto-run on load
-  window.addEventListener('load', () => {
-    showWelcomeIfNeeded();
-    const navTarget = document.querySelector('.navbar-right .navbar-nav-wrap') || document.querySelector('.dashboard-header');
-    if (navTarget && !document.getElementById('floodlines-tour-restart')) {
-      const btn = document.createElement('button');
-      btn.id = 'floodlines-tour-restart';
-      btn.className = 'btn btn-link floodlines-tour-restart';
+    var navTarget = document.querySelector('.navbar-right .navbar-nav-wrap')
+                 || document.querySelector('.navbar .navbar-right')
+                 || document.querySelector('.dashboard-header');
+    if (navTarget && !document.getElementById('fl-tour-restart-btn')) {
+      var btn = document.createElement('button');
+      btn.id        = 'fl-tour-restart-btn';
+      btn.className = 'btn btn-link fl-tour-restart-btn';
+      btn.setAttribute('aria-label', 'Take the guided tour');
       btn.textContent = 'Take tour';
-      btn.addEventListener('click', () => { restartTour(); });
+      btn.addEventListener('click', function () { restartTour(); });
       navTarget.appendChild(btn);
     }
   });
 
-})();
+  /* ── runtime styles (structural only; aesthetics in tour.css) ────────────── */
+  injectStyle('fl-tour-runtime', [
+    '#fl-tour-highlight{',
+      'position:absolute;pointer-events:none;',
+      'border:2px solid #f5a623;border-radius:6px;',
+      'box-shadow:0 0 0 2000px rgba(0,0,0,0.20);',
+      'transition:left 180ms ease,top 180ms ease,width 180ms ease,height 180ms ease;',
+      'z-index:9990;display:none;}',
+    '#fl-tour-welcome-modal{',
+      'position:fixed;inset:0;',
+      'background:rgba(10,20,40,0.55);',
+      'display:flex;align-items:center;justify-content:center;',
+      'z-index:9999;font-family:inherit;}'
+  ].join(''));
+
+  /* ── public API ──────────────────────────────────────────────────────────── */
+  window.restartTour = restartTour;
+  window.FloodlinesTour = {
+    start:   startTour,
+    restart: restartTour,
+    isSeen:  function () { return !!localStorage.getItem(SEEN_KEY); }
+  };
+
+}());
