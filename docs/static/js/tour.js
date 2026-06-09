@@ -218,11 +218,13 @@
   }
 
   /* Select a town for tour demonstration.
-     Guards only against a genuine user selection (stats card populated with a
-     real town name). The sel.value check is intentionally absent: the select
-     element commonly carries a non-empty default value before any user
-     interaction, which would otherwise prevent the tour from ever selecting a
-     demonstration town. */
+     Guards only against a genuine user selection (stats card already populated
+     with a real town name). The sel.value guard is intentionally absent — the
+     select commonly has a non-empty value before any user interaction.
+
+     Dispatches both 'change' and 'input' so the dashboard's event listener
+     (which listens for 'change' on #towns-dropdown) fires correctly.
+     Does NOT scroll here — callers manage scrolling for better pacing. */
   function selectTown(townName) {
     var selectors = ['#towns-dropdown', '#towns-control select', 'select[name="town"]', 'select'];
     var sel = null;
@@ -232,6 +234,7 @@
     }
     if (!sel) return Promise.resolve(false);
 
+    // Only skip if the user has already chosen a town themselves
     var statsNameEl = document.getElementById('stats-town-name');
     var statsText   = statsNameEl ? statsNameEl.textContent.trim().toLowerCase() : '';
     if (statsText && statsText !== 'town snapshot') return Promise.resolve(false);
@@ -245,28 +248,27 @@
     var opt = opts.find(function (o) { return o.text.trim().toLowerCase() === lower; });
     // 2. Exact value match
     if (!opt) opt = opts.find(function (o) { return o.value.toLowerCase() === lower; });
-    // 3. Prefix match — 'Newport' matches 'Newport city' and vice-versa
+    // 3. Prefix match — handles 'Newport' vs 'Newport city'
     if (!opt) opt = opts.find(function (o) {
       var t = o.text.trim().toLowerCase();
       return t.indexOf(lower) === 0 || lower.indexOf(t) === 0;
     });
-    // 4. Base-name match — strip city/town/village suffix from both sides
+    // 4. Base-name match — strip trailing city/town/village suffix
     var strip = function (s) { return s.replace(/\s+(city|town|village|gore|grant)$/i, '').trim(); };
     if (!opt) opt = opts.find(function (o) {
       return strip(o.text.trim().toLowerCase()) === strip(lower);
     });
-    // 5. Fallback to first non-empty option so the demo always shows something
+    // 5. Fallback: first non-empty option so the demo always shows something
     if (!opt) opt = opts.find(function (o) { return o.value !== '' && o.text.trim().length > 0; });
     if (!opt) return Promise.resolve(false);
 
     sel.value = opt.value;
-    sel.dispatchEvent(new Event('input',  { bubbles: true }));
+    // Fire both events — dashboard wired to 'change', but belt-and-suspenders
     sel.dispatchEvent(new Event('change', { bubbles: true }));
+    sel.dispatchEvent(new Event('input',  { bubbles: true }));
 
-    var statsCard = document.getElementById('stats-card');
-    if (statsCard) scrollTo(statsCard);
-
-    return delay(800).then(function () { return true; });
+    // Give the map time to zoom before returning
+    return delay(1200).then(function () { return true; });
   }
 
   function restoreSelectEl() {
@@ -495,8 +497,10 @@
         beforeShowPromise: function () {
           scrollTo(mapEl);
           return delay(400)
-            .then(function () { setHighlight(mapEl); return delay(400); })
-            .then(function () { return switchPrimaryModel('Risk per Person'); return delay(400); })
+            .then(function () { setHighlight(mapEl); })
+            .then(function () { return delay(300); })
+            .then(function () { return switchPrimaryModel('Risk per Person'); })
+            .then(function () { return delay(300); })
             .then(function () { return switchPrimaryModel('Total Risk'); });
         },
         when: { hide: function () { clearHighlight(); } },
@@ -524,7 +528,8 @@
               return delay(400);
             })
             .then(function () { return setRelativeToggle(true); })
-            .then(function () { scrollTo(choroplethCtrl); });
+            .then(function () { scrollTo(choroplethCtrl); })
+            .then(function () { setHighlight(choroplethCtrl); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
@@ -539,6 +544,7 @@
         attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(mapEl);
+          switchChoropleth('Funding Gap');
           return delay(400).then(function () { setHighlight(mapEl); });
         },
         when: { hide: function () { clearHighlight(); } },
@@ -555,13 +561,16 @@
         beforeShowPromise: function () {
           scrollTo(plotContainer);
           return delay(500)
-            .then(function () { scrollTo(modelGroupSecondary); })
-            .then(function () { setHighlight(modelGroupSecondary); return delay(800); })
+            .then(function () { setHighlight(modelGroupSecondary); })
+            .then(function () { return delay(800); })
             .then(function () { scrollTo(plotContainer); })
-            // .then(function () { setHighlight(plotContainer); })
-            .then(function () { return switchSecondaryModel('Total Risk'); return delay(1200); })
-            .then(function () { return switchSecondaryModel('Risk per Person'); return delay(1200); })
-            .then(function () { return switchSecondaryModel('FEMA Risk Index'); });
+            .then(function () { setHighlight(plotContainer); })
+            .then(function () { return switchSecondaryModel('Total Risk'); })
+            .then(function () { return delay(1000); })
+            .then(function () { return switchSecondaryModel('Risk per Person'); })
+            .then(function () { return delay(1000); })
+            .then(function () { return switchSecondaryModel('FEMA Risk Index'); })
+            .then(function () { return delay(1000); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
@@ -623,8 +632,11 @@
             .then(function () { return switchPrimaryModel('Risk per Person'); })
             .then(function () { return setRelativeToggle(false); })
             .then(function () { scrollTo(mapEl); })
-            .then(function () { return selectTown(DEFAULT_TOWN); return delay(500); })
+            .then(function () { return delay(400); })
+            .then(function () { return selectTown(DEFAULT_TOWN); })
+            /* selectTown() delays 1200ms internally — map zoom is visible */
             .then(function () { scrollTo(statsCard); })
+            .then(function () { return delay(500); })
             .then(function () { setHighlight(statsCard); });
         },
         when: { hide: function () { clearHighlight(); } },
@@ -641,11 +653,16 @@
         beforeShowPromise: function () {
           scrollTo(contextControls);
           return delay(400)
-            .then(function () { setHighlight(contextControls); return delay(400); })
-            .then(function () { return activateContextLayer('River Corridors'); return delay(1200); })
-            .then(function () { scrollTo(mapEl); setHighlight(mapEl); return delay(1200); })
-            .then(function () { return activateContextLayer('Population'); return delay(1200); })
-            .then(function () { return activateContextLayer('Funding Bubble'); });
+            .then(function () { setHighlight(contextControls); })
+            .then(function () { return delay(700); })
+            .then(function () { return activateContextLayer('Population'); })
+            .then(function () { return delay(700); })
+            .then(function () { scrollTo(mapEl); setHighlight(mapEl); })
+            .then(function () { return delay(400); })
+            .then(function () { return activateContextLayer('River Corridors'); })
+            .then(function () { return delay(700); })
+            .then(function () { return activateContextLayer('Funding Bubble'); })
+            .then(function () { return delay(700); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav

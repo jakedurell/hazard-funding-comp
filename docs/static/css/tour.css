@@ -123,8 +123,9 @@
   font-weight: 700;
   color: #111;
   line-height: 1.3;
-  word-break: break-word;   /* prevent overflow on narrow screens */
+  white-space: normal;      /* allow wrapping */
   overflow-wrap: break-word;
+  word-break: normal;       /* don't break mid-word unless necessary */
   flex: 1 1 auto;
   min-width: 0;
 }
