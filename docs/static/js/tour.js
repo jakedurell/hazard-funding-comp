@@ -234,11 +234,6 @@
     }
     if (!sel) return Promise.resolve(false);
 
-    // Only skip if the user has already chosen a town themselves
-    var statsNameEl = document.getElementById('stats-town-name');
-    var statsText   = statsNameEl ? statsNameEl.textContent.trim().toLowerCase() : '';
-    if (statsText && statsText !== 'town snapshot') return Promise.resolve(false);
-
     savedSelectEl    = sel;
     savedSelectValue = sel.value;
 
@@ -268,7 +263,7 @@
     sel.dispatchEvent(new Event('input',  { bubbles: true }));
 
     // Give the map time to zoom before returning
-    return delay(1200).then(function () { return true; });
+    return delay(400).then(function () { return true; });
   }
 
   function restoreSelectEl() {
@@ -283,9 +278,10 @@
   }
 
   /* Reset the dashboard to its default post-load state:
-     Quadrants active, Risk per Person, Statewide Percentile, context layers off. */
+     Quadrants active, State of Vermont 'top' selected, Risk per Person, Statewide Percentile, context layers off. */
   function resetDashboard() {
     return switchChoropleth('Quadrants')
+      .then(function () { return selectTown('top'); }) // return to State in dropdown, which resets the stats card and map zoom
       .then(function () { return switchPrimaryModel('Risk per Person'); })
       .then(function () { return setRelativeToggle(false); })
       .then(function () { return deactivateContextLayer('Population'); })
@@ -449,7 +445,7 @@
             .then(function () { return switchPrimaryModel('Risk per Person'); })
             .then(function () { return setRelativeToggle(false); })
             .then(function () { scrollTo(mapEl); return delay(400); })
-            .then(function () { setHighlight(mapEl); });
+            .then(function () { setHighlight(mapEl); }); // introduce map and quadrants view
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
@@ -463,7 +459,7 @@
         attachTo: quadrantsBtn ? { element: quadrantsBtn, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(quadrantsBtn);
-          return delay(300).then(function () { setHighlight(quadrantsBtn); });
+          return delay(300).then(function () { setHighlight(quadrantsBtn); }); // introduce quadrants button
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
@@ -479,7 +475,7 @@
         beforeShowPromise: function () {
           scrollTo(modelGroup);
           return delay(400)
-            .then(function () { setHighlight(modelGroup); return delay(400); })
+            .then(function () { setHighlight(modelGroup); return delay(400); }) // show controls and switch a model to demonstrate use
             .then(function () { return switchPrimaryModel('FEMA Risk Index'); });
         },
         when: { hide: function () { clearHighlight(); } },
@@ -497,7 +493,7 @@
         beforeShowPromise: function () {
           scrollTo(mapEl);
           return delay(400)
-            .then(function () { setHighlight(mapEl); })
+            .then(function () { setHighlight(mapEl); }) // switch models while map is highlighted so the connection is clear
             .then(function () { return delay(300); })
             .then(function () { return switchPrimaryModel('Risk per Person'); })
             .then(function () { return delay(300); })
@@ -514,10 +510,7 @@
           '<p>Funding Gap compares modeled need against mitigation funding received. Viewing it relative to the Vermont average highlights towns receiving substantially more or less funding than their risk profile suggests.</p>',
         attachTo: choroplethCtrl ? { element: choroplethCtrl, on: 'top' } : undefined,
         beforeShowPromise: function () {
-          scrollTo(choroplethCtrl);
           return delay(400)
-            .then(function () { setHighlight(choroplethCtrl); })
-            .then(function () { return switchChoropleth('Funding Gap'); })
             .then(function () {
               var toggleEl  = document.querySelector('#toggle-relative');
               var container = toggleEl
@@ -526,10 +519,12 @@
               scrollTo(toggleEl || container);
               setHighlight(container || toggleEl);
               return delay(400);
-            })
+            }) // scroll to toggle and activate it
             .then(function () { return setRelativeToggle(true); })
-            .then(function () { scrollTo(choroplethCtrl); })
-            .then(function () { setHighlight(choroplethCtrl); });
+            .then(function () { return delay(400); })
+            .then(function () { scrollTo(choroplethCtrl); }) // then scroll to choropleth controls and activate the Gap view
+            .then(function () { setHighlight(choroplethCtrl); })
+            .then(function () { return switchChoropleth('Funding Gap'); })
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
@@ -544,7 +539,7 @@
         attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(mapEl);
-          switchChoropleth('Funding Gap');
+          switchChoropleth('Funding Gap'); // ensure map is on Gap view before highlighting
           return delay(400).then(function () { setHighlight(mapEl); });
         },
         when: { hide: function () { clearHighlight(); } },
@@ -559,11 +554,14 @@
           '<p>The scatterplot shows every Vermont town. Horizontal axis: measured need. Vertical axis: funding received. Each model switch reshuffles both &mdash; the scatter around a perfect diagonal is the story.</p>',
         attachTo: plotContainer ? { element: plotContainer, on: 'top' } : undefined,
         beforeShowPromise: function () {
-          scrollTo(plotContainer);
+          // scrollTo(plotContainer);
           return delay(500)
-            .then(function () { setHighlight(modelGroupSecondary); })
+            .then(function () { setHighlight(modelGroupSecondary); }) // highlight the secondary model selector group before switching models so the connection is clear
+            .then(function () { scrollTo(modelGroupSecondary); })
+            .then(function () { return delay(400); })
+            .then(function () { return switchPrimaryModel('FEMA Risk Index'); })
             .then(function () { return delay(800); })
-            .then(function () { scrollTo(plotContainer); })
+            .then(function () { scrollTo(plotContainer); }) // highlight the plot container and switch models to show impact
             .then(function () { setHighlight(plotContainer); })
             .then(function () { return switchSecondaryModel('Total Risk'); })
             .then(function () { return delay(1000); })
@@ -633,9 +631,9 @@
             .then(function () { return setRelativeToggle(false); })
             .then(function () { scrollTo(mapEl); })
             .then(function () { return delay(400); })
-            .then(function () { return selectTown(DEFAULT_TOWN); })
-            /* selectTown() delays 1200ms internally — map zoom is visible */
-            .then(function () { scrollTo(statsCard); })
+            .then(function () { return selectTown(DEFAULT_TOWN); }) // zoom into selected town
+            .then(function () { return delay(2000); }) // pause on zoomed town before stats card
+            .then(function () { scrollTo(statsCard); }) // show stats card
             .then(function () { return delay(500); })
             .then(function () { setHighlight(statsCard); });
         },
@@ -653,11 +651,12 @@
         beforeShowPromise: function () {
           scrollTo(contextControls);
           return delay(400)
-            .then(function () { setHighlight(contextControls); })
+            .then(function () { return selectTown('top'); }) // reset to State after town zoom
+            .then(function () { setHighlight(contextControls); }) // show controls before activating so the connection is clear
             .then(function () { return delay(700); })
             .then(function () { return activateContextLayer('Population'); })
             .then(function () { return delay(700); })
-            .then(function () { scrollTo(mapEl); setHighlight(mapEl); })
+            .then(function () { scrollTo(mapEl); setHighlight(mapEl); }) // show map and activate more layers to demonstrate how context adds up
             .then(function () { return delay(400); })
             .then(function () { return activateContextLayer('River Corridors'); })
             .then(function () { return delay(700); })
