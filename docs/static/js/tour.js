@@ -556,11 +556,11 @@
           scrollTo(plotContainer);
           return delay(500)
             .then(function () { scrollTo(modelGroupSecondary); })
-            .then(function () { setHighlight(modelGroupSecondary); return delay(400); })
+            .then(function () { setHighlight(modelGroupSecondary); return delay(800); })
+            .then(function () { return switchSecondaryModel('Total Risk'); return delay(1600); })
             .then(function () { scrollTo(plotContainer); })
             .then(function () { setHighlight(plotContainer); })
-            .then(function () { return switchSecondaryModel('Total Risk'); return delay(400); })
-            .then(function () { return switchSecondaryModel('Risk per Person'); return delay(400); })
+            .then(function () { return switchSecondaryModel('Risk per Person'); return delay(800); })
             .then(function () { return switchSecondaryModel('FEMA Risk Index'); });
         },
         when: { hide: function () { clearHighlight(); } },
@@ -596,8 +596,16 @@
             if (jumpVt && !jumpVt.disabled) jumpVt.click();
             return delay(600);
           }).then(function () {
+              var toggleEl  = document.querySelector('#toggle-relative-secondary');
+              var container = toggleEl
+                ? (toggleEl.closest('[class*="col-"]') || toggleEl.parentElement)
+                : null;
+              scrollTo(toggleEl || container);
+              setHighlight(container || toggleEl);
+              return delay(400);
+            }).then(function () {
             return setRelativeToggle(false);
-          });
+          }).then(function () { scrollTo(rankJumps); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
@@ -634,9 +642,10 @@
           scrollTo(contextControls);
           return delay(400)
             .then(function () { setHighlight(contextControls); return delay(400); })
-            .then(function () { return activateContextLayer('River Corridors'); return delay(400); })
-            .then(function () { scrollTo(mapEl); setHighlight(mapEl); return delay(800); })
-            .then(function () { return activateContextLayer('Population'); });
+            .then(function () { return activateContextLayer('River Corridors'); return delay(1200); })
+            .then(function () { scrollTo(mapEl); setHighlight(mapEl); return delay(1200); })
+            .then(function () { return activateContextLayer('Population'); return delay(1200); })
+            .then(function () { return activateContextLayer('Funding Bubble'); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
