@@ -557,10 +557,10 @@
           return delay(500)
             .then(function () { scrollTo(modelGroupSecondary); })
             .then(function () { setHighlight(modelGroupSecondary); return delay(800); })
-            .then(function () { return switchSecondaryModel('Total Risk'); return delay(1600); })
             .then(function () { scrollTo(plotContainer); })
-            .then(function () { setHighlight(plotContainer); })
-            .then(function () { return switchSecondaryModel('Risk per Person'); return delay(800); })
+            // .then(function () { setHighlight(plotContainer); })
+            .then(function () { return switchSecondaryModel('Total Risk'); return delay(1200); })
+            .then(function () { return switchSecondaryModel('Risk per Person'); return delay(1200); })
             .then(function () { return switchSecondaryModel('FEMA Risk Index'); });
         },
         when: { hide: function () { clearHighlight(); } },
