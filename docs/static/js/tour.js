@@ -1067,8 +1067,8 @@
 
   /* ── auto-prompt on load ─────────────────────────────────────────────────── */
   window.addEventListener("load", function () {
-    // if (hasPromptExpired()) showWelcomeModal();
-    showWelcomeModal(); // auto-show without checking localStorage for testing/demo purposes; comment out for production
+    if (hasPromptExpired()) showWelcomeModal();
+    // showWelcomeModal(); // auto-show without checking localStorage for testing/demo purposes; comment out for production
     // startTour(); // auto-start tour without prompting for testing/demo purposes; comment out for production
 
     var navTarget =
