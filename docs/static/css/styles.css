@@ -813,6 +813,29 @@ body {
   background-color: #0085a1;
 }
 
+.metric-framework {
+  max-width: 900px;
+  margin: 1.2em auto;
+  padding: 0.85em 1.2em;
+  background: #f7fafd;
+  border: 1px solid #e3eafc;
+  border-left: 4px solid #0085a1;
+  border-radius: 10px;
+  font-size: 0.97em;
+  color: #555;
+  line-height: 1.8;
+}
+.metric-framework strong {
+  color: #1a237e;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.2em;
+}
+.metric-framework em {
+  color: #3a4a8c;
+  font-style: italic;
+}
+
 .metric-definitions {
   max-width: 900px;
   margin: 1.5em auto 1.5em auto;

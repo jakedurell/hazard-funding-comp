@@ -864,6 +864,32 @@ body {
   background-color: $primary-color;
 }
 
+// metric framework explainer
+.metric-framework {
+  max-width: 900px;
+  margin: 1.2em auto;
+  padding: 0.85em 1.2em;
+  background: #f7fafd;
+  border: 1px solid #e3eafc;
+  border-left: 4px solid $primary-color;
+  border-radius: $border-radius;
+  font-size: 0.97em;
+  color: #555;
+  line-height: 1.8;
+
+  strong {
+    color: #1a237e;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.2em;
+  }
+
+  em {
+    color: #3a4a8c;
+    font-style: italic;
+  }
+}
+
 // metric definitions
 .metric-definitions {
   max-width: 900px;
