@@ -233,6 +233,47 @@ function addLegend(type) {
       // build legend content
       div.innerHTML = `<div class="legend-title">${label}</div>`;
 
+      // show active model (human label) under title when available
+      // for some base metrics the model is not applicable; show "model independent"
+      const activeModelKey = metricEngine && metricEngine.model;
+      const activeModelLabel =
+        typeof modelKeyToLabel !== "undefined" && activeModelKey
+          ? modelKeyToLabel[activeModelKey] || activeModelKey
+          : activeModelKey || null;
+
+      // model-independent metrics
+      const modelIndependentBases = new Set([
+        "vulnerability",
+        "claims",
+        "funding",
+      ]);
+      let modelText = null;
+
+      // prefer the canonical base from metricEngine; fall back to stripping suffixes from `metric`
+      const baseMetric =
+        metricEngine?.baseMetric ??
+        (metric ? metric.replace(/_(rank|rel)(?:_.*)?$/, "") : null);
+
+      // conditional for model label text based on whether this metric is model-independent or not
+      if (baseMetric && modelIndependentBases.has(baseMetric)) {
+        modelText = "Model independent";
+      } else if (activeModelLabel) {
+        modelText = `Model: ${activeModelLabel}`;
+      }
+
+      // style and insert model label
+      if (modelText) {
+        const modelEl = document.createElement("div");
+        modelEl.className = "legend-model";
+        modelEl.textContent = modelText;
+        modelEl.style.fontSize = "12px";
+        modelEl.style.opacity = "0.85";
+        modelEl.style.margin = "6px 0";
+        const titleEl = div.querySelector(".legend-title");
+        if (titleEl) titleEl.insertAdjacentElement("afterend", modelEl);
+        else div.insertBefore(modelEl, div.firstChild);
+      }
+
       // create gradient bar and range labels
       const gradientBar = createGradientBar(scale);
       div.appendChild(gradientBar);
@@ -256,6 +297,25 @@ function addLegend(type) {
     } else if (type === "quadrant") {
       // quadrant legend -- create discrete legend based on quadrantColors mapping
       div.innerHTML = `<div class="legend-title">Funding Alignment</div>`;
+
+      // show active model label for quadrant-based legends when available
+      const activeModelKey = metricEngine && metricEngine.model;
+      const activeModelLabel =
+        typeof modelKeyToLabel !== "undefined" && activeModelKey
+          ? modelKeyToLabel[activeModelKey] || activeModelKey
+          : activeModelKey || null;
+      // style and insert model label
+      if (activeModelLabel) {
+        const modelEl = document.createElement("div");
+        modelEl.className = "legend-model";
+        modelEl.textContent = `Model: ${activeModelLabel}`;
+        modelEl.style.fontSize = "12px";
+        modelEl.style.opacity = "0.85";
+        modelEl.style.margin = "6px 0";
+        const titleEl = div.querySelector(".legend-title");
+        if (titleEl) titleEl.insertAdjacentElement("afterend", modelEl);
+        else div.insertBefore(modelEl, div.firstChild);
+      }
 
       // build legend rows (color swatch + label)
       const items = Object.entries(quadrantColors)
