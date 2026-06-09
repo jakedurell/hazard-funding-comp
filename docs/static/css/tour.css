@@ -115,12 +115,22 @@
 
 .shepherd-floodlines .shepherd-header {
   padding: 16px 20px 0 20px;
+  flex-wrap: wrap;          /* allow long titles to wrap on mobile */
+  align-items: flex-start;  /* keep cancel icon top-aligned when title wraps */
 }
 .shepherd-floodlines .shepherd-title {
   font-size: 1.05rem;
   font-weight: 700;
   color: #111;
   line-height: 1.3;
+  word-break: break-word;   /* prevent overflow on narrow screens */
+  overflow-wrap: break-word;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+/* Responsive max-width: never wider than the viewport on small screens */
+.shepherd-element.shepherd-floodlines {
+  max-width: min(460px, calc(100vw - 24px));
 }
 .shepherd-floodlines .shepherd-text {
   padding: 10px 20px 14px 20px;

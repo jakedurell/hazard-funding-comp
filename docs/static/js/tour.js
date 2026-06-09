@@ -217,7 +217,12 @@
     return delay(400);
   }
 
-  /* Select a town only when none is currently selected. */
+  /* Select a town for tour demonstration.
+     Guards only against a genuine user selection (stats card populated with a
+     real town name). The sel.value check is intentionally absent: the select
+     element commonly carries a non-empty default value before any user
+     interaction, which would otherwise prevent the tour from ever selecting a
+     demonstration town. */
   function selectTown(townName) {
     var selectors = ['#towns-dropdown', '#towns-control select', 'select[name="town"]', 'select'];
     var sel = null;
@@ -229,16 +234,29 @@
 
     var statsNameEl = document.getElementById('stats-town-name');
     var statsText   = statsNameEl ? statsNameEl.textContent.trim().toLowerCase() : '';
-    var alreadySet  = statsText && statsText !== 'town snapshot';
-    if (alreadySet || (sel.value && sel.value !== '')) return Promise.resolve(false);
+    if (statsText && statsText !== 'town snapshot') return Promise.resolve(false);
 
     savedSelectEl    = sel;
     savedSelectValue = sel.value;
 
-    var opts = Array.from(sel.options || []);
-    var opt  = opts.find(function (o) { return o.text.trim().toLowerCase() === townName.toLowerCase(); });
-    if (!opt) opt = opts.find(function (o) { return o.value.toLowerCase() === townName.toLowerCase(); });
-    if (!opt) opt = opts.find(function (o) { return o.text.trim().length > 0; });
+    var opts  = Array.from(sel.options || []);
+    var lower = townName.toLowerCase();
+    // 1. Exact text match (case-insensitive, trimmed)
+    var opt = opts.find(function (o) { return o.text.trim().toLowerCase() === lower; });
+    // 2. Exact value match
+    if (!opt) opt = opts.find(function (o) { return o.value.toLowerCase() === lower; });
+    // 3. Prefix match — 'Newport' matches 'Newport city' and vice-versa
+    if (!opt) opt = opts.find(function (o) {
+      var t = o.text.trim().toLowerCase();
+      return t.indexOf(lower) === 0 || lower.indexOf(t) === 0;
+    });
+    // 4. Base-name match — strip city/town/village suffix from both sides
+    var strip = function (s) { return s.replace(/\s+(city|town|village|gore|grant)$/i, '').trim(); };
+    if (!opt) opt = opts.find(function (o) {
+      return strip(o.text.trim().toLowerCase()) === strip(lower);
+    });
+    // 5. Fallback to first non-empty option so the demo always shows something
+    if (!opt) opt = opts.find(function (o) { return o.value !== '' && o.text.trim().length > 0; });
     if (!opt) return Promise.resolve(false);
 
     sel.value = opt.value;
@@ -374,7 +392,8 @@
       waitFor('#plot-container',                 4000),
       waitFor('#rankings-container',             4000),
       waitFor('#stats-card',                     4000),
-      waitFor('#context-controls',               2000)
+      waitFor('#context-controls',               2000),
+      waitFor('.rank-jumps',                     4000)
     ]).then(function (els) {
       var mapEl                = els[0];
       var quadrantsBtn         = els[1];
@@ -385,6 +404,7 @@
       var rankingsContainer    = els[6];
       var statsCard            = els[7];
       var contextControls      = els[8];
+      var rankJumps            = els[9];
 
       tour = new Shepherd.Tour({
         useModalOverlay: true,
@@ -401,7 +421,7 @@
         { text: 'Next &rarr;', classes: 'shepherd-button-primary',   action: function () { tour.next(); } }
       ];
 
-      /* STEP 1 — Introduction */
+      /* STEP 1 - Introduction */
       s({
         id:    'intro',
         title: 'Does mitigation funding reach the towns that need it most?',
@@ -410,18 +430,18 @@
           '<p>Different definitions of risk produce different rankings &mdash; and different answers to that question.</p>' +
           '<p>This short tour explains how to read the dashboard. You can also <a href="article.html" target="_blank" rel="noopener">read the full story</a> for the complete analysis.</p>',
         buttons: [
-          { text: 'Skip tour',    classes: 'shepherd-button-secondary', action: function () { markPrompted(); tour.cancel(); } },
-          { text: 'Start tour &rarr;', classes: 'shepherd-button-primary', action: function () { tour.next(); } }
+          { text: 'Skip tour',         classes: 'shepherd-button-secondary', action: function () { markPrompted(); tour.cancel(); } },
+          { text: 'Start tour &rarr;', classes: 'shepherd-button-primary',   action: function () { tour.next(); } }
         ]
       });
 
-      /* STEP 2 — Quadrant view on map */
+      /* STEP 2 - Quadrant view on map */
       s({
         id:    'quadrant-map',
         text:
           '<p>This is the default view: <strong>Quadrant Analysis</strong>.</p>' +
           '<p>Each town is placed by two questions: <em>How high is the need?</em> and <em>How much funding has been received?</em> The upper-left quadrant &mdash; high need, low funding &mdash; is where disparities are sharpest.</p>',
-        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+        attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           return switchChoropleth('Quadrants')
             .then(function () { return switchPrimaryModel('Risk per Person'); })
@@ -433,7 +453,7 @@
         buttons: nav
       });
 
-      /* STEP 3 — Quadrant button */
+      /* STEP 3 - Quadrant button */
       s({
         id:    'quadrant-button',
         text:
@@ -447,133 +467,182 @@
         buttons: nav
       });
 
-      /* STEP 4 — Model change on map */
+      /* STEP 4 - Model selector intro */
+      s({
+        id:    'model-selector',
+        text:
+          '<p>Flood risk can be measured in different ways. Some models emphasize total expected loss, others adjust for population size, and FEMA&rsquo;s National Risk Index builds in social vulnerability and community resilience.</p>' +
+          '<p>The selected model affects every map, ranking, and comparison in the dashboard.</p>',
+        attachTo: modelGroup ? { element: modelGroup, on: 'top' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(modelGroup);
+          return delay(400)
+            .then(function () { setHighlight(modelGroup); return delay(400); })
+            .then(function () { return switchPrimaryModel('FEMA Risk Index'); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 5 - Model change on map */
       s({
         id:    'model-change',
         text:
           '<p>Watch the map change.</p>' +
-          '<p><strong>Total Risk</strong> (now active) tends to elevate larger towns with more infrastructure. <strong>Risk per Person</strong> surfaces smaller communities with concentrated exposure.</p>' +
+          '<p><strong>Total Risk</strong> (now active) tends to elevate larger towns with more infrastructure. <strong>Risk per Person</strong> surfaces smaller communities with concentrated exposure relative to their size.</p>' +
           '<p>The model you choose changes which towns appear most vulnerable.</p>',
-        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+        attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(mapEl);
           return delay(400)
-            .then(function () { setHighlight(mapEl); })
+            .then(function () { setHighlight(mapEl); return delay(400); })
+            .then(function () { return switchPrimaryModel('Risk per Person'); return delay(400); })
             .then(function () { return switchPrimaryModel('Total Risk'); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 5 — Funding Gap overlay */
+      /* STEP 6 - Funding Gap controls */
       s({
-        id:    'funding-gap',
+        id:    'funding-gap-controls',
         text:
-          '<p>Watch the map change again.</p>' +
-          '<p><strong>Funding Gap</strong> compares measured need against mitigation funding received. The wider the gap, the greater the disparity &mdash; towns in red are receiving far less funding relative to their risk.</p>',
-        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+          '<p>Funding Gap compares modeled need against mitigation funding received. Viewing it relative to the Vermont average highlights towns receiving substantially more or less funding than their risk profile suggests.</p>',
+        attachTo: choroplethCtrl ? { element: choroplethCtrl, on: 'top' } : undefined,
         beforeShowPromise: function () {
-          scrollTo(mapEl);
+          scrollTo(choroplethCtrl);
           return delay(400)
-            .then(function () { setHighlight(mapEl); })
-            .then(function () { return switchChoropleth('Funding Gap'); });
+            .then(function () { setHighlight(choroplethCtrl); })
+            .then(function () { return switchChoropleth('Funding Gap'); })
+            .then(function () {
+              var toggleEl  = document.querySelector('#toggle-relative');
+              var container = toggleEl
+                ? (toggleEl.closest('[class*="col-"]') || toggleEl.parentElement)
+                : null;
+              scrollTo(toggleEl || container);
+              setHighlight(container || toggleEl);
+              return delay(400);
+            })
+            .then(function () { return setRelativeToggle(true); })
+            .then(function () { scrollTo(choroplethCtrl); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 6 — Relative toggle */
+      /* STEP 7 - Funding Gap map result */
       s({
-        id:    'relative-toggle',
+        id:    'funding-gap-map',
         text:
-          '<p>Watch the map update.</p>' +
-          '<p>The map can show <strong>statewide percentile ranks</strong> or comparisons <strong>against the Vermont average</strong>. Switching perspectives can make disparities appear more or less extreme depending on which towns you&rsquo;re comparing.</p>',
-        attachTo: mapEl ? { element: mapEl, on: 'right' } : undefined,
+          '<p>This is the funding gap on the map, compared to the Vermont average. Towns in red are receiving far less funding than their risk profile would suggest; towns in blue are receiving more.</p>' +
+          '<p>The pattern is not random &mdash; it follows where past disaster declarations happened, not where projected future risk is greatest.</p>',
+        attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(mapEl);
-          return delay(400)
-            .then(function () { setHighlight(mapEl); })
-            .then(function () { return setRelativeToggle(true); });
+          return delay(400).then(function () { setHighlight(mapEl); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 7 — Scatterplot model change */
+      /* STEP 8 - Scatterplot: three visible model switches so dots move twice */
       s({
         id:    'scatterplot',
         text:
           '<p>Watch the dots move.</p>' +
-          '<p>The scatterplot reveals how closely funding follows need across the entire state. Switching the model reshuffles the rankings &mdash; the scatter around a perfect diagonal is the story.</p>',
+          '<p>The scatterplot shows every Vermont town. Horizontal axis: measured need. Vertical axis: funding received. Each model switch reshuffles both &mdash; the scatter around a perfect diagonal is the story.</p>',
         attachTo: plotContainer ? { element: plotContainer, on: 'top' } : undefined,
         beforeShowPromise: function () {
           scrollTo(plotContainer);
           return delay(500)
+            .then(function () { scrollTo(modelGroupSecondary); })
+            .then(function () { setHighlight(modelGroupSecondary); return delay(400); })
+            .then(function () { scrollTo(plotContainer); })
             .then(function () { setHighlight(plotContainer); })
-            .then(function () { return switchSecondaryModel('Risk per Person'); });
+            .then(function () { return switchSecondaryModel('Total Risk'); return delay(400); })
+            .then(function () { return switchSecondaryModel('Risk per Person'); return delay(400); })
+            .then(function () { return switchSecondaryModel('FEMA Risk Index'); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 8 — Rankings table */
+      /* STEP 9 - Rankings table */
       s({
         id:    'rankings',
         text:
-          '<p>The rankings table shows the same underlying data sorted by the current model.</p>' +
-          '<p>Use the jump buttons to navigate to the highest-need towns, the Vermont average, or your own town once you&rsquo;ve selected one.</p>',
+          '<p>The rankings table shows the same data behind the map, sorted by the current model.</p>' +
+          '<p>A town that appears in the middle of the map can look very different here &mdash; the table is where to look for specific outliers.</p>',
         attachTo: rankingsContainer ? { element: rankingsContainer, on: 'top' } : undefined,
         beforeShowPromise: function () {
           scrollTo(rankingsContainer);
+          return delay(400).then(function () { setHighlight(rankingsContainer); });
+        },
+        when: { hide: function () { clearHighlight(); } },
+        buttons: nav
+      });
+
+      /* STEP 10 - Rankings navigation */
+      s({
+        id:    'rankings-nav',
+        text:
+          '<p>The navigation buttons jump to key reference points &mdash; the highest-ranked towns, the statewide average, or a selected town once you&rsquo;ve chosen one.</p>',
+        attachTo: rankJumps ? { element: rankJumps, on: 'top' } : undefined,
+        beforeShowPromise: function () {
+          scrollTo(rankJumps);
           return delay(400).then(function () {
-            setHighlight(rankingsContainer);
-            var jumpTop = document.getElementById('jump-top');
-            if (jumpTop) jumpTop.click();
-            return delay(400);
+            setHighlight(rankJumps);
+            var jumpVt = document.getElementById('jump-vt');
+            if (jumpVt && !jumpVt.disabled) jumpVt.click();
+            return delay(600);
+          }).then(function () {
+            return setRelativeToggle(false);
           });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 9 — Town snapshot */
+      /* STEP 11 - Town snapshot */
       s({
         id:    'town-snapshot',
         text:
           '<p>Select any town from the dropdown to open a local snapshot.</p>' +
-          '<p>Here&rsquo;s <strong>Newport</strong> &mdash; risk, vulnerability, funding, and funding alignment are all shown here. Rankings shift depending on the active model.</p>',
-        attachTo: statsCard ? { element: statsCard, on: 'left' } : undefined,
+          '<p>Here&rsquo;s <strong>Newport</strong> &mdash; risk, vulnerability, funding, and alignment are all shown here. Rankings may shift depending on the active model.</p>',
+        attachTo: statsCard ? { element: statsCard, on: 'top' } : undefined,
         beforeShowPromise: function () {
           return switchChoropleth('Quadrants')
             .then(function () { return switchPrimaryModel('Risk per Person'); })
             .then(function () { return setRelativeToggle(false); })
-            .then(function () { scrollTo(mapEl); return delay(500); })
-            .then(function () { return selectTown(DEFAULT_TOWN); })
+            .then(function () { scrollTo(mapEl); })
+            .then(function () { return selectTown(DEFAULT_TOWN); return delay(500); })
+            .then(function () { scrollTo(statsCard); })
             .then(function () { setHighlight(statsCard); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 10 — Context layers */
+      /* STEP 12 - Context layers: scroll to controls -> activate -> scroll to map -> activate more */
       s({
         id:    'context-layers',
         text:
           '<p>Context layers add geographic perspective without changing the underlying analysis.</p>' +
-          '<p><strong>Town Population</strong> and <strong>Flood Corridors</strong> help explain why certain towns appear vulnerable &mdash; a small town sitting in a mapped river corridor may face concentrated risk that aggregate models underweight.</p>',
-        attachTo: contextControls ? { element: contextControls, on: 'top' } : undefined,
+          '<p>A small town in a mapped river corridor may face concentrated risk that aggregate models underweight &mdash; population counts and flood corridor boundaries help show why.</p>',
+        attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
-          scrollTo(mapEl);
+          scrollTo(contextControls);
           return delay(400)
-            .then(function () { setHighlight(contextControls); })
-            .then(function () { return activateContextLayer('Population'); })
-            .then(function () { return activateContextLayer('River Corridors'); });
+            .then(function () { setHighlight(contextControls); return delay(400); })
+            .then(function () { return activateContextLayer('River Corridors'); return delay(400); })
+            .then(function () { scrollTo(mapEl); setHighlight(mapEl); return delay(800); })
+            .then(function () { return activateContextLayer('Population'); });
         },
         when: { hide: function () { clearHighlight(); } },
         buttons: nav
       });
 
-      /* STEP 11 — Conclusion */
+      /* STEP 13 - Conclusion: full dashboard reset before handing control back */
       s({
         id:    'conclusion',
         title: "You're ready to explore.",
