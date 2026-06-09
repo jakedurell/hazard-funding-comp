@@ -422,8 +422,8 @@
       /* STEP 1 - Introduction */
       s({
         id:    'intro',
-        title: 'Does mitigation funding reach the towns that need it most?',
         text:
+          '<p><b>Does mitigation funding reach the towns that need it most?</b></p>' +
           '<p>Floodlines compares modeled flood need against FEMA mitigation funding across Vermont&rsquo;s 250+ towns.</p>' +
           '<p>Different definitions of risk produce different rankings &mdash; and different answers to that question.</p>' +
           '<p>This short tour explains how to read the dashboard. You can also <a href="article.html" target="_blank" rel="noopener">read the full story</a> for the complete analysis.</p>',
@@ -670,8 +670,8 @@
       /* STEP 13 - Conclusion: full dashboard reset before handing control back */
       s({
         id:    'conclusion',
-        title: "You're ready to explore.",
         text:
+          "<p>You're ready to explore.</p>" +
           '<p>Try switching models, comparing towns, and testing different perspectives.</p>' +
           '<p>One of this dashboard&rsquo;s central themes: <em>conclusions change depending on how flood risk is defined</em>. That ambiguity is not a flaw &mdash; it&rsquo;s part of the story.</p>' +
           '<p>You can restart this tour anytime using the header button.</p>',
