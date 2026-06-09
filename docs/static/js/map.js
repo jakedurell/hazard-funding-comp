@@ -1233,10 +1233,24 @@ function toggleButton(buttonId, enable = true) {
 function resetMapView() {
   // center map on State of Vermont and reset zoom
   mapState.map.setView(vtDefaultView.center, vtDefaultView.zoom);
+
   // reset choropleth style (towns may remain uncovered otherwise)
   if (mapState.choroplethLayer) {
     mapState.choroplethLayer.resetStyle();
   }
+
+  // Close any open popups (choropleth feature popups or bubble popups)
+  // and clear locked popup tracking so popups don't persist after reset
+  if (lockedPopupLayer) {
+    lockedPopupLayer.closePopup();
+    lockedPopupLayer = null;
+  }
+
+  // close any popups not specifically tracked by lockedPopupLayer (necessary)
+  if (mapState.map && typeof mapState.map.closePopup === "function") {
+    mapState.map.closePopup();
+  }
+  _lockedPopupTown = null;
 }
 
 // zooms map for town view, updates infoBox and plots
