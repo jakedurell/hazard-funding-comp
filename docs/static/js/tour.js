@@ -424,9 +424,8 @@
         id:    'intro',
         text:
           '<p><b>Does mitigation funding reach the towns that need it most?</b></p>' +
-          '<p>Floodlines compares modeled flood need against FEMA mitigation funding across Vermont&rsquo;s 250+ towns.</p>' +
-          '<p>Different definitions of risk produce different rankings &mdash; and different answers to that question.</p>' +
-          '<p>This short tour explains how to read the dashboard. You can also <a href="article.html" target="_blank" rel="noopener">read the full story</a> for the complete analysis.</p>',
+          '<p>Floodlines compares flood risk, community vulnerability, and FEMA mitigation funding across Vermont.</p>' +
+          '<p>This short tour introduces the dashboard and the main story it reveals. You can also <a href="article.html" target="_blank" rel="noopener">read the full analysis</a>.</p>',
         buttons: [
           { text: 'Skip tour',         classes: 'shepherd-button-secondary', action: function () { markPrompted(); tour.cancel(); } },
           { text: 'Start tour &rarr;', classes: 'shepherd-button-primary',   action: function () { tour.next(); } }
@@ -437,8 +436,9 @@
       s({
         id:    'quadrant-map',
         text:
-          '<p>This is the default view: <strong>Quadrant Analysis</strong>.</p>' +
-          '<p>Each town is placed by two questions: <em>How high is the need?</em> and <em>How much funding has been received?</em> The upper-left quadrant &mdash; high need, low funding &mdash; is where disparities are sharpest.</p>',
+          '<p>This is the dashboard\'s starting view.</p>' +
+          '<p>Each town is grouped by two things: <em>how much need it has</em>, and <em>how much FEMA mitigation funding it has received</em>. The legend explains the categories.<p>' +
+          '<p>Communities with high need but little funding are a central focus of this analysis.</p>',
         attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           return switchChoropleth('Quadrants')
@@ -455,7 +455,7 @@
       s({
         id:    'quadrant-button',
         text:
-          '<p>This button returns to the primary view at any time. When you&rsquo;ve been exploring other overlays, click <strong>Quadrant Analysis</strong> to reset to the central framing.</p>',
+          '<p>This button returns to the main view at any time.</p>',
         attachTo: quadrantsBtn ? { element: quadrantsBtn, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(quadrantsBtn);
@@ -469,8 +469,9 @@
       s({
         id:    'model-selector',
         text:
-          '<p>Flood risk can be measured in different ways. Some models emphasize total expected loss, others adjust for population size, and FEMA&rsquo;s National Risk Index builds in social vulnerability and community resilience.</p>' +
-          '<p>The selected model affects every map, ranking, and comparison in the dashboard.</p>',
+          '<p><b>There is no single way to measure flood risk.</b></p>' +
+          '<p>Some approaches emphasize total losses. Others focus on risk relative to population. FEMA also publishes its own risk framework.</p>' +
+          '<p>Changing the model changes which communities appear most at risk.</p>',
         attachTo: modelGroup ? { element: modelGroup, on: 'top' } : undefined,
         beforeShowPromise: function () {
           scrollTo(modelGroup);
@@ -486,9 +487,8 @@
       s({
         id:    'model-change',
         text:
-          '<p>Watch the map change.</p>' +
-          '<p><strong>Total Risk</strong> (now active) tends to elevate larger towns with more infrastructure. <strong>Risk per Person</strong> surfaces smaller communities with concentrated exposure relative to their size.</p>' +
-          '<p>The model you choose changes which towns appear most vulnerable.</p>',
+          '<p>As the definition of risk changes, some towns rise while others fall.</p>' +
+          '<p>There is no universally correct model. One of the project\'s central questions is how measurement choices shape our understanding of need.</p>',
         attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(mapEl);
@@ -507,7 +507,7 @@
       s({
         id:    'funding-gap-controls',
         text:
-          '<p>Funding Gap compares modeled need against mitigation funding received. Viewing it relative to the Vermont average highlights towns receiving substantially more or less funding than their risk profile suggests.</p>',
+          '<p>These controls change what the map displays. For this tour, we\'ve switched to <strong>Funding Gap</strong> and enabled comparison against the Vermont average.</p>',
         attachTo: choroplethCtrl ? { element: choroplethCtrl, on: 'top' } : undefined,
         beforeShowPromise: function () {
           return delay(400)
@@ -534,8 +534,9 @@
       s({
         id:    'funding-gap-map',
         text:
-          '<p>This is the funding gap on the map, compared to the Vermont average. Towns in red are receiving far less funding than their risk profile would suggest; towns in blue are receiving more.</p>' +
-          '<p>The pattern is not random &mdash; it follows where past disaster declarations happened, not where projected future risk is greatest.</p>',
+          '<p>This map compares modeled need with FEMA mitigation funding received.</p>' +
+          '<p>Red towns appear to have received less funding than their risk profile suggests. Blue towns have received more.</p>' +
+          '<p>This is the project\'s central question: <b>where does need exceed investment before disaster strikes?</b></p>',
         attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(mapEl);
@@ -550,8 +551,9 @@
       s({
         id:    'scatterplot',
         text:
-          '<p>Watch the dots move.</p>' +
-          '<p>The scatterplot shows every Vermont town. Horizontal axis: measured need. Vertical axis: funding received. Each model switch reshuffles both &mdash; the scatter around a perfect diagonal is the story.</p>',
+          '<p>Each bubble represents a Vermont town. Bubble size reflects population.</p>' +
+          '<p>Need is shown on the horizontal axis and funding on the vertical axis. The model controls below are synchronized with the map.</p>' +
+          '<p>Watch how towns move as different definitions of risk are applied, favoring small or large towns depending on the model.</p>',
         attachTo: plotContainer ? { element: plotContainer, on: 'top' } : undefined,
         beforeShowPromise: function () {
           // scrollTo(plotContainer);
@@ -578,8 +580,7 @@
       s({
         id:    'rankings',
         text:
-          '<p>The rankings table shows the same data behind the map, sorted by the current model.</p>' +
-          '<p>A town that appears in the middle of the map can look very different here &mdash; the table is where to look for specific outliers.</p>',
+          '<p>The rankings table shows the same data behind the map and scatterplot. It makes it easier to identify specific towns and compare them directly.</p>',
         attachTo: rankingsContainer ? { element: rankingsContainer, on: 'top' } : undefined,
         beforeShowPromise: function () {
           scrollTo(rankingsContainer);
@@ -593,7 +594,7 @@
       s({
         id:    'rankings-nav',
         text:
-          '<p>The navigation buttons jump to key reference points &mdash; the highest-ranked towns, the statewide average, or a selected town once you&rsquo;ve chosen one.</p>',
+          '<p>These shortcuts jump to notable locations in the rankings, including top-ranked towns and statewide averages.</p>',
         attachTo: rankJumps ? { element: rankJumps, on: 'top' } : undefined,
         beforeShowPromise: function () {
           scrollTo(rankJumps);
@@ -622,8 +623,8 @@
       s({
         id:    'town-snapshot',
         text:
-          '<p>Select any town from the dropdown to open a local snapshot.</p>' +
-          '<p>Here&rsquo;s <strong>Newport</strong> &mdash; risk, vulnerability, funding, and alignment are all shown here. Rankings may shift depending on the active model.</p>',
+          '<p>Select any town to zoom in on the map and see a local snapshot.</p>' +
+          '<p>Key measures of risk, vulnerability, funding, and funding alignment are summarized here.</p>',
         attachTo: statsCard ? { element: statsCard, on: 'top' } : undefined,
         beforeShowPromise: function () {
           return switchChoropleth('Quadrants')
@@ -645,8 +646,8 @@
       s({
         id:    'context-layers',
         text:
-          '<p>Context layers add geographic perspective without changing the underlying analysis.</p>' +
-          '<p>A small town in a mapped river corridor may face concentrated risk that aggregate models underweight &mdash; population counts and flood corridor boundaries help show why.</p>',
+          '<p>These optional layers add geographic context.</p>' +
+          '<p>River corridors, population patterns, and funding locations help explain why some towns appear where they do in the analysis.</p>',
         attachTo: mapEl ? { element: mapEl, on: 'bottom' } : undefined,
         beforeShowPromise: function () {
           scrollTo(contextControls);
@@ -671,9 +672,10 @@
       s({
         id:    'conclusion',
         text:
-          "<p>You're ready to explore.</p>" +
-          '<p>Try switching models, comparing towns, and testing different perspectives.</p>' +
-          '<p>One of this dashboard&rsquo;s central themes: <em>conclusions change depending on how flood risk is defined</em>. That ambiguity is not a flaw &mdash; it&rsquo;s part of the story.</p>' +
+          "<p><b>You're ready to explore.</b></p>" +
+          '<p>The analysis finds that funding is only weakly related to modeled need, while past flood damages and insurance claims are more strongly associated with where funding goes.</p>' +
+          '<p>The results suggest a system that responds more to previous disasters than to future risk.</p>' +
+          '<p>Try comparing towns, switching models, and seeing which communities consistently appear underfunded.</p>' +
           '<p>You can restart this tour anytime using the header button.</p>',
         beforeShowPromise: function () {
           return resetDashboard()
