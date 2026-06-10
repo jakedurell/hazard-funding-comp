@@ -1353,6 +1353,29 @@ body {
   }
 }
 
+.article .article-byline {
+  color: #444;
+  font-size: 1.45rem;
+  margin-top: 0.6rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-style: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.article .article-byline .author {
+  font-weight: 700;
+  color: #1a237e;
+}
+
+.article .article-byline time {
+  color: #888;
+  font-size: 1.45rem;
+}
+
 .article hr {
   border: none;
   border-top: 1px solid #e5e7eb;
@@ -1403,7 +1426,7 @@ body {
   margin-top: 0.4rem;
 }
 
-.article .byline {
+.article .legal-byline {
   color: #666;
   font-size: 1.35rem;
   margin-top: 1.25rem;
