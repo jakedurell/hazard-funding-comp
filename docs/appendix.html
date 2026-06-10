@@ -6,18 +6,46 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta
       name="description"
-      content="Technical appendix to data analysis exploring flood risk in Vermont."
+      content="Methods, data sources, modeling choices, and validation procedures used in the Floodlines flood risk and mitigation funding analysis."
     />
     <meta name="author" content="Bryan C. Johns" />
-    <title>Floodlines | Appendix</title>
+    <title>Floodlines Methodology & Technical Appendix</title>
 
-    <!-- Leaflet CSS -->
-    <!-- <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
-    /> -->
+    <!-- Open Graph metadata for social sharing: -->
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:title"
+      content="Floodlines Methodology & Technical Appendix"
+    />
+    <meta
+      property="og:description"
+      content="Data sources, risk models, funding calculations, and methodological limitations behind the Floodlines analysis."
+    />
+    <meta
+      property="og:image"
+      content="https://johbry17.github.io/Floodlines/static/images/masthead_etl.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:url"
+      content="https://johbry17.github.io/Floodlines/appendix.html"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Floodlines Methodology & Technical Appendix"
+    />
+    <meta
+      name="twitter:description"
+      content="Technical documentation for the Floodlines flood risk and mitigation funding analysis."
+    />
+    <meta
+      name="twitter:image"
+      content="https://johbry17.github.io/Floodlines/static/images/masthead_etl.png"
+    />
+
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -64,15 +92,18 @@
     </div>
 
     <!-- Hero image -->
-    <figure class="site-hero" aria-label="Flooding in Montpelier, Vermont, July 2023">
+    <figure
+      class="site-hero"
+      aria-label="Flooding in Montpelier, Vermont, July 2023"
+    >
       <img
         src="./static/images/Flooding_Montpelier_2023_–_Vermont_National_Guard.jpg"
         alt="Aerial view of flooding in downtown Montpelier, Vermont, July 2023"
         loading="eager"
       />
       <figcaption>
-        Flooding in downtown Montpelier, Vermont, July 2023.
-        Credit: Vermont National Guard /
+        Flooding in downtown Montpelier, Vermont, July 2023. Credit: Vermont
+        National Guard /
         <a
           href="https://commons.wikimedia.org/wiki/File:Flooding_Montpelier_2023_%E2%80%93_Vermont_National_Guard.jpg"
           target="_blank"
