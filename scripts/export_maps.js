@@ -1,3 +1,5 @@
+// !!!! AI-generated code !!!! Thank you, Claude
+
 // Headless exporter for choropleth images using Puppeteer
 // Usage:
 // 1) Install puppeteer: `npm install puppeteer` (or use `npx`)
