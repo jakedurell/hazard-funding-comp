@@ -1577,35 +1577,35 @@ body {
     padding-top: 90px;
   }
 
-    /* When floating on small screens, pin the control to the viewport top
+  /* When floating on small screens, pin the control to the viewport top
        below the navbar so the float appears at the top (simpler and more
        robust than bottom-floating across mobile browsers). */
-    .article-model-control.is-floating {
-      position: fixed;
-      top: 72px;
-      left: 12px;
-      right: 12px;
-      width: auto;
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 10px 12px;
-      border-radius: 12px;
-      z-index: 1200;
-      box-sizing: border-box;
-    }
+  .article-model-control.is-floating {
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 10px 12px;
+    border-radius: 12px;
+    z-index: 1200;
+    box-sizing: border-box;
+  }
 
-    /* Ensure the non-floating inline control inside the flow remains usable */
-    .article-model-control {
-      top: auto;
-      bottom: auto;
-      left: auto;
-      right: auto;
-      transform: none;
-      width: 100%;
-      padding: 0;
-      max-width: 780px;
-      box-sizing: border-box;
-    }
+  /* Ensure the non-floating inline control inside the flow remains usable */
+  .article-model-control {
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    transform: none;
+    width: 100%;
+    padding: 0;
+    max-width: 780px;
+    box-sizing: border-box;
+  }
 
   .article-model-control .btn-group .btn {
     flex: 1 1 0;
@@ -1616,22 +1616,22 @@ body {
     white-space: normal;
   }
 
-    /* Dock alignment: center the ghost dock and ensure it doesn't overflow */
-    #article-model-dock {
-      text-align: center;
-      padding: 0 12px;
-      box-sizing: border-box;
-    }
+  /* Dock alignment: center the ghost dock and ensure it doesn't overflow */
+  #article-model-dock {
+    text-align: center;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
 
-    #article-model-dock .article-model-control {
-      display: inline-block;
-      margin: 0.6em auto;
-      width: calc(100% - 24px);
-      max-width: 520px;
-      box-sizing: border-box;
-      left: auto !important;
-      transform: none !important;
-    }
+  #article-model-dock .article-model-control {
+    display: inline-block;
+    margin: 0.6em auto;
+    width: calc(100% - 24px);
+    max-width: 520px;
+    box-sizing: border-box;
+    left: auto !important;
+    transform: none !important;
+  }
 }
 
 /* Respect reduced-motion preference */
@@ -1640,6 +1640,23 @@ body {
   .article-model-control * {
     transition: none !important;
   }
+}
+
+/* underline h3 only inside the appendix page */
+.appendix-content h3 {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.12em;
+  text-decoration-color: #1a237e; /* optional accent */
+}
+#appendix-content .appendix-toc h3 {
+  text-decoration: none; /* keep TOC heading un-underscored if you like */
+}
+// turn h4 gray in the appendix for visual hierarchy
+.appendix-content h4 {
+  color: #666;
+  font-weight: 500;
+  margin-top: 0.8em;
 }
 
 /* Footer styles */

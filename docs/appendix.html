@@ -66,19 +66,7 @@
     <!-- Main Dashboard Header -->
     <div class="dashboard-header">
       <h1>Floodlines</h1>
-      <!-- <h2>Mapping the gap between flood risk and flood funding</h2> -->
       <h2>Technical Appendix</h2>
-      <!-- <div class="dashboard-subtitle">
-        Vermont has been hit by two catastrophic floods in twelve years. The
-        money meant to prepare for the next one isn't going where the risk is
-        greatest.
-      </div> -->
-      <!-- <div class="analysis-link">
-        <a href="index.html" class="analysis-button">
-          Explore the Dashboard
-          <span class="arrow">→</span>
-        </a>
-      </div> -->
     </div>
 
     <div
@@ -94,31 +82,27 @@
         <h3>Contents</h3>
         <ul>
           <li><a href="#executive-summary">Executive Summary</a></li>
+          <li><a href="#technical-methodology">Research Question</a></li>
+          <li><a href="#data-sources">Data Sources</a></li>
           <li>
-            <ul>
-              <li><a href="#technical-methodology">Research Question</a></li>
-              <li><a href="#data-sources">Data Sources</a></li>
-              <li>
-                <a href="#data-processing">Data Processing &amp; Integration</a>
-              </li>
-              <li><a href="#need-index">Need Index Construction</a></li>
-              <li><a href="#model-eval">Model Evaluation</a></li>
-              <li>
-                <a href="#funding-alignment">Funding Alignment Analysis</a>
-              </li>
-              <li><a href="#spatial-analysis">Spatial Analysis</a></li>
-              <li><a href="#key-findings">Key Findings</a></li>
-              <li><a href="#limitations">Key Limitations</a></li>
-              <li><a href="#reproducibility">Reproducibility</a></li>
-            </ul>
+            <a href="#data-processing">Data Processing &amp; Integration</a>
           </li>
+          <li><a href="#need-index">Need Index Construction</a></li>
+          <li><a href="#model-eval">Model Evaluation</a></li>
+          <li>
+            <a href="#funding-alignment">Funding Alignment Analysis</a>
+          </li>
+          <li><a href="#spatial-analysis">Spatial Analysis</a></li>
+          <li><a href="#key-findings">Key Findings</a></li>
+          <li><a href="#limitations">Key Limitations</a></li>
+          <li><a href="#reproducibility">Reproducibility</a></li>
           <li>
             <a href="#data-dictionary">Data Dictionary</a>
           </li>
         </ul>
       </nav>
 
-      <h2 id="executive-summary">Executive Summary</h2>
+      <h3 id="executive-summary">Executive Summary</h3>
 
       <p>
         Floodlines integrates FEMA, Census, NFIP, and Vermont geospatial
@@ -594,7 +578,7 @@
       id="front-end-data-dictionary"
       style="max-width: 1100px; margin-top: 1.5em"
     >
-      <h2 id="data-dictionary">Abbreviated Dashboard Data Dictionary</h2>
+      <h3 id="data-dictionary">Abbreviated Dashboard Data Dictionary</h3>
 
       <p>
         The interactive dashboard uses a flat town table
@@ -609,7 +593,7 @@
         >.
       </p>
 
-      <h3>Identifiers &amp; base attributes</h3>
+      <h4>Identifiers &amp; base attributes</h4>
       <ul>
         <li>
           <code>GEOID</code>: 10‑digit Census town FIPS identifier (primary join
@@ -624,7 +608,7 @@
         </li>
       </ul>
 
-      <h3>Core socioeconomic &amp; exposure fields</h3>
+      <h4>Core socioeconomic &amp; exposure fields</h4>
       <p>
         <code>pct_below_poverty</code>, <code>percent_elderly</code>,
         <code>pct_no_vehicle</code>, <code>pct_renter_occupied</code>,
@@ -635,7 +619,7 @@
         annual loss (EAL) measures used as primary exposure/risk inputs.
       </p>
 
-      <h3>Vulnerability composite</h3>
+      <h4>Vulnerability composite</h4>
       <p>
         <code>vulnerability</code>, <code>vulnerability_rank</code>,
         <code>vulnerability_rel</code> — composite (percentile‑rank mean of
@@ -643,7 +627,7 @@
         as part of need.
       </p>
 
-      <h3>Modeled indices (per‑model naming convention)</h3>
+      <h4>Modeled indices (per‑model naming convention)</h4>
       <p>
         For each model suffix (examples used in export: <code>eal</code>,
         <code>eal_per_capita</code>, <code>nri</code>) the dashboard expects the
@@ -676,7 +660,7 @@
         </li>
       </ul>
 
-      <h3>Funding and NFIP fields</h3>
+      <h4>Funding and NFIP fields</h4>
       <ul>
         <li>
           <code>funding_total</code>: Total FEMA mitigation funding obligated to
@@ -696,7 +680,7 @@
         </li>
       </ul>
 
-      <h3>State summary row</h3>
+      <h4>State summary row</h4>
       <p>
         The export appends a synthetic
         <code>town_name = "State of Vermont"</code> row populated with
@@ -704,7 +688,7 @@
         dashboard can show statewide comparisons without extra aggregation.
       </p>
 
-      <h3>Provenance &amp; Notes</h3>
+      <h4>Provenance &amp; Notes</h4>
       <ul>
         <li>
           Export datasets, field definitions, and backend schemas are documented

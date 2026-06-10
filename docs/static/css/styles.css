@@ -1497,8 +1497,8 @@ body {
     padding-top: 90px;
   }
   /* When floating on small screens, pin the control to the viewport top
-     below the navbar so the float appears at the top (simpler and more
-     robust than bottom-floating across mobile browsers). */
+       below the navbar so the float appears at the top (simpler and more
+       robust than bottom-floating across mobile browsers). */
   .article-model-control.is-floating {
     position: fixed;
     top: 72px;
@@ -1555,6 +1555,24 @@ body {
     transition: none !important;
   }
 }
+/* underline h3 only inside the appendix page */
+.appendix-content h3 {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.12em;
+  text-decoration-color: #1a237e; /* optional accent */
+}
+
+#appendix-content .appendix-toc h3 {
+  text-decoration: none; /* keep TOC heading un-underscored if you like */
+}
+
+.appendix-content h4 {
+  color: #666;
+  font-weight: 500;
+  margin-top: 0.8em;
+}
+
 /* Footer styles */
 .site-footer {
   margin-top: 2em;
