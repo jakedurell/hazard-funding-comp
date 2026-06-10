@@ -169,6 +169,73 @@ body {
   }
 }
 
+// ── Site-wide hero image ─────────────────────────────────────────────────
+.site-hero {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+
+  img {
+    width: 100%;
+    height: auto;       // show the full image — no crop
+    display: block;
+  }
+
+  figcaption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.48);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem;
+    padding: 5px 14px;
+    text-align: right;
+    font-style: italic;
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: underline;
+      &:hover { color: #fff; }
+    }
+  }
+}
+
+// Dashboard pull quote (Jensen) — floated between lede and context band
+.dashboard-pull-quote {
+  max-width: 720px;
+  margin: 1.2rem auto;
+  padding: 0.9rem 1.5rem;
+  border-left: 4px solid $primary-color;
+  background: #f7fafd;
+  border-radius: 0 6px 6px 0;
+  box-shadow: $box-shadow;
+  text-align: left;
+
+  p {
+    margin: 0 0 0.4rem;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: #2c3e5e;
+    line-height: 1.5;
+  }
+
+  footer {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: normal;
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-size: 0.85em;
+      vertical-align: super;
+      &:hover { text-decoration: underline; }
+    }
+  }
+}
+
 // header / title
 .dashboard-header {
   text-align: center;
@@ -1398,6 +1465,103 @@ body {
   .article blockquote {
     width: 70%;
   } /* narrower on large screens */
+}
+
+// Cited pull quote — attributed external voice (interview / news quote)
+.article .pull-quote--cited {
+  font-size: 1.45rem;
+  font-weight: 500;
+  color: #2c3e5e;
+  border-top-color: $primary-color;
+  border-bottom-color: $primary-color;
+
+  &::before { color: $primary-color; }
+
+  p { margin: 0 0 0.5rem; }
+
+  footer {
+    font-size: 0.82em;
+    font-weight: 400;
+    font-style: normal;
+    color: #666;
+    margin-top: 0.35rem;
+
+    a {
+      color: $primary-color;
+      text-decoration: none;
+      font-size: 0.9em;
+      vertical-align: super;
+      &:hover { text-decoration: underline; }
+    }
+  }
+}
+
+// Footnotes list at article end
+.article .footnotes {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 1.1rem;
+  color: #666;
+  list-style: decimal;
+  padding-left: 1.4rem;
+
+  li { margin-bottom: 0.4rem; }
+
+  a {
+    color: $primary-color;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// Editorial pull quote — typographic highlight of the article's thesis sentence
+.article .pull-quote {
+  position: relative;
+  margin: 2rem auto;
+  max-width: 720px;
+  width: 92%;
+  padding: 1.8rem 2rem;
+  border: none;
+  border-top: 2px solid $secondary-color;
+  border-bottom: 2px solid $secondary-color;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+  color: $secondary-color;
+  font-size: 1.6rem;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+
+  &::before {
+    content: '\201C';
+    position: absolute;
+    /* lift the glyph so it does not overlap the first line of text */
+    top: -1.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    line-height: 1;
+    color: $secondary-color;
+    font-style: normal;
+    background: #fff;
+    padding: 0 0.4rem;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .article .pull-quote {
+    font-size: 1.3rem;
+    padding: 1.3rem 1.2rem;
+  }
+  .article .pull-quote::before {
+    font-size: 2rem;
+    top: -0.9rem;
+    padding: 0 0.35rem;
+  }
 }
 
 .article ul,
