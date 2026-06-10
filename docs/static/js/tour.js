@@ -1085,8 +1085,8 @@
     // startTour(); // auto-start tour without prompting for testing/demo purposes; comment out for production
 
     var navTarget =
-      document.querySelector(".navbar-right .navbar-nav-wrap") ||
-      document.querySelector(".navbar .navbar-right") ||
+      document.querySelector(".navbar-left.navbar-brand-wrap") ||
+      document.querySelector(".navbar-left") ||
       document.querySelector(".dashboard-header");
     if (navTarget && !document.getElementById("fl-tour-restart-btn")) {
       var btn = document.createElement("button");
