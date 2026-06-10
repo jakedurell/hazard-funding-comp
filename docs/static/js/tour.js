@@ -882,34 +882,47 @@
         text: "<p>Select any town from the dropdown to zoom in on the map and open a local snapshot:  risk, vulnerability, funding, and funding alignment all in one place.</p>",
         attachTo: statsCard ? { element: statsCard, on: "top" } : undefined,
         beforeShowPromise: function () {
-          return switchChoropleth("Quadrants")
-            .then(function () {
-              return switchPrimaryModel("Risk per Person");
-            })
-            .then(function () {
-              return setRelativeToggle(false);
-            })
-            .then(function () {
-              scrollTo(mapEl);
-            })
-            .then(function () {
-              return delay(400);
-            })
-            .then(function () {
-              return selectTown(DEFAULT_TOWN);
-            }) // zoom into selected town
-            .then(function () {
-              return delay(2000);
-            }) // pause on zoomed town before stats card
-            .then(function () {
-              scrollTo(statsCard);
-            }) // show stats card
-            .then(function () {
-              return delay(500);
-            })
-            .then(function () {
-              setHighlight(statsCard);
-            });
+          return (
+            switchChoropleth("Quadrants")
+              .then(function () {
+                return switchPrimaryModel("Risk per Person");
+              })
+              .then(function () {
+                return setRelativeToggle(false);
+              })
+              .then(function () {
+                scrollTo(mapEl);
+              })
+              // highlight town dropdown and select a town to demonstrate the stats card and map zoom working together
+              .then(function () {
+                return delay(800);
+              })
+              .then(function () {
+                var dd =
+                  document.querySelector("#towns-dropdown") ||
+                  document.querySelector("#towns-control select");
+                scrollTo(dd);
+                setHighlight(dd);
+                return delay(800);
+              }) // pause so highlight on dropdown is visible
+              .then(function () {
+                return selectTown(DEFAULT_TOWN);
+              }) // zoom into selected town
+              .then(function () {
+                clearHighlight();
+                scrollTo(mapEl);
+                return delay(2000);
+              }) // clear dropdown highlight and pause on zoomed town before stats card
+              .then(function () {
+                scrollTo(statsCard);
+              }) // show stats card
+              .then(function () {
+                return delay(500);
+              })
+              .then(function () {
+                setHighlight(statsCard);
+              })
+          );
         },
         when: {
           hide: function () {
