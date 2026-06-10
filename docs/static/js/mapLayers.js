@@ -1,4 +1,9 @@
 // Description: Functions to create and initialize map layers - towns, choropleth, and bubble chart
+// !!!!! Refactor TODOS:
+// !!!!! Break up map.js and mapLayers.js into multiple files
+// !!!!! Clean up technical debt from adding popups and hover text late in development 
+// !!!!! Comment tour.js, possibly refactor
+// !!!!! Refactor overlay management to be object-oriented (see repo's archive/overlay-manager-refactor.js for a sketch of this approach)
 
 // river corridor style constants
 // default style for river corridors layer at state-level zoom

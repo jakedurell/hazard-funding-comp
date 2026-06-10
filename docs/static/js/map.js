@@ -1,4 +1,11 @@
 // Description: This file contains the functions to create the map and controls, and to handle user interactions
+// !!!!! Due for a refactor to clean up technical debt from adding export mode on top of existing interactive mode
+// !!!!! Comment scripts/export_map.js
+// !!!!! Other Refactor TODOS:
+// !!!!! Break up map.js and mapLayers.js into multiple files
+// !!!!! Clean up technical debt from adding popups and hover text late in development 
+// !!!!! Comment tour.js, possibly refactor
+// !!!!! Refactor overlay management to be object-oriented (see repo's archive/overlay-manager-refactor.js for a sketch of this approach)
 
 // globals for tracking map state and active layers
 const mapState = {
