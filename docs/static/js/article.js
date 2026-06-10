@@ -1,3 +1,5 @@
+// !!!! AI-generated glue code for article interactivity. Refactor and comment needed, but this is the basic idea of how to coordinate model toggling, image crossfades, and plot updates across the article.
+
 // Article-level glue: model toggle, image crossfade, and plot bootstrapping
 (function () {
   const STORAGE_KEY = "floodlines_article_model";
