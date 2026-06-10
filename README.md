@@ -1,6 +1,6 @@
 # Floodlines
 
-![GitHub last commit](https://img.shields.io/github/last-commit/johbry17/Floodlines)
+<!-- ![GitHub last commit](https://img.shields.io/github/last-commit/johbry17/Floodlines) -->
 
 _Risk is not equally distributed. Neither is the money to address it._  
 An independent analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont municipalities.
@@ -109,11 +109,11 @@ Key findings:
 
 ## Gallery
 
+![ETL Infographic](./resources/images/etl_graphic.png)  
+_Data sources and analytical workflow used in this study. Federal hazard, insurance, demographic, and mitigation datasets are integrated at the municipal level and transformed into comparative measures of need, funding, and funding alignment. Source: AI-generated_
+
 ![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
 _All Vermont towns classified into funding quadrants (high/low funding, high/low need, zero-funding)_
-
-![ETL Infographic](./resources/images/etl_graphic.png)  
-_Visual representation of data extraction process_
 
 ![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
 _Measuring Need: A rank-based composite of flood exposure and social vulnerability_
@@ -127,11 +127,14 @@ _Loose cloud confirming weak alignment between structural need and federal mitig
 ![Town detail panel](./resources/images/stats_card.png)  
 _Per-town statistics, percentile rankings, and quadrant classification for a selected community_
 
-![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita_rel.png)  
-_Risk map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank_
+<!-- ![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita_rel.png)  
+_Risk map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank_ -->
 
 ![NFIP claims overlay](./resources/images/choropleth_claims_eal_per_capita.png)  
 _Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest_
+
+![Reactive vs proactive mitigation, showing cliams vs. modeled risk](./resources/images/reactive_proactive.png)
+_This analysis does not establish which towns deserve funding, nor does it replace engineering studies or local planning. Its value lies in identifying broad patterns. If relatively simple, interpretable models can reliably highlight communities that may be overlooked, they can serve as an early-warning tool, helping decision-makers act before losses occur rather than after they are remembered. Source: AI-generated_
 
 ## Data & Methodology
 
