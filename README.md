@@ -133,8 +133,8 @@ _Risk map rescaled to show deviation from the Vermont statewide average rather t
 ![NFIP claims overlay](./resources/images/choropleth_claims_eal_per_capita.png)  
 _Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest_
 
-![Reactive vs proactive mitigation, showing cliams vs. modeled risk](./resources/images/reactive_proactive.png)
-_This analysis does not establish which towns deserve funding, nor does it replace engineering studies or local planning. Its value lies in identifying broad patterns. If relatively simple, interpretable models can reliably highlight communities that may be overlooked, they can serve as an early-warning tool, helping decision-makers act before losses occur rather than after they are remembered. Source: AI-generated_
+<!-- ![Reactive vs proactive mitigation, showing cliams vs. modeled risk](./resources/images/reactive_proactive.png)
+_This analysis does not establish which towns deserve funding, nor does it replace engineering studies or local planning. Its value lies in identifying broad patterns. If relatively simple, interpretable models can reliably highlight communities that may be overlooked, they can serve as an early-warning tool, helping decision-makers act before losses occur rather than after they are remembered. Source: AI-generated_ -->
 
 ## Data & Methodology
 
