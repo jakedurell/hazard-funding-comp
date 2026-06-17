@@ -55,11 +55,11 @@ const nriBlockedMetrics = ["risk", "vulnerability"];
 
 // human-readable quadrant labels (keys match quadrantColors)
 const quadrantLabels = {
-  zero_funding: "No FEMA Funding", // No Funding
-  underfunded: "High Need / Low Funding",
-  aligned: "Funding Roughly Aligned",
-  overfunded: "Lower Need / Higher Funding", // Over-allocated
-  low_priority: "Lower Need / Lower Funding", // Low Exposure
+  zero_funding: "No recorded investment", // No Funding
+  underfunded: "Underserved",
+  aligned: "Funding roughly aligned",
+  overfunded: "Historically invested", // Over-allocated
+  low_priority: "Low priority", // Low Exposure
 };
 
 // narrative headlines for the stats card header (longer than quadrantLabels — not used in map/plot)
@@ -67,21 +67,21 @@ const quadrantHeadlines = {
   zero_funding: "No recorded FEMA mitigation funding",
   underfunded: "High flood need, limited mitigation funding",
   aligned: "Funding broadly aligned with measured need",
-  overfunded: "Higher funding relative to measured need",
+  overfunded: "Prior disaster history reflected in funding record",
   low_priority: "Lower flood need and lower funding priority",
 };
 
 // one-sentence interpretive sublines for the stats card
 const quadrantSummaries = {
   zero_funding:
-    "Measurable flood exposure with no FEMA mitigation investment on record.",
+    "Measurable flood exposure present, but no FEMA mitigation investment appears in the funding record.",
   underfunded: "Modeled flood need outpaces current mitigation investment.",
   aligned:
     "Mitigation investment reflects modeled flood exposure and community vulnerability.",
   overfunded:
-    "Investment exceeds current modeled need — often reflecting past disaster recovery rather than ongoing risk.",
+    "Investment levels often reflect past disaster recovery — a pattern of the system responding to prior loss rather than current modeled risk.",
   low_priority:
-    "Lower modeled risk and vulnerability; flood exposure is not a primary driver here.",
+    "Lower modeled risk and vulnerability relative to other Vermont municipalities.",
 };
 
 // default map view for Vermont
