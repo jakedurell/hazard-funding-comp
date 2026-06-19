@@ -135,8 +135,8 @@
       </h2>
       <div class="dashboard-subtitle">
         This dashboard compares flood risk, social vulnerability, and FEMA
-        mitigation funding across Vermont's towns to explore whether funding
-        aligns with need.
+        mitigation funding across Vermont's towns to explore how closely funding
+        aligns with modeled need.
       </div>
       <div class="analysis-link">
         <a href="article.html" class="analysis-button">
@@ -179,13 +179,15 @@
       <div class="context-body">
         The default view compares flood need against mitigation funding
         received. Towns are grouped into quadrants showing whether funding and
-        need are broadly aligned or out of balance.
+        need appear aligned, and where they diverge. Can we identify high-risk
+        places before they become disaster statistics?
 
         <br /><br />
 
         Use the model selector to compare three different measures of risk:
         total expected loss, expected loss per resident, and FEMA's National
-        Risk Index. The overall pattern remains similar across all three.
+        Risk Index. While rankings shift across models, the broader pattern
+        remains similar.
       </div>
     </div>
 
@@ -271,7 +273,7 @@
       <!-- Special Overlay Buttons (Quadrants) — primary dashboard view -->
       <div class="col-md-12 text-center">
         <div class="special-overlay-label">
-          Start here:<br />Compare modeled need against mitigation funding
+          Start here:<br />Compare modeled need against funding history
         </div>
         <div
           id="choropleth-control-special"
@@ -407,8 +409,12 @@
       Risk asks: <em>Where could flooding cause damage?</em><br />
       Vulnerability asks: <em>Who would have the hardest time recovering?</em
       ><br />
-      Combined Need brings those together.<br />
-      Funding Gap compares need with FEMA mitigation funding received.
+      Combined Need asks:
+      <em
+        >Who faces serious exposure <b>and</b> has limited capacity to
+        recover?</em
+      ><br />
+      Funding Gap compares modeled need against FEMA mitigation funding history.
     </div>
 
     <!-- Metric Definitions -->
@@ -434,14 +440,13 @@
       <div class="metric-definition" id="def-funding">
         <strong>Mitigation Funding</strong><br />
         Flood-related FEMA Hazard Mitigation Assistance grants received since
-        1990, adjusted for inflation. Higher values indicate more funding
-        received.
+        1990, including both disaster-triggered and competitive mitigation
+        programs.
       </div>
       <div class="metric-definition" id="def-gap">
         <strong>Funding Gap</strong><br />
-        The difference between a town's need rank and its funding rank. Larger
-        gaps indicate communities whose measured need exceeds the mitigation
-        funding they have received.
+        The difference between a town's need rank and its funding rank. A larger
+        gap means a town ranks much higher on need than on funding received.
       </div>
       <div class="metric-definition" id="def-claims">
         <strong>NFIP Claims per Capita</strong><br />
@@ -453,9 +458,9 @@
       </div>
       <div class="metric-definition" id="def-quadrants">
         <strong>Quadrants</strong><br />
-        Each town is categorized by its relative need and mitigation funding.
-        The quadrant view categorizes where funding and measured need appear
-        aligned and where they diverge.
+        Each town is placed in one of five categories based on its relative need
+        and funding record — from communities where investment aligns with
+        modeled need, to those with no recorded mitigation funding at all.
       </div>
       <div class="metric-definition" id="def-population">
         <strong>Town Population</strong><br />
@@ -470,7 +475,7 @@
       <div class="metric-definition" id="def-river-corridors">
         <strong>River Corridors</strong><br />
         River corridors defined by State of Vermont ANR. Shaded areas show
-        mapped flood-prone river corridors. Many underfunded towns overlap these
+        mapped flood-prone river corridors. Many underserved towns overlap these
         high-risk zones.
       </div>
       <!-- </div>
@@ -511,7 +516,7 @@
           The map shows statewide comparisons. This panel shows detailed local
           values.
           <br />
-          N.b., Rankings change when different measures of flood risk are used.
+          Note: rankings shift when you change the risk model.
         </p>
         <p
           id="stats-zero-pop-note"
@@ -612,8 +617,7 @@
         <h3>FEMA National Risk Index</h3>
         <p>
           FEMA's own composite risk benchmark produces a similar pattern.
-          Funding remains only weakly aligned with measured risk across
-          municipalities.
+          Funding remains only weakly aligned with measured risk across towns.
         </p>
       </div>
     </div>
