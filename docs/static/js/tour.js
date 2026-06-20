@@ -558,7 +558,7 @@
       s({
         id: "intro",
         text:
-          "<p><b>Does FEMA flood mitigation funding go where it&rsquo;s needed most?</b></p>" +
+          "<p><b>What happens when future-oriented risk models are compared against a mitigation system largely shaped by past disasters?</b></p>" +
           "<p>Floodlines maps flood risk, community vulnerability, and federal mitigation spending across Vermont, and asks whether the money follows the need.</p>" +
           '<p>This tour walks through the dashboard. You can also <a href="article.html" target="_blank" rel="noopener">read the full analysis</a>.</p>',
         buttons: [
@@ -585,8 +585,8 @@
         id: "quadrant-map",
         text:
           "<p>This is the <strong>Quadrant Analysis</strong>, the dashboard&rsquo;s default view.</p>" +
-          "<p>Each town is placed into one of four categories based on two things: its modeled flood need, and the FEMA mitigation funding it has received. The map legend defines each category.</p>" +
-          "<p>The category to watch: <strong>high need, low funding</strong>.</p>",
+          "<p>Each town is placed into one of five categories based on two things: its modeled flood need, and the FEMA mitigation funding it has received. The map legend defines each category.</p>" +
+          "<p>Two categories stand out: <strong>Underserved</strong> (high need, limited funding) and <strong>No recorded investment</strong> (no FEMA mitigation funding on record at all). Roughly half of Vermont towns fall into that last group.</p>",
         attachTo: mapEl ? { element: mapEl, on: "bottom" } : undefined,
         beforeShowPromise: function () {
           return switchChoropleth("Quadrants")
@@ -697,7 +697,7 @@
       s({
         id: "funding-gap-controls",
         text:
-          "<p>These controls change what the map displays: Risk, Funding Gap, and other views.</p>" +
+          "<p>The map can show any of the underlying components — risk, vulnerability, funding gap — not just the quadrant summary.</p>" +
           "<p>The toggle switches between statewide rankings and comparisons against the Vermont average, making it easier to spot towns that stand out from their peers.</p>",
         attachTo: choroplethCtrl
           ? { element: choroplethCtrl, on: "top" }
@@ -993,9 +993,8 @@
         id: "conclusion",
         text:
           "<p><b>You're ready to explore.</b></p>" +
-          "<p>Across all three risk models, the relationship between need and FEMA mitigation funding is weak. Prior flood insurance claims are a substantially stronger predictor of where funding goes.</p>" +
-          "<p>The results suggest a system that responds more strongly to past losses than to projected future risk.</p>" +
-          "<p>Try switching models, comparing towns, and seeing which communities consistently appear in the <strong>high need, low funding</strong> category.</p>" +
+          "<p>Across all three risk models, the relationship between need and FEMA mitigation funding is weak. Funding is more closely associated with historical indicators of flood damage, such as prior insurance claims, than with the forward-looking risk measures used in this analysis. The question is whether that divergence reflects a gap worth closing before the next flood.</p>" +
+          "<p>Try switching models, comparing towns, and seeing which communities consistently appear in the <strong>underserved</strong> category, or have <strong>no recorded investment</strong> at all.</p>" +
           "<p>You can restart this tour anytime using the header button.</p>",
         beforeShowPromise: function () {
           return resetDashboard().then(function () {
