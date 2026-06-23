@@ -28,7 +28,9 @@ An independent analysis of flood risk, social vulnerability, and FEMA mitigation
 
 **Floodlines** is an index-based spatial analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont's 250+ towns. The central question: _does mitigation funding align with flood risk and community need?_
 
-Vermont has experienced repeated, severe flood events, most notably Hurricane Irene (2011) and the historic flooding of 2023. Yet federal mitigation funding has not flowed evenly. Some high-risk, high-vulnerability towns have received little to nothing. Others have received substantial investment. This project builds a reproducible, methodologically transparent framework to measure that gap.
+Vermont has experienced repeated, severe flood events, most notably Hurricane Irene (2011) and the historic flooding of 2023. Yet federal mitigation funding has not flowed evenly. Some high-risk, high-vulnerability towns have received little to nothing. Others have received substantial investment. This project builds a reproducible, methodologically transparent framework to measure that gap. More broadly, Floodlines explores the geography of institutional memory. Federal mitigation programs are designed around real constraints: disaster declarations, competitive grant processes, local administrative capacity, and documented losses. The result is not necessarily a system that ignores future risk, but one that often sees future risk through the lens of past experience.
+
+Floodlines combines federal hazard models, flood insurance records, Census demographics, and mitigation funding data into a single framework for comparing where risk exists, where money has gone, and where the two diverge.
 
 The analysis combines:
 
@@ -39,8 +41,6 @@ The analysis combines:
 - **FEMA National Risk Index (NRI)** expected annual loss and composite risk scores
 - **Index construction** using rank-based normalization across multiple model specifications, with sensitivity analysis
 - **An interactive web dashboard** visualizing risk, vulnerability, need, gap, and quadrant assignment for every Vermont town
-
-Key findings:
 
 ## Key Findings
 
@@ -57,7 +57,7 @@ Key findings:
 
 **Interactive Dashboard:**
 
-- Quadrant view classifying each town as underfunded, overfunded, aligned, low-priority, or zero-funding
+- Quadrant view classifying each town as underserved, aligned, historically invested, low priority, or no recorded investment
 - Choropleth map of all Vermont towns, switchable across six metrics: flood risk, social vulnerability, need index, mitigation funding, funding gap, and NFIP claims
 - River corridor, population, and funding context overlays
 - Model switcher (EAL, EAL per capita, FEMA NRI)
@@ -113,7 +113,7 @@ Key findings:
 _Data sources and analytical workflow used in this study. Federal hazard, insurance, demographic, and mitigation datasets are integrated at the municipal level and transformed into comparative measures of need, funding, and funding alignment. Source: AI-generated_
 
 ![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
-_All Vermont towns classified into funding quadrants (high/low funding, high/low need, zero-funding)_
+_Vermont towns classified as underserved, historically invested, aligned, low priority, or no recorded investment_
 
 ![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
 _Measuring Need: A rank-based composite of flood exposure and social vulnerability_
@@ -139,12 +139,12 @@ _This analysis does not establish which towns deserve funding, nor does it repla
 ## Data & Methodology
 
 **Index construction:**  
-The need index combines a flood risk component (FEMA EAL or river corridor exposure) and a social vulnerability component (poverty rate, percent elderly, percent households without a vehicle), normalized using percentile ranks across all Vermont towns. The gap index is defined as need minus scaled funding — positive values indicate towns receiving less mitigation investment than their need would predict.
+The need index combines a flood risk component (FEMA EAL or river corridor exposure) and a social vulnerability component (poverty rate, percent elderly, percent households without a vehicle), normalized using percentile ranks across all Vermont towns. The gap index is defined as need minus scaled funding — positive values indicate towns that rank higher on modeled need than on funding received.
 
 **Model selection:**  
 Three models were carried forward for the dashboard: `core_EAL_model` (primary — highest logit AUC at 0.70), `eal_per_capita_model` (robustness — most normalization-stable at Spearman 0.97), and `fema_national_risk_index` (benchmark — FEMA's own composite for external validity).
 
-Claims-based models were excluded because their high need–funding correlation (~0.55) reflects a reactive rather than proactive pattern; their near-zero gap meaningfulness (~0.04) confirms the gap index adds no independent signal when claims drive the need score. Expanded vulnerability specifications (adding housing tenure, disability, mobile homes) were also excluded: increasing the variable count raised normalization sensitivity (mean rank difference 19–21 vs. 13–15 for core models) without improving logit AUC, violating the parsimony criterion. Similarly, simple spatial exposure metrics — river corridor percentage and NFHL flood zone coverage — were replaced by FEMA Expected Annual Loss, which captures both hazard intensity and asset exposure rather than treating all land within a flood polygon as equally at risk.
+Claims-based models were excluded because their high need–funding correlation (~0.55) reflects a reactive rather than proactive pattern; their near-zero gap meaningfulness (~0.04) confirms the gap index adds no independent signal when claims drive the need score. Expanded vulnerability specifications (adding housing tenure, disability, mobile homes) were also excluded: increasing the variable count raised normalization sensitivity (mean rank difference 19–21 vs. 13–15 for core models) without improving logit AUC, violating the parsimony criterion. Similarly, rather than treating all land within a flood polygon as equally at risk, simple spatial exposure metrics — river corridor percentage and NFHL flood zone coverage — were replaced by FEMA Expected Annual Loss, which captures both hazard intensity and asset exposure.
 
 Models were selected based on predictive performance, stability across normalization methods, interpretability, and comparability to established FEMA benchmarks.
 
@@ -205,6 +205,6 @@ Thanks to the Vermont Agency of Natural Resources, FEMA, and the U.S. Census Bur
 
 ## Author
 
-Bryan Johns, May 2026  
+Bryan Johns, June 2026  
 [bryan.johns@informedwanderer.com](mailto:bryan.johns@informedwanderer.com) | [LinkedIn](https://www.linkedin.com/in/b-johns/) | [GitHub](https://github.com/johbry17) | [Portfolio](https://informedwanderer.com)  
 — Fluent in Data. Fluent in Human.
