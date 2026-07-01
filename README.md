@@ -7,9 +7,7 @@ An independent analysis of flood risk, social vulnerability, and FEMA mitigation
 
 🔗 [Live Dashboard](https://johbry17.github.io/Floodlines/)  
 📖 [Analysis Article](https://johbry17.github.io/Floodlines/article.html)  
-🔬 [Technical Appendix](https://johbry17.github.io/Floodlines/appendix.html)  
-
-⚠️ This project is under active development.
+<!-- 🔬 [Technical Appendix](https://johbry17.github.io/Floodlines/appendix.html)   -->
 
 ## Table of Contents
 
@@ -110,7 +108,7 @@ The analysis combines:
 ## Gallery
 
 ![ETL Infographic](./resources/images/etl_graphic.png)  
-_Data sources and analytical workflow used in this study. Federal hazard, insurance, demographic, and mitigation datasets are integrated at the municipal level and transformed into comparative measures of need, funding, and funding alignment. Source: AI-generated_
+_Data sources and analytical workflow used in this study. Federal hazard, insurance, demographic, and mitigation datasets are integrated at the municipal level and transformed into comparative measures of need, funding, and funding alignment. Illustration: AI-generated_
 
 ![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
 _Vermont towns classified as underserved, historically invested, aligned, low priority, or no recorded investment_
@@ -133,8 +131,9 @@ _Risk map rescaled to show deviation from the Vermont statewide average rather t
 ![NFIP claims overlay](./resources/images/choropleth_claims_eal_per_capita.png)  
 _Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest_
 
-<!-- ![Reactive vs proactive mitigation, showing cliams vs. modeled risk](./resources/images/reactive_proactive.png)
-_This analysis does not establish which towns deserve funding, nor does it replace engineering studies or local planning. Its value lies in identifying broad patterns. If relatively simple, interpretable models can reliably highlight communities that may be overlooked, they can serve as an early-warning tool, helping decision-makers act before losses occur rather than after they are remembered. Source: AI-generated_ -->
+![Church Waterline](./resources/images/church_waterline.png)  
+_A visual metaphor for the central question explored in Floodlines: when institutions measure risk through past disasters, future floods may arrive above the last high-water mark. Illustration: AI-generated._
+<!-- _A visual metaphor for reactive flood planning and the geography of institutional memory. Illustration: AI-generated._ -->
 
 ## Data & Methodology
 
