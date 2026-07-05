@@ -1,13 +1,18 @@
-// Description: Functions to create and initialize map layers - towns, choropleth, and bubble chart
+// ==========================================================
+// Map Layers
+//
+// Creates and styles Leaflet layers.
+//
+// Responsibilities:
+// • River corridor layers
+// • Quadrant layer
+// • Choropleth layer
+// • Bubble layers
+// • Labels
+// • Bubble popups
+// ==========================================================
 
-// helper to calculate centroid
-// river corridors
-// quadrants
-// metric choropleths
-// bubbles (population and funding)
-// popup mouse events
-
-///////////////////////////////////////////////////////
+// helper to calculate centroid (for labels and bubble placement) using Turf.js
 
 // calculates centroid for choropleth and bubble chart layers
 function calculateCentroid(feature) {
@@ -18,6 +23,7 @@ function calculateCentroid(feature) {
 ///////////////////////////////////////////////////////
 
 // river corridor style constants
+
 // default style for river corridors layer at state-level zoom
 const RIVER_STYLE_DEFAULT = {
   color: defaultColors.riverColor,

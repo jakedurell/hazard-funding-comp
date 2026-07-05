@@ -1,12 +1,21 @@
-// !!!!! Refactor TODOS:
-// !!!!! Clean up technical debt from adding popups and hover text late in development
-// Such debt is easily solved when I move to:
-// !!!!! Refactor overlay management to be object-oriented (see repo's archive/overlay-manager-refactor.js for a sketch of this approach)
+// ==========================================================
+// Map Choropleth Popups
+//
+// Generates hover tooltips and click popups for choropleth
+// map features.
+//
+// Responsibilities:
+// • Hover tooltip content
+// • Popup content
+// • Popup interaction helpers
+// • Metric formatting helpers
+//
+// Technical debt remains from integrating hover labels and
+// popups late in development. See docs/static/js/app.js for 
+// context.
+// ==========================================================
 
 // helper to add note re: model to popups
-// choropleth hover & popups
-// quadrant hover & popups
-// bubble (population & funding) hover & popups included in layer initialization (mapLayers.js)
 
 // appends note to popups re: active model
 function buildModelNote() {
@@ -27,6 +36,8 @@ function buildModelNote() {
 }
 
 ///////////////////////////////////////////////////////
+
+// choropleth hover & popups
 
 // short one-sentence hover tooltip — shown on mouseover, quickly scannable
 function buildChoroplethHover(town) {
@@ -381,6 +392,8 @@ function buildChoroplethPopup(town) {
 }
 
 //////////////////////////////////////////////////////////
+
+// quadrant hover & popups
 
 // short one-line hover for quadrant layer
 function buildQuadrantHover(town) {

@@ -1,4 +1,16 @@
-// Description: This file contains functions to initialize and render the rankings table based on the selected metric and town.
+// ==========================================================
+// Rankings
+//
+// Renders the interactive rankings table and manages ranking
+// navigation for the selected metric, model, and town.
+//
+// Responsibilities:
+// • Initialize ranking data
+// • Render ranking rows and bars
+// • Manage VT reference markers
+// • Handle ranking navigation and jump buttons
+// • Synchronize rankings with map selections
+// ==========================================================
 
 // globals to store rankings data and VT baseline for relative metrics
 let rankingsData = [];

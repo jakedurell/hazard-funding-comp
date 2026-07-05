@@ -1,49 +1,16 @@
-// UI wiring and event listeners
-
-//////////////////////////////////////////////////////////
-
-// create dropdown for town interaction
-function initializeTownsDropdown() {
-  const controlDiv = document.getElementById("towns-control");
-  const dropdown = createTownsDropdown();
-  controlDiv.appendChild(dropdown);
-
-  // create towns layer but don't add it to the map yet
-  mapState.choroplethLayer = initializeChoroplethLayer();
-}
-
-// create town dropdown elements
-function createTownsDropdown() {
-  const dropdown = document.createElement("select");
-  dropdown.id = "towns-dropdown";
-
-  // sort towns alphabetically
-  const sortedFeatures = [...towns.features].sort((a, b) =>
-    a.properties.town_name.localeCompare(b.properties.town_name),
-  );
-
-  // populate dropdown menu, VT first, then sorted towns
-  const allVT = createOption("State of Vermont", "top");
-  dropdown.appendChild(allVT);
-  sortedFeatures.forEach((feature) => {
-    const option = createOption(
-      feature.properties.town_name,
-      feature.properties.town_name,
-    );
-    option.setAttribute("aria-label", `Town: ${feature.properties.town_name}`);
-    dropdown.appendChild(option);
-  });
-
-  return dropdown;
-}
-
-// create dropdown options
-function createOption(text, value) {
-  const option = document.createElement("option");
-  option.text = text;
-  option.value = value;
-  return option;
-}
+// ==========================================================
+// Map Controls
+//
+// Wires UI controls and user interactions to the map.
+//
+// Responsibilities:
+// • Town dropdown
+// • Overlay buttons
+// • Relative toggle
+// • Model selector
+// • Zoom-dependent behaviors
+// • River corridor zoom logic
+// ==========================================================
 
 //////////////////////////////////////////////////////////
 

@@ -1,6 +1,15 @@
-// overlay switching, dashboard updates, state transitions
-
-/////////////////////////////////////////////////////////////
+// ==========================================================
+// Map Overlays
+//
+// Manages overlay state and synchronizes dashboard updates.
+//
+// Responsibilities:
+// • Overlay switching
+// • Dashboard synchronization
+// • Metric updates
+// • Layer visibility
+// • Map navigation helpers
+// ==========================================================
 
 // update dashboard components based on selected metric and model
 

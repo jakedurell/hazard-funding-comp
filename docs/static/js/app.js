@@ -1,4 +1,21 @@
-// Description: Main JavaScript file for the VT Floodlines project
+// ==========================================================
+// Application Entry Point
+//
+// Loads project datasets, prepares shared application data,
+// and creates the map.
+//
+// Responsibilities:
+// • Load GeoJSON and CSV resources
+// • Build the town lookup object
+// • Bootstrap the interactive map
+//
+// Technical debt remains from integrating hover labels and
+// popups late in development (see mapChoroplethPopups.js).
+//
+// Future direction:
+//   • Convert overlay management to an object-oriented design
+//   • See archive/overlay-manager-refactor.js
+// ==========================================================
 
 // globals for data
 let towns = {};

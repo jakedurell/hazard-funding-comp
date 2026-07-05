@@ -1,3 +1,16 @@
+// ==========================================================
+// Color Configuration
+//
+// Defines the project's shared color palettes and D3 color
+// scales used throughout the dashboard and interactive map.
+//
+// Responsibilities:
+// • Shared UI colors
+// • Quadrant color palette
+// • Choropleth color scales
+// • Legend labels
+// ==========================================================
+
 // set default color scheme
 const defaultColors = {
   defaultGray: "#6c757d", // #343a40

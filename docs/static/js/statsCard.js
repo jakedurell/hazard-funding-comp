@@ -1,4 +1,15 @@
-// Description: JS for populating stats card
+// ==========================================================
+// Statistics Card
+//
+// Renders the summary statistics card for the selected town
+// or statewide view.
+//
+// Responsibilities:
+// • Populate summary statistics
+// • Format values for display
+// • Generate narrative headlines
+// • Update card content after map interactions
+// ==========================================================
 
 // render stats card for a given town (or statewide if "top" is passed)
 function renderStatsCard(town) {

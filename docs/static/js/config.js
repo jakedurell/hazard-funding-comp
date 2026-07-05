@@ -1,5 +1,19 @@
-// Description: Centralised label ↔ key mappings for overlays and models.
-// Edit here when adding metrics or renaming UI labels — no other files need to change.
+// ==========================================================
+// Application Configuration
+//
+// Central configuration for UI labels, metric mappings,
+// model definitions, default settings, and narrative text.
+//
+// Edit here when adding metrics or renaming UI labels,
+// no other files need to change.
+//
+// Responsibilities:
+// • Overlay ↔ metric mappings
+// • Model ↔ data key mappings
+// • Definition lookup tables
+// • Quadrant labels and narratives
+// • Default Vermont map view
+// ==========================================================
 
 // overlay label (data-overlay attribute) → base metric key
 const overlayToBase = {

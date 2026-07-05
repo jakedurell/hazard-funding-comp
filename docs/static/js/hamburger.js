@@ -1,4 +1,14 @@
-// Description: JavaScript for hamburger menu toggle on mobile
+// ==========================================================
+// Mobile Navigation
+//
+// Controls the responsive hamburger menu used on smaller
+// screen sizes.
+//
+// Responsibilities:
+// • Toggle navigation visibility
+// • Update accessibility attributes
+// • Close the menu when clicking outside
+// ==========================================================
 
 document.addEventListener('DOMContentLoaded', function () {
   const toggle = document.getElementById('site-nav-toggle');

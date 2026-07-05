@@ -1,6 +1,14 @@
-// legend conditional
-// gradient bar
-// range labels
+// ==========================================================
+// Map Legend
+//
+// Builds and renders legends for each map visualization.
+//
+// Responsibilities:
+// • Choropleth legend
+// • Quadrant legend
+// • Bubble legends
+// • River corridor legend
+// ==========================================================
 
 // create legend, depending on layer type (choropleth vs quadrant vs bubble vs river corridors)
 function addLegend(type) {

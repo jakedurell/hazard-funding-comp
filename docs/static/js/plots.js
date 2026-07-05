@@ -1,4 +1,16 @@
-// Description: JavaScript file for creating plot
+// ==========================================================
+// Data Visualizations
+//
+// Renders the interactive scatter plot and supporting plot
+// elements for the selected town, metric, and model.
+//
+// Responsibilities:
+// • Render the quadrant scatter plot
+// • Build and update plot data
+// • Manage plot annotations and labels
+// • Handle plot interactions and tooltips
+// • Update plot titles and captions
+// ==========================================================
 
 // render plot based on selected metric and town
 function renderPlot(metric, selectedTown) {
@@ -321,6 +333,7 @@ function renderQuadrantScatter(selectedTown) {
   addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin);
 }
 
+// add quadrant labels to scatter plot with halo effect for legibility over colored circles
 function addQuadrantLabels(svg, x, y, xMed, yMed, width, height, margin) {
   // calculate plot bounds for dynamic label positioning
   const [xMin, xMax] = x.domain();

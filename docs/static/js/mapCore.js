@@ -1,10 +1,15 @@
-// Description: This file contains the functions to create the map and controls, and to handle user interactions
-// !!!!! Due for a refactor to clean up technical debt from adding export mode on top of existing interactive mode
-// !!!!! Comment scripts/export_map.js
-// !!!!! Other Refactor TODOS:
-// !!!!! Clean up technical debt from adding popups and hover text late in development
-// !!!!! Comment tour.js, possibly refactor
-// !!!!! Refactor overlay management to be object-oriented (see repo's archive/overlay-manager-refactor.js for a sketch of this approach)
+// ==========================================================
+// Map Core
+//
+// Initializes the Leaflet map and bootstraps application state.
+//
+// Responsibilities:
+// • Create the map and shared panes
+// • Initialize runtime configuration
+// • Configure interactive vs. export mode
+// • Initialize default layers
+// • Manage global map state
+// ==========================================================
 
 // globals for tracking map state and active layers
 const mapState = {
@@ -278,6 +283,51 @@ function wireLockedPopupDismiss() {
     }
     _lockedPopupTown = null;
   });
+}
+
+/////////////////////////////////////////////////////////////
+
+// create dropdown for town interaction
+function initializeTownsDropdown() {
+  const controlDiv = document.getElementById("towns-control");
+  const dropdown = createTownsDropdown();
+  controlDiv.appendChild(dropdown);
+
+  // create towns layer but don't add it to the map yet
+  mapState.choroplethLayer = initializeChoroplethLayer();
+}
+
+// create town dropdown elements
+function createTownsDropdown() {
+  const dropdown = document.createElement("select");
+  dropdown.id = "towns-dropdown";
+
+  // sort towns alphabetically
+  const sortedFeatures = [...towns.features].sort((a, b) =>
+    a.properties.town_name.localeCompare(b.properties.town_name),
+  );
+
+  // populate dropdown menu, VT first, then sorted towns
+  const allVT = createOption("State of Vermont", "top");
+  dropdown.appendChild(allVT);
+  sortedFeatures.forEach((feature) => {
+    const option = createOption(
+      feature.properties.town_name,
+      feature.properties.town_name,
+    );
+    option.setAttribute("aria-label", `Town: ${feature.properties.town_name}`);
+    dropdown.appendChild(option);
+  });
+
+  return dropdown;
+}
+
+// create dropdown options
+function createOption(text, value) {
+  const option = document.createElement("option");
+  option.text = text;
+  option.value = value;
+  return option;
 }
 
 /////////////////////////////////////////////////////////////
