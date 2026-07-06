@@ -1,4 +1,23 @@
-// !!!! AI-generated glue code for article interactivity. Refactor and comment needed, but this is the basic idea of how to coordinate model toggling, image crossfades, and plot updates across the article.
+// ==========================================================
+// Article Interactivity
+//
+// Coordinates interactive behavior for the Floodlines article,
+// including model switching, image transitions, plot updates,
+// and sticky navigation controls.
+//
+// Responsibilities:
+// • Initialize article widgets
+// • Synchronize model selection across article components
+// • Crossfade model-specific figures
+// • Bootstrap article plots
+// • Manage sticky model controls
+//
+// Notes:
+// • Originally AI-generated (Claude), then reviewed and adapted for
+//   the project's interactive article.
+// • Serves as integration ("glue") code between reusable
+//   dashboard components and article-specific UI.
+// ==========================================================
 
 // Article-level glue: model toggle, image crossfade, and plot bootstrapping
 (function () {
@@ -46,30 +65,27 @@
     };
   }
 
-  // helper: set which model is active across article widgets
+  // Update the active model across every article component.
   function setArticleModel(model, persist = true) {
     if (!model) return;
-    // update metric engine
     metricEngine.model = model;
     if (!metricEngine.baseMetric) metricEngine.baseMetric = "need";
 
-    // toggle stacked model images per container
+    // Crossfade model-specific images per container
     document.querySelectorAll(".model-switcher").forEach((container) => {
       const imgs = Array.from(container.querySelectorAll(".model-img"));
       if (!imgs.length) return;
-      // find the target image for this model and the currently visible one
       const target = imgs.find((i) => i.classList.contains(`model-${model}`));
       const current = imgs.find((i) => i.classList.contains("visible"));
 
-      // if target already visible, nothing to do
+      // If target already visible, nothing to do
       if (target && target === current) return;
 
-      // make the target visible first so it can fade in
+      // Make the target visible first so it can fade in
       if (target) target.classList.add("visible");
 
-      // remove visibility from other images on the next frame so the two overlap
-      // Use a per-container rAF handle so different model-switcher containers
-      // don't cancel each other's cleanup when toggling rapidly.
+      // Wait one animation frame so both images briefly overlap,
+      // allowing the CSS transition to crossfade smoothly
       if (container._articleImageCleanup)
         cancelAnimationFrame(container._articleImageCleanup);
       container._articleImageCleanup = requestAnimationFrame(() => {
@@ -80,8 +96,10 @@
       });
     });
 
-    // update selector active state and sync radio inputs across any control instances
-    const selectorLabels = document.querySelectorAll(".article-model-control label[data-model]");
+    // Synchronize every model selector (main and dock) to reflect the new model
+    const selectorLabels = document.querySelectorAll(
+      ".article-model-control label[data-model]",
+    );
     selectorLabels.forEach((lbl) => {
       const input = lbl.querySelector("input[type=radio]");
       if (lbl.dataset && lbl.dataset.model === model) {
@@ -95,19 +113,18 @@
 
     if (persist) localStorage.setItem(STORAGE_KEY, model);
 
-    // re-render scatter if available
+    // Re-render scatter if available
     if (typeof renderPlot === "function") {
       try {
-        // use 'top' so article scatter shows full-bright dots (dashboard default)
+        // Use 'top' so article scatter shows full-bright dots (dashboard default)
         renderPlot(metricEngine.baseMetric, "top");
       } catch (e) {
-        // graceful: do nothing if plots not ready
         console.warn("renderPlot failed:", e);
       }
     }
   }
 
-  // ensure the model-switcher container keeps the right height and images overlay
+  // Size image containers and stack model images for crossfading
   function positionModelSwitchers() {
     document.querySelectorAll(".model-switcher").forEach((container) => {
       const imgs = container.querySelectorAll(".model-img");
@@ -134,79 +151,88 @@
     });
   }
 
-  // create a non-interactive ghost of the control in the dock placeholder
+  // Create the floating model selector by cloning the primary
+  // control and wiring it independently
   function populateDockGhost() {
     const dock = document.getElementById("article-model-dock");
     const ctrl = document.getElementById("article-model-control");
     if (!dock || !ctrl) return;
     if (dock.dataset.populated) return;
     try {
-      // clone inner markup but keep inputs non-interactive
-        dock.innerHTML = '<div class="article-model-control article-model-control-ghost">' + ctrl.innerHTML + "</div>";
-        // sanitize duplicate ids in the ghost and make it interactive
-        const clonedSelector = dock.querySelector('#article-model-selector');
-        if (clonedSelector) clonedSelector.id = 'article-model-selector-dock';
+      // Clone the control without copying event listeners
+      dock.innerHTML =
+        '<div class="article-model-control article-model-control-ghost">' +
+        ctrl.innerHTML +
+        "</div>";
+      // Sanitize duplicate ids in the ghost and make it interactive
+      const clonedSelector = dock.querySelector("#article-model-selector");
+      if (clonedSelector) clonedSelector.id = "article-model-selector-dock";
     } catch (e) {
-      // fallback: simple cloneNode without events
+      // Fallback: simple cloneNode without events
       const clone = ctrl.cloneNode(true);
       dock.appendChild(clone);
     }
-    // make ghost inputs independent and interactive, and sync their checked state
-    const model = metricEngine && metricEngine.model ? metricEngine.model : null;
-    dock.querySelectorAll('input[type=radio]').forEach((i) => {
-      // avoid native browser grouping between main control and ghost
-      i.name = 'article-model-dock';
+    // Give the cloned controls their own radio group
+    const model =
+      metricEngine && metricEngine.model ? metricEngine.model : null;
+    dock.querySelectorAll("input[type=radio]").forEach((i) => {
+      // Avoid native browser grouping between main control and ghost
+      i.name = "article-model-dock";
       i.disabled = false;
-      i.removeAttribute('aria-hidden');
+      i.removeAttribute("aria-hidden");
       i.tabIndex = 0;
-      // ensure label reflect current model state
-      const lbl = i.closest('label[data-model]');
+      // Ensure label reflects current active model state
+      const lbl = i.closest("label[data-model]");
       if (lbl) {
         if (model && lbl.dataset.model === model) {
-          lbl.classList.add('active');
+          lbl.classList.add("active");
           i.checked = true;
         } else {
-          lbl.classList.remove('active');
+          lbl.classList.remove("active");
           i.checked = false;
         }
       }
     });
-    // make dock visible to assistive tech now that it's interactive
-    dock.removeAttribute('aria-hidden');
-    // wire up event handlers for the dock selector so it controls the article
-    const dockSelector = dock.querySelector('#article-model-selector-dock');
+    // Make dock visible to assistive tech now that it's interactive
+    dock.removeAttribute("aria-hidden");
+    // Wire event handlers for the dock selector
+    const dockSelector = dock.querySelector("#article-model-selector-dock");
     if (dockSelector) wireSelector(dockSelector);
     dock.dataset.populated = "1";
   }
 
-  // helper to wire a selector element with click/change handlers (idempotent)
+  // Attach model-selection handlers to a selector instance
   function wireSelector(selectorEl) {
     if (!selectorEl) return;
     if (selectorEl.dataset && selectorEl.dataset.wired) return;
     selectorEl.dataset.wired = "1";
 
-    selectorEl.addEventListener('click', (ev) => {
-      const lbl = ev.target.closest('label[data-model]');
+    selectorEl.addEventListener("click", (ev) => {
+      const lbl = ev.target.closest("label[data-model]");
       if (!lbl) return;
       const model = lbl.dataset.model;
       setArticleModel(model, true);
     });
 
-    selectorEl.querySelectorAll && selectorEl.querySelectorAll('input[type=radio]').forEach((inp) => {
-      inp.addEventListener('change', (ev) => {
-        const lbl = ev.target.closest('label[data-model]');
-        if (!lbl) return;
-        setArticleModel(lbl.dataset.model, true);
+    selectorEl.querySelectorAll &&
+      selectorEl.querySelectorAll("input[type=radio]").forEach((inp) => {
+        inp.addEventListener("change", (ev) => {
+          const lbl = ev.target.closest("label[data-model]");
+          if (!lbl) return;
+          setArticleModel(lbl.dataset.model, true);
+        });
       });
-    });
   }
 
-  // helper to find the article container used for page padding
+  // Helper to find the article container used for page padding
   function getArticleElement() {
-    return document.getElementById("article-content") || document.querySelector(".article");
+    return (
+      document.getElementById("article-content") ||
+      document.querySelector(".article")
+    );
   }
 
-  // wire UI controls
+  // Connect the primary article controls
   function wireControls() {
     const selector = document.getElementById("article-model-selector");
     if (!selector) return;
@@ -217,7 +243,7 @@
       setArticleModel(model, true);
     });
 
-    // keyboard / input support: if radio input changed
+    // Keyboard / input support: if radio input changed
     selector.querySelectorAll("input[type=radio]").forEach((inp) => {
       inp.addEventListener("change", (ev) => {
         const lbl = ev.target.closest("label[data-model]");
@@ -227,7 +253,8 @@
     });
   }
 
-  // Sticky behavior using CSS `position: sticky` plus lightweight observers
+  // Keep the model selector floating while the reader is
+  // within the interactive map section
   function initStickyModelControl() {
     const ctrl = document.getElementById("article-model-control");
     if (!ctrl) return;
@@ -242,8 +269,10 @@
       ctrl._stickyObservers = null;
     }
     if (ctrl._stickyHandlers) {
-      window.removeEventListener('scroll', ctrl._stickyHandlers.scroll, { passive: true });
-      window.removeEventListener('resize', ctrl._stickyHandlers.resize);
+      window.removeEventListener("scroll", ctrl._stickyHandlers.scroll, {
+        passive: true,
+      });
+      window.removeEventListener("resize", ctrl._stickyHandlers.resize);
       ctrl._stickyHandlers = null;
     }
     if (ctrl._stickyRAF) {
@@ -254,8 +283,9 @@
     function setFloating(on) {
       if (on) {
         ctrl.classList.add("is-floating");
-        // mobile padding
-        if (window.innerWidth <= 720) getArticleElement()?.classList.add("has-sticky-model");
+        // Mobile padding
+        if (window.innerWidth <= 720)
+          getArticleElement()?.classList.add("has-sticky-model");
         getArticleElement()?.classList.add("has-floating-model");
       } else {
         ctrl.classList.remove("is-floating");
@@ -274,8 +304,10 @@
         return;
       }
       const startRect = startAnchor.getBoundingClientRect();
-      const endRect = endAnchor ? endAnchor.getBoundingClientRect() : { top: Infinity, bottom: Infinity };
-      // trigger offset: use a stable offset below the navbar for all viewports
+      const endRect = endAnchor
+        ? endAnchor.getBoundingClientRect()
+        : { top: Infinity, bottom: Infinity };
+      // Keep the control below the fixed navigation bar
       const triggerTop = 72;
       const startPassed = startRect.top <= triggerTop;
       const endPassed = endAnchor ? endRect.top <= triggerTop : false;
@@ -284,9 +316,9 @@
       setFloating(shouldFloat);
 
       if (endPassed) {
-        ctrl.classList.add('is-settled');
+        ctrl.classList.add("is-settled");
       } else {
-        ctrl.classList.remove('is-settled');
+        ctrl.classList.remove("is-settled");
       }
     }
 
@@ -298,26 +330,25 @@
       });
     };
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     ctrl._stickyHandlers = { scroll: onScroll, resize: onScroll };
 
-    // initial check
     updateFloating();
   }
 
-  // bootstrap: load town stats (if not present) then initialize visuals
+  // Initialize article components once the page is ready
   function bootstrap() {
     const initialModel = localStorage.getItem(STORAGE_KEY) || DEFAULT_MODEL;
 
-    // preload model images then size switchers
+    // Wait for model images before sizing the crossfade containers
     const imgs = Array.from(
       document.querySelectorAll(".model-switcher .model-img"),
     );
     if (imgs.length > 0) {
       let loaded = 0;
       imgs.forEach((img) => {
-        // image may already be cached/loaded
+        // Image may already be cached/loaded
         if (img.complete) {
           loaded += 1;
         } else {
@@ -331,12 +362,10 @@
           });
         }
       });
-      // if all were already complete
       if (loaded === imgs.length) positionModelSwitchers();
 
-      // re-calc on resize
+      // Recalculate image sizing after the layout changes
       window.addEventListener("resize", () => {
-        // small debounce
         clearTimeout(window._article_resize_timer);
         window._article_resize_timer = setTimeout(positionModelSwitchers, 120);
       });
@@ -344,7 +373,7 @@
 
     wireControls();
 
-    // load stats if necessary then render
+    // Load stats if necessary then render
     if (!window.statsRaw || !window.statsRaw.length) {
       if (typeof d3 !== "undefined" && d3.csv) {
         d3.csv("./static/resources/town_stats.csv").then((ts) => {
@@ -354,7 +383,7 @@
           initStickyModelControl();
         });
       } else {
-        // no d3 available; still set model so images/captions update
+        // No d3 available; still set model so images/captions update
         setArticleModel(initialModel, false);
         populateDockGhost();
         initStickyModelControl();
@@ -366,7 +395,7 @@
     }
   }
 
-  // init when DOM ready
+  // Initialize once the document is ready
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", bootstrap);
   } else {
