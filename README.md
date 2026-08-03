@@ -1,209 +1,246 @@
-# Floodlines
+# Hazard Funding Comp
 
-<!-- ![GitHub last commit](https://img.shields.io/github/last-commit/johbry17/Floodlines) -->
+_Risk is not equally distributed. Neither is the money to address it — and neither is the effort to go get it._
 
-_Risk is not equally distributed. Neither is the money to address it._  
-An independent analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont municipalities.
+A comparative analysis of FEMA hazard mitigation funding in **North Topsail Beach, North Carolina** against similarly situated coastal municipalities, built for eventual incorporation into the **Reef Advocate** project.
 
-🔗 [Live Dashboard](https://johbry17.github.io/Floodlines/)  
-📖 [Analysis Article](https://johbry17.github.io/Floodlines/article.html)  
-<!-- 🔬 [Technical Appendix](https://johbry17.github.io/Floodlines/appendix.html)   -->
+> **Attribution.** This repository is a derivative work of **[Floodlines](https://github.com/johbry17/Floodlines)** by **Bryan C. Johns**, used and adapted under the MIT License. The entire analytical framework, ETL pipeline, index methodology, and interactive dashboard are his work. See [Attribution & Upstream Project](#attribution--upstream-project) below.
+
+> **Status.** A first North Carolina module is live at **`docs/nc/`** — an interactive map of every FEMA hazard mitigation award to the state's 21 Atlantic-facing barrier-island municipalities, built directly from the FEMA API. The inherited **Vermont** index pipeline (notebooks, `data/cleaned/`, `docs/index.html`) is untouched and still describes Vermont; the need/gap index has not yet been ported to NC.
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Tools & Technologies](#tools--technologies)
+- [The Question](#the-question)
+- [Why This Framework](#why-this-framework)
+- [Comparison Design](#comparison-design)
+- [What This Data Can and Cannot Show](#what-this-data-can-and-cannot-show)
+- [Roadmap](#roadmap)
+- [Repository Structure](#repository-structure)
 - [Usage](#usage)
-- [Gallery](#gallery)
-- [Data & Methodology](#data--methodology)
+- [Inherited Methodology](#inherited-methodology)
+- [Gallery (Upstream Vermont Dashboard)](#gallery-upstream-vermont-dashboard)
+- [Attribution & Upstream Project](#attribution--upstream-project)
 - [References](#references)
 - [License](#license)
-- [Acknowledgements](#acknowledgements)
 - [Author](#author)
 
-## Project Overview
+## The Question
 
-**Floodlines** is an index-based spatial analysis of flood risk, social vulnerability, and FEMA mitigation funding across Vermont's 250+ towns. The central question: _does mitigation funding align with flood risk and community need?_
+FEMA's Hazard Mitigation Assistance programs — HMGP, BRIC/PDM, and Flood Mitigation Assistance — do not pay homeowners directly. Property owners cannot apply on their own. Funding flows through a **sub-applicant**, almost always the local government, which identifies candidate properties, assembles benefit-cost analyses, files the sub-application with the state emergency management agency, and administers the award.
 
-Vermont has experienced repeated, severe flood events, most notably Hurricane Irene (2011) and the historic flooding of 2023. Yet federal mitigation funding has not flowed evenly. Some high-risk, high-vulnerability towns have received little to nothing. Others have received substantial investment. This project builds a reproducible, methodologically transparent framework to measure that gap. More broadly, Floodlines explores the geography of institutional memory. Federal mitigation programs are designed around real constraints: disaster declarations, competitive grant processes, local administrative capacity, and documented losses. The result is not necessarily a system that ignores future risk, but one that often sees future risk through the lens of past experience.
+That structure makes the municipality a gatekeeper. A town that actively solicits interest from flood-damaged homeowners, maintains a repetitive-loss list, and staffs grant administration will move federal mitigation dollars to its residents. A town that does none of those things will not, no matter how much its residents want elevation, acquisition, or reconstruction assistance.
 
-Floodlines combines federal hazard models, flood insurance records, Census demographics, and mitigation funding data into a single framework for comparing where risk exists, where money has gone, and where the two diverge.
+This project asks whether **North Topsail Beach** has functioned as the second kind of town, by measuring its mitigation funding record against comparable North Carolina coastal municipalities facing similar hazard exposure.
 
-The analysis combines:
+## Why This Framework
 
-- **GIS preprocessing** of flood zone, river corridor, and town boundary data
-- **ACS demographic data** for town-level social vulnerability (poverty, age, vehicle access, and more)
-- **FEMA Hazard Mitigation Assistance (HMA)** funding records, inflation-adjusted to 2025 dollars
-- **NFIP** insurance claims and policy data
-- **FEMA National Risk Index (NRI)** expected annual loss and composite risk scores
-- **Index construction** using rank-based normalization across multiple model specifications, with sensitivity analysis
-- **An interactive web dashboard** visualizing risk, vulnerability, need, gap, and quadrant assignment for every Vermont town
+Floodlines already solves the hard parts of this comparison. It builds a reproducible, defensible measure of how much mitigation funding a municipality *should* have pursued given its risk and its residents' vulnerability, then measures the distance between that and what it actually received:
 
-## Key Findings
+- **Need index** — a rank-normalized composite of flood risk (FEMA Expected Annual Loss) and social vulnerability (poverty, age 65+, no vehicle access)
+- **Funding gap** — need minus scaled funding, so positive values identify municipalities receiving less than their measured need would predict
+- **Quadrant classification** — underserved / aligned / historically invested / low priority / no recorded investment
+- **Sensitivity analysis** — leave-one-variable-out, weight perturbation, and normalization comparison, so a finding cannot be dismissed as an artifact of modeling choices
 
-- More than half of Vermont municipalities received no FEMA Hazard Mitigation Assistance funding.
-- Funding shows only weak alignment with forward-looking measures of flood risk and vulnerability.
-- Funding is more strongly associated with past insured flood losses than with modeled future risk.
-- The pattern persists across multiple risk models, normalization methods, and sensitivity tests.
-<!-- - Flood mitigation funding is only weakly correlated with structural need (Spearman ~0.10–0.30 for most models)
-- Past insurance claims are a far stronger predictor of funding (Spearman ~0.55), suggesting a reactive rather than proactive allocation pattern
-- ~55–60% of Vermont towns are underfunded relative to their measured need
-- The index framework is robust to normalization method choice (need-index Spearman z vs. rank: 0.89–1.00) -->
+That last point matters most here. An adversarial reader will argue the ranking was constructed to produce the desired answer. The inherited sensitivity machinery is the response to that argument, and it should be run and reported, not skipped.
 
-## Features
+## Comparison Design
 
-**Interactive Dashboard:**
+**Subject:** North Topsail Beach, Onslow County, NC.
 
-- Quadrant view classifying each town as underserved, aligned, historically invested, low priority, or no recorded investment
-- Choropleth map of all Vermont towns, switchable across six metrics: flood risk, social vulnerability, need index, mitigation funding, funding gap, and NFIP claims
-- River corridor, population, and funding context overlays
-- Model switcher (EAL, EAL per capita, FEMA NRI)
-- Relative-to-state-average toggle for contextualizing local values
-- Town-level detail panel with key statistics and percentile rankings
-- Scatter plot of need vs. funding, updating dynamically with the active model
-- Rankings table showing each town's percentile position across all key metrics
-- Responsive layout with mobile support
+**Candidate comparison towns — proposed, not yet determined.** North Carolina barrier-island and oceanfront municipalities with comparable exposure:
 
-**Analysis Pipeline:**
+| Region | Candidates |
+|--------|-----------|
+| Topsail Island (same island, same inlet dynamics) | Surf City, Topsail Beach |
+| Bogue Banks | Emerald Isle, Atlantic Beach, Pine Knoll Shores, Indian Beach |
+| Brunswick County | Holden Beach, Ocean Isle Beach, Oak Island, Caswell Beach |
+| New Hanover County | Carolina Beach, Kure Beach, Wrightsville Beach |
+| Outer Banks | Nags Head, Kitty Hawk, Kill Devil Hills, Duck |
 
-- Reproducible ETL notebooks for all data sources (GIS, ACS, FEMA HMA, NFIP, NRI)
-- Index construction and model evaluation across 20 model specifications and two normalization methods
-- Sensitivity analysis (LOVO, weight perturbation, normalization comparison)
-- Quadrant and exclusion analysis
-- Spatial autocorrelation (Moran's I)
-- Exportable web data with raw scores, percentile ranks, and relative-to-mean values
+Comps should be matched on hazard exposure, housing stock, population and seasonal-population profile, and municipal fiscal capacity — not merely on being coastal. Two structural factors deserve explicit treatment before any comparison is drawn:
 
-## Tools & Technologies
+1. **Coastal Barrier Resources System (CBRS).** Substantial portions of North Topsail Beach lie within CBRS units, which restricts certain federal expenditures and new federal flood insurance availability. This can independently suppress a funding record. Verify current unit boundaries against the FWS CBRS mapper and either match comps on CBRS status or control for it explicitly.
+2. **NFIP Community Rating System participation.** CRS class is a direct, public indicator of a municipality's investment in floodplain-management activity, and several candidate comps participate. It belongs in the comparison as an independent variable.
 
-**Frontend:** JavaScript, Leaflet.js, D3.js, HTML/CSS  
-**Backend:** Python, Pandas, GeoPandas, NumPy, Jupyter Notebook  
-**Spatial:** GeoPandas, Shapely, libpysal, ESDA (Moran's I)  
-**Statistics:** scikit-learn, scipy, statsmodels  
-**Data sources:** U.S. Census / ACS, OpenFEMA, FEMA NFHL, Vermont ANR, FRED CPI  
-**Hosting:** GitHub Pages
+## What This Data Can and Cannot Show
+
+The FEMA HMA dataset records **approved projects**. It does not record applications filed, applications denied, or assistance a town declined to offer. This is stated as a limitation in the upstream project, and the reframed question here depends on it more heavily than the original did.
+
+**The quantitative pipeline can establish:** that North Topsail Beach's mitigation funding record diverges from peer municipalities with comparable risk and vulnerability, that the divergence is robust across model specifications, and its approximate magnitude in inflation-adjusted federal dollars.
+
+**It cannot, by itself, establish:** that the divergence is caused by municipal inaction. A thin funding record is equally consistent with a town that applied and lost, a town whose residents never sought assistance, or a town constrained by CBRS designation.
+
+Closing that gap requires records this pipeline does not contain:
+
+- FEMA and NC Emergency Management sub-application records, including unsuccessful and withdrawn applications
+- Town council minutes, budgets, and staffing records bearing on grant administration capacity
+- NFIP repetitive-loss and severe-repetitive-loss property counts
+- CRS participation history and class
+- Public communications to homeowners about available mitigation programs
+
+Public records requests to the Town of North Topsail Beach and to NCEM are the natural source. Keep the quantitative finding and the causal claim clearly separated in anything published from this repo.
+
+## Quickstart
+
+```bash
+npm install     # one time — installs Puppeteer (map image export)
+npm run build   # fetch FEMA + Census data, build the map payload
+npm start       # serve at http://localhost:8000
+```
+
+Then open **http://localhost:8000/nc/** — the North Carolina comparison map.
+(http://localhost:8000/ is the inherited Vermont dashboard.)
+
+| Command | What it does |
+|---|---|
+| `npm run build` | Rebuild the NC map data from cached sources |
+| `npm run build:refresh` | Re-download from FEMA + Census first, then rebuild |
+| `npm start` | Serve `docs/` on port 8000 |
+| `npm run export-maps` | Regenerate static map images (Vermont article) |
+
+Only `npm run build` needs the network, and only Python 3 — no pip installs. The
+Vermont notebook pipeline is separate and has its own dependencies (see [Usage](#usage)).
+
+## The NC Comparison Map
+
+**What it shows.** Every HMA award to the 21 NC oceanfront municipalities, 1989–2024. Click a town to drill in, shift-click to compare. Filter by program year range, program (HMGP / FMA / PDM / SRL), and project category. Any view is shareable — selection, year range, and metric round-trip through the URL.
+
+**The metric that matters** is *homeowner-directed* funding: FEMA activity codes for acquisition, elevation, and reconstruction of **private structures**, separated from generators, utilities, planning, and other municipal-asset work. A town can post a respectable funding total without a dollar of it reaching a homeowner, and this view makes that visible.
+
+**Coast-wide, all years:** $5.78M federal obligated, $24.0M in non-federal share, 65 awards across 18 of 21 towns. Duck, Pine Knoll Shores, and Indian Beach have no record at all.
+
+**Data sources:** FEMA OpenFEMA HMA Projects v4 (bulk CSV) and Census TIGERweb incorporated places (GeoJSON). Both public, neither requiring a key. `docs/nc/data/unmatched.csv` is the audit trail for the subrecipient name-matching step.
+
+## Roadmap
+
+1. Finalize comparison towns and document the matching criteria
+2. Resolve the unit of analysis — NC municipalities are Census **incorporated places** (7-digit GEOID), not the county subdivisions Vermont uses (10-digit GEOID); this propagates through every join in the pipeline
+3. Port ETL notebooks `01`–`09` to NC sources; the national datasets (HMA, NFIP, NRI, NFHL, ACS, CPI) carry over unchanged, the Vermont ANR river-corridor layer does not and needs a coastal substitute
+4. Add CBRS and CRS status as variables
+5. Re-run index construction, sensitivity, and quadrant analysis on the NC comp set
+6. Layer in the qualitative record from public records requests
+7. Rebuild the dashboard and narrative for the comp set, then port into Reef Advocate
+
+## Repository Structure
+
+```
+notebooks/     Numbered ETL → EDA → index → sensitivity → export pipeline
+data/          raw/ source data, cleaned/ pipeline outputs, resources/ reference tables
+docs/          Static dashboard + article, deployed via GitHub Pages
+scripts/       Puppeteer map-image export utility
+archive/       Unimplemented Postgres backend and overlay-refactor sketches
+```
+
+Each of `notebooks/`, `data/`, and `docs/static/js/` has its own README. Variable-level documentation lives in `data_dictionary_backend.md` and `data_dictionary_frontend.md`; methodology in `technical_summary.md`.
 
 ## Usage
 
-**Live dashboard:**  
-🔗 [https://johbry17.github.io/Floodlines/](https://johbry17.github.io/Floodlines/)
-
 **Run the analysis locally:**
 
-1. Clone the repository
-2. Install dependencies (Python 3.10+, standard geospatial stack):
-   ```bash
-   pip install pandas geopandas numpy matplotlib seaborn scikit-learn scipy statsmodels esda libpysal jupyterlab
-   ```
-3. Run notebooks in order:
-   - `01_etl_gis.ipynb` — spatial preprocessing
-   - `02_etl_acs.ipynb` through `05_etl_fema_nri.ipynb` — source ETL
-   - `09_etl_final_merge.ipynb` — merge all sources
-   - `10_eda_overview.ipynb` through `13_eda_hma_nfip.ipynb` — exploratory analysis
-   - `20_analysis_build_index.ipynb` — index construction and model evaluation
-   - `21_sensitivity_checks.ipynb` — LOVO and weight sensitivity
-   - `22_quadrant_and_exclusion_analysis.ipynb` — quadrant assignment
-   - `29_export_to_web.ipynb` — generate `town_stats.csv` and `town_boundaries.geojson`
+```bash
+pip install pandas geopandas numpy matplotlib seaborn scikit-learn scipy statsmodels esda libpysal jupyterlab
+jupyter lab
+```
 
-## Gallery
+Run notebooks in numeric order: `01`–`06` (source ETL) → `09` (merge) → `10`–`13` (EDA) → `20` (index) → `21` (sensitivity) → `22` (quadrants) → `29` (web export).
 
-![ETL Infographic](./resources/images/etl_graphic.png)  
-_Data sources and analytical workflow used in this study. Federal hazard, insurance, demographic, and mitigation datasets are integrated at the municipal level and transformed into comparative measures of need, funding, and funding alignment. Illustration: AI-generated_
+**Serve the dashboard locally** (must be over HTTP — the app fetches CSV and GeoJSON):
 
-![Default view — Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)  
-_Vermont towns classified as underserved, historically invested, aligned, low priority, or no recorded investment_
+```bash
+python -m http.server 8000 --directory docs
+```
 
-![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)  
-_Measuring Need: A rank-based composite of flood exposure and social vulnerability_
+**Regenerate static map images:**
 
-![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita_rel.png)  
-_Towns where need substantially exceeds FEMA HMA investment, highlighting the most underserved communities_
+```bash
+npm install && node scripts/export_maps.js
+```
 
-![Scatter plot — Need vs. Funding](./resources/images/scatterplot_model_change.webp)  
-_Loose cloud confirming weak alignment between structural need and federal mitigation dollars, showing impact of different definitions of need_
+## Inherited Methodology
 
-![Town detail panel](./resources/images/stats_card.png)  
-_Per-town statistics, percentile rankings, and quadrant classification for a selected community_
+Summarized from the upstream project; full detail in `technical_summary.md`.
 
-<!-- ![Relative toggle — EAL risk](./resources/images/choropleth_risk_eal_per_capita_rel.png)  
-_Risk map rescaled to show deviation from the Vermont statewide average rather than absolute percentile rank_ -->
+**Index construction.** The need index combines a flood-risk component (FEMA Expected Annual Loss) and a social-vulnerability component (poverty rate, percent elderly, percent households without a vehicle), each percentile-normalized across all municipalities and weighted 50/50. The gap index is need minus scaled funding.
 
-![NFIP claims overlay](./resources/images/choropleth_claims_eal_per_capita.png)  
-_Reactive benchmark layer showing where insured losses occurred vs. where modeled risk is highest_
+**Normalization.** Rank-based rather than z-score — robust to the extreme outliers typical of flood data, bounded [0,1] and interpretable to non-technical audiences, comparable across incompatible units, and confirmed by sensitivity analysis to leave substantive findings stable (need-index Spearman between methods: 0.89–1.00).
 
-![Church Waterline](./resources/images/church_waterline.png)  
-_A visual metaphor for the central question explored in Floodlines: when institutions measure risk through past disasters, future floods may arrive above the last high-water mark. Illustration: AI-generated._
-<!-- _A visual metaphor for reactive flood planning and the geography of institutional memory. Illustration: AI-generated._ -->
+**Model specifications.** Three carried into the dashboard: `core_EAL_model` (primary), `eal_per_capita_model` (robustness), and `fema_national_risk_index` (external benchmark). Claims-based need models were excluded as circular — their high need–funding correlation reflects the reactive allocation pattern being measured, not independent signal. Expanded vulnerability specifications were excluded for failing parsimony without improving predictive performance.
 
-## Data & Methodology
+**Funding.** All HMA amounts inflation-adjusted to 2025 dollars via CPI-U. Only approved projects localizable to a specific municipality are counted; county, regional, and statewide projects and planning/administrative costs are excluded. Amounts reflect the federal share obligated.
 
-**Index construction:**  
-The need index combines a flood risk component (FEMA EAL or river corridor exposure) and a social vulnerability component (poverty rate, percent elderly, percent households without a vehicle), normalized using percentile ranks across all Vermont towns. The gap index is defined as need minus scaled funding — positive values indicate towns that rank higher on modeled need than on funding received.
+**NFIP.** Claims reflect insured losses only, so they understate true flood exposure wherever policy penetration is low.
 
-**Model selection:**  
-Three models were carried forward for the dashboard: `core_EAL_model` (primary — highest logit AUC at 0.70), `eal_per_capita_model` (robustness — most normalization-stable at Spearman 0.97), and `fema_national_risk_index` (benchmark — FEMA's own composite for external validity).
+## Gallery (Upstream Vermont Dashboard)
 
-Claims-based models were excluded because their high need–funding correlation (~0.55) reflects a reactive rather than proactive pattern; their near-zero gap meaningfulness (~0.04) confirms the gap index adds no independent signal when claims drive the need score. Expanded vulnerability specifications (adding housing tenure, disability, mobile homes) were also excluded: increasing the variable count raised normalization sensitivity (mean rank difference 19–21 vs. 13–15 for core models) without improving logit AUC, violating the parsimony criterion. Similarly, rather than treating all land within a flood polygon as equally at risk, simple spatial exposure metrics — river corridor percentage and NFHL flood zone coverage — were replaced by FEMA Expected Annual Loss, which captures both hazard intensity and asset exposure.
+These images show the **Vermont** analysis as built by Bryan Johns — included to illustrate what the framework produces, not as results for North Carolina.
 
-Models were selected based on predictive performance, stability across normalization methods, interpretability, and comparability to established FEMA benchmarks.
+![ETL Infographic](./resources/images/etl_graphic.png)
+_Data sources and analytical workflow. Federal hazard, insurance, demographic, and mitigation datasets integrated at the municipal level. Illustration: AI-generated._
 
-**Normalization:**  
-Rank-based (percentile) normalization was chosen over z-scores for four reasons: robustness to extreme outliers in Vermont flood data, bounded [0,1] output interpretable to general audiences, comparability across variables with incompatible units and distributions, and confirmation from sensitivity analysis that the substantive findings are stable across both methods (need-index Spearman z vs. rank: 0.89–1.00).
+![Quadrant map](./resources/images/choropleth_quadrant_eal_per_capita.png)
+_Municipalities classified as underserved, historically invested, aligned, low priority, or no recorded investment._
 
-**Funding:**  
-All FEMA HMA dollar amounts are inflation-adjusted to 2025 dollars using CPI-U (FRED). Only approved projects localizable to a specific town are included; county-wide, regional, and statewide projects (~37% of filtered HMA) are excluded, as are planning and administrative costs. Amounts reflect the federal share obligated (~75% of total project cost).
+![Need index choropleth](./resources/images/choropleth_need_eal_per_capita.png)
+_The need index: a rank-based composite of flood exposure and social vulnerability._
 
-**NFIP:**  
-Claims reflect insured losses only. Fewer than 2% of Vermont housing units are covered by NFIP policies, so claims data systematically underrepresents flood exposure statewide.
+![Funding gap choropleth](./resources/images/choropleth_gap_eal_per_capita_rel.png)
+_Where need substantially exceeds FEMA HMA investment._
+
+![Scatter plot — Need vs. Funding](./resources/images/scatterplot_model_change.webp)
+_Weak alignment between structural need and federal mitigation dollars, across alternative definitions of need._
+
+![Town detail panel](./resources/images/stats_card.png)
+_Per-municipality statistics, percentile rankings, and quadrant classification._
+
+## Attribution & Upstream Project
+
+**Floodlines** — © 2026 Bryan C. Johns, MIT License.
+🔗 [Repository](https://github.com/johbry17/Floodlines) · [Live Dashboard](https://johbry17.github.io/Floodlines/) · [Analysis Article](https://johbry17.github.io/Floodlines/article.html)
+
+Floodlines asked whether FEMA mitigation funding aligns with flood risk and community need across Vermont's 250+ towns, following Hurricane Irene (2011) and the 2023 floods. Its findings:
+
+- More than half of Vermont municipalities received no FEMA Hazard Mitigation Assistance funding
+- Funding shows only weak alignment with forward-looking measures of flood risk and vulnerability
+- Funding is more strongly associated with past insured losses than with modeled future risk
+- The pattern persists across multiple risk models, normalization methods, and sensitivity tests
+
+The framing that funding follows institutional memory of past disasters rather than modeled future risk is Bryan Johns's, as is every line of the pipeline and dashboard this repository builds on. This project applies his framework to a narrower question in a different state; any errors introduced in that adaptation are ours.
+
+Upstream acknowledgements, preserved: the Vermont Agency of Natural Resources, FEMA, and the U.S. Census Bureau for public data, and the open-source geospatial community — GeoPandas, libpysal, Leaflet, D3, and OpenStreetMap.
+
+**Tools & technologies** (inherited): JavaScript, Leaflet.js, D3.js, HTML/CSS · Python, Pandas, GeoPandas, NumPy, Jupyter · Shapely, libpysal, ESDA · scikit-learn, scipy, statsmodels · GitHub Pages.
 
 ## References
 
-- [U.S. Census Bureau, 2025 TIGER/Line Shapefiles: Vermont County Subdivisions](https://www2.census.gov/geo/tiger/TIGER2025/COUSUB/tl_2025_50_cousub.zip)  
-  Used for Vermont town (county subdivision) boundaries and spatial joins.
+National sources — carry over to the North Carolina adaptation:
 
-- [U.S. Census Bureau, 2025 TIGER/Line Shapefiles: Vermont Areawater (Chittenden County)](https://www2.census.gov/geo/tiger/TIGER2025/AREAWATER/tl_2025_50007_areawater.zip)
-  Used for delineating water bodies (including Lake Champlain) in Chittenden County for spatial masking of flood zones.
+- [OpenFEMA: Hazard Mitigation Assistance Projects](https://www.fema.gov/openfema-data-page/hazard-mitigation-assistance-projects-v4) — mitigation funding and project allocation by municipality
+- [FEMA Mitigation eGrants Guide to Eligible Activities and Codes](https://www.fema.gov/sites/default/files/2020-08/fema_mt-egrants-guide-to-eligible-activities-and-codes_job_aid_March_2018.pdf) — project type classification
+- [OpenFEMA: NFIP Redacted Claims](https://www.fema.gov/openfema-data-page/fima-nfip-redacted-claims-v2) — municipal flood insurance claims
+- [OpenFEMA: NFIP Redacted Policies](https://www.fema.gov/openfema-data-page/fima-nfip-redacted-policies-v2) — policy counts and insurance penetration
+- [FEMA National Risk Index](https://www.fema.gov/about/openfema/data-sets/national-risk-index-data) — expected annual loss, social vulnerability, community resilience
+- [National Flood Hazard Layer (NFHL)](https://hazards.fema.gov/femaportal/NFHL/searchResult/) — flood zone boundaries
+- [U.S. Census: American Community Survey](https://data.census.gov/) — demographic, housing, and socioeconomic variables
+- [U.S. Census TIGER/Line Shapefiles](https://www2.census.gov/geo/tiger/) — municipal boundaries and spatial joins (NC adaptation needs `PLACE`, not `COUSUB`)
+- [FRED: CPI-U, U.S. City Average](https://fred.stlouisfed.org/series/CPIAUCSL) — inflation adjustment to constant dollars
+- [UnitedStatesZipCodes.org ZIP Code Database](https://www.unitedstateszipcodes.org/zip-code-database/) — ZIP crosswalk for policies with missing community names
 
-- [National Flood Hazard Layer (NFHL) Database](https://hazards.fema.gov/femaportal/NFHL/searchResult/)  
-  Used for FEMA flood zone boundaries and risk mapping.
+Vermont-specific, replaced in the North Carolina adaptation:
 
-- [State of Vermont Agency of Natural Resources: River Corridors Data](https://www.arcgis.com/home/item.html?id=51797aa9327343b9a04215e5e59e00c5)  
-  Used for delineating river corridors and flood-prone areas.
+- [Vermont ANR River Corridors](https://www.arcgis.com/home/item.html?id=51797aa9327343b9a04215e5e59e00c5) — no NC analog; coastal substitutes needed
+- Vermont Center for Geographic Information boundaries — state reference boundaries
 
-- [U.S. Census: American Community Survey Data](https://data.census.gov/)  
-  Used for town-level demographic, housing, and socioeconomic variables.
+To be added for North Carolina:
 
-- [OpenFEMA Dataset: Hazard Mitigation Assistance Projects](https://www.fema.gov/openfema-data-page/hazard-mitigation-assistance-projects-v4)  
-  Used for FEMA mitigation funding and project allocation by town.
-
-- [FEMA Mitigation eGrants Guide to Eligible Activities and Codes](https://www.fema.gov/sites/default/files/2020-08/fema_mt-egrants-guide-to-eligible-activities-and-codes_job_aid_March_2018.pdf)  
-  Used to classify FEMA project types.
-
-- [Federal Reserve Economic Data (FRED): Consumer Price Index for All Urban Consumers (CPI-U), U.S. City Average](https://fred.stlouisfed.org/series/CPIAUCSL)  
-  Used for inflation adjustment of funding and economic variables to constant dollars. Downloaded as CSV for annual CPI values.
-
-- [OpenFEMA Dataset: NFIP Redacted Claims](https://www.fema.gov/openfema-data-page/fima-nfip-redacted-claims-v2)  
-  Used for town-level flood insurance claims analysis.
-
-- [OpenFEMA Dataset: NFIP Redacted Policies](https://www.fema.gov/openfema-data-page/fima-nfip-redacted-policies-v2)  
-  Used for town-level flood insurance policy counts and penetration.
-
-- [UnitedStatesZipCodes.org ZIP Code Database](https://www.unitedstateszipcodes.org/zip-code-database/)  
-  Used to assign Vermont towns to policies with missing community names via ZIP code crosswalk.
-
-- [FEMA National Risk Index (NRI) Data](https://www.fema.gov/about/openfema/data-sets/national-risk-index-data)  
-  Used for town-level expected annual loss, social vulnerability, and community resilience scores as risk and vulnerability benchmarks.
+- U.S. Fish & Wildlife Service Coastal Barrier Resources System mapper — CBRS unit boundaries
+- FEMA Community Rating System eligible communities list — CRS class by municipality
+- NC Emergency Management hazard mitigation program records
 
 ## License
 
-MIT License © 2026 Bryan Johns. See [LICENSE](LICENSE) for details.
-
-## Acknowledgements
-
-Thanks to the Vermont Agency of Natural Resources, FEMA, and the U.S. Census Bureau for making the underlying data publicly available. Thanks to the open-source geospatial community — GeoPandas, libpysal, Leaflet, D3, and OpenStreetMap — for the tools that made this analysis possible.
+MIT License. Original work © 2026 Bryan C. Johns; adaptations © 2026 Jake Durell. See [LICENSE](LICENSE) — the upstream copyright notice is retained as the license requires.
 
 ## Author
 
-Bryan Johns, June 2026  
-[bryan.johns@informedwanderer.com](mailto:bryan.johns@informedwanderer.com) | [LinkedIn](https://www.linkedin.com/in/b-johns/) | [GitHub](https://github.com/johbry17) | [Portfolio](https://informedwanderer.com)  
-— Fluent in Data. Fluent in Human.
+Adaptation by Jake Durell, [JOD Law](mailto:jdurell@jod-law.com), 2026.
+Original framework by [Bryan Johns](https://github.com/johbry17) — [bryan.johns@informedwanderer.com](mailto:bryan.johns@informedwanderer.com) · [LinkedIn](https://www.linkedin.com/in/b-johns/) · [Portfolio](https://informedwanderer.com)
