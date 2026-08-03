@@ -1,4 +1,12 @@
 {
+  "name": "hazard-funding-comp",
+  "private": true,
+  "scripts": {
+    "build": "python3 scripts/build_nc_data.py",
+    "build:refresh": "python3 scripts/build_nc_data.py --refresh",
+    "start": "python3 -m http.server 8000 --directory docs",
+    "export-maps": "node scripts/export_maps.js"
+  },
   "dependencies": {
     "puppeteer": "^25.0.4"
   }
