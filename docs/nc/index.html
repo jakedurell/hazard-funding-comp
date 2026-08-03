@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NC Oceanfront Hazard Mitigation — Funding Comparison</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+:root {
+  color-scheme: light;
+  --surface-0:#f4f3f0; --surface-1:#fcfcfb; --surface-2:#eceae5;
+  --line:#dedbd4; --line-strong:#c6c2b8;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7a7873;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+  --seq-100:#cde2fb; --seq-200:#9ec5f4; --seq-300:#6da7ec;
+  --seq-450:#2a78d6; --seq-550:#1c5cab; --seq-700:#0d366b;
+  --zero:#e2e0da; --accent:#2a78d6;
+  --critical:#c0322f;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-0:#131312; --surface-1:#1a1a19; --surface-2:#242422;
+    --line:#33332f; --line-strong:#48473f;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8f8e84;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+    --seq-100:#0d366b; --seq-200:#184f95; --seq-300:#256abf;
+    --seq-450:#3987e5; --seq-550:#6da7ec; --seq-700:#b7d3f6;
+    --zero:#2e2e2b; --accent:#3987e5;
+    --critical:#e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0:#131312; --surface-1:#1a1a19; --surface-2:#242422;
+  --line:#33332f; --line-strong:#48473f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8f8e84;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+  --seq-100:#0d366b; --seq-200:#184f95; --seq-300:#256abf;
+  --seq-450:#3987e5; --seq-550:#6da7ec; --seq-700:#b7d3f6;
+  --zero:#2e2e2b; --accent:#3987e5;
+  --critical:#e66767;
+}
+
+*,*::before,*::after { box-sizing:border-box; }
+body {
+  margin:0; background:var(--surface-0); color:var(--text-primary);
+  font:14px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3 { margin:0; font-weight:600; letter-spacing:-0.01em; }
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums; }
+
+/* ---------- shell ---------- */
+header {
+  padding:16px 20px 14px; border-bottom:1px solid var(--line); background:var(--surface-1);
+}
+header h1 { font-size:17px; }
+header p { margin:4px 0 0; color:var(--text-secondary); font-size:12.5px; max-width:70ch; }
+
+.controls {
+  display:flex; flex-wrap:wrap; gap:18px; align-items:flex-end;
+  padding:12px 20px; background:var(--surface-1); border-bottom:1px solid var(--line);
+}
+.ctl { display:flex; flex-direction:column; gap:6px; }
+.ctl > label { font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); font-weight:600; }
+select {
+  background:var(--surface-2); color:var(--text-primary); border:1px solid var(--line-strong);
+  border-radius:7px; padding:6px 9px; font-size:13px; min-width:190px;
+}
+.chips { display:flex; flex-wrap:wrap; gap:5px; }
+.chip {
+  border:1px solid var(--line-strong); background:var(--surface-2); color:var(--text-secondary);
+  border-radius:999px; padding:4px 10px; font-size:11.5px; cursor:pointer; user-select:none;
+  display:inline-flex; align-items:center; gap:5px; transition:background .12s,color .12s;
+}
+.chip:hover { border-color:var(--text-muted); }
+.chip[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:#fff; }
+.chip .dot { width:8px; height:8px; border-radius:2px; flex:none; }
+.chip[aria-pressed="true"] .dot { box-shadow:0 0 0 1.5px rgba(255,255,255,.85); }
+
+/* year range */
+.range-wrap { position:relative; width:260px; height:26px; }
+.range-track { position:absolute; top:11px; left:0; right:0; height:4px; background:var(--surface-2); border-radius:2px; }
+.range-fill  { position:absolute; top:11px; height:4px; background:var(--accent); border-radius:2px; }
+.range-wrap input[type=range] {
+  position:absolute; top:0; left:0; width:100%; height:26px; margin:0;
+  -webkit-appearance:none; appearance:none; background:none; pointer-events:none;
+}
+.range-wrap input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; pointer-events:auto; width:15px; height:15px; border-radius:50%;
+  background:var(--surface-1); border:2.5px solid var(--accent); cursor:grab; margin-top:0;
+}
+.range-wrap input[type=range]::-moz-range-thumb {
+  pointer-events:auto; width:15px; height:15px; border-radius:50%;
+  background:var(--surface-1); border:2.5px solid var(--accent); cursor:grab;
+}
+.range-label { font-size:12.5px; color:var(--text-secondary); min-width:96px; }
+.presets { display:flex; gap:4px; }
+.presets button {
+  font-size:10.5px; padding:3px 7px; border-radius:5px; cursor:pointer;
+  border:1px solid var(--line-strong); background:var(--surface-2); color:var(--text-secondary);
+}
+.presets button:hover { border-color:var(--text-muted); color:var(--text-primary); }
+
+.toggle { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-secondary); cursor:pointer; }
+.toggle input { accent-color:var(--accent); width:15px; height:15px; }
+
+/* ---------- layout ---------- */
+main { display:grid; grid-template-columns:minmax(0,1fr) 430px; height:calc(100vh - 172px); min-height:520px; }
+#map { height:100%; background:var(--surface-2); }
+aside {
+  border-left:1px solid var(--line); background:var(--surface-1);
+  overflow-y:auto; padding:16px 18px 60px;
+}
+@media (max-width:1000px) {
+  main { grid-template-columns:1fr; height:auto; }
+  #map { height:56vh; }
+  aside { border-left:none; border-top:1px solid var(--line); max-height:none; }
+}
+
+/* ---------- sidebar pieces ---------- */
+.side-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:3px; }
+.side-head h2 { font-size:15px; }
+.side-sub { color:var(--text-muted); font-size:11.5px; margin:0 0 14px; }
+
+.tiles { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.tile { background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:9px 11px; }
+.tile .k { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:600; }
+.tile .v { font-size:19px; font-weight:600; margin-top:2px; letter-spacing:-0.02em; }
+.tile .n { font-size:10.5px; color:var(--text-muted); margin-top:1px; }
+.tile.flag { border-color:var(--critical); }
+.tile.flag .v { color:var(--critical); }
+
+.sec { margin:18px 0 8px; font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); font-weight:600; }
+
+/* horizontal bar rows */
+.bars { display:flex; flex-direction:column; gap:4px; }
+.bar-row { display:grid; grid-template-columns:104px 1fr auto; gap:8px; align-items:center; font-size:12px; cursor:default; }
+.bar-row.click { cursor:pointer; }
+.bar-row.click:hover .bar-name { color:var(--accent); }
+.bar-name { color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bar-row.sel .bar-name { color:var(--text-primary); font-weight:600; }
+.bar-track { background:var(--surface-2); border-radius:3px; height:15px; position:relative; overflow:hidden; }
+/* display:block — an inline span ignores width/height */
+.bar-fill { display:block; height:100%; border-radius:0 3px 3px 0; }
+.bar-val { color:var(--text-secondary); font-size:11.5px; min-width:56px; text-align:right; }
+
+/* stacked share bar */
+.stack { display:flex; height:22px; border-radius:4px; overflow:hidden; background:var(--surface-2); gap:2px; }
+.stack span { display:block; height:100%; }
+.legend { display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; font-size:11.5px; color:var(--text-secondary); }
+.legend i { width:9px; height:9px; border-radius:2px; display:inline-block; margin-right:5px; vertical-align:baseline; }
+
+table.proj { width:100%; border-collapse:collapse; font-size:11.5px; margin-top:6px; }
+table.proj th {
+  text-align:left; font-size:9.5px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--text-muted); font-weight:600; padding:5px 6px 5px 0; border-bottom:1px solid var(--line);
+}
+table.proj td { padding:6px 6px 6px 0; border-bottom:1px solid var(--line); vertical-align:top; color:var(--text-secondary); }
+table.proj td.r, table.proj th.r { text-align:right; }
+table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-left:7px; }
+.tag { display:inline-block; font-size:9.5px; padding:1px 5px; border-radius:4px; background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line); }
+.tag.z { color:var(--critical); border-color:var(--critical); }
+
+.note {
+  margin-top:16px; padding:10px 12px; border-radius:8px; font-size:11.5px; line-height:1.55;
+  background:var(--surface-2); border:1px solid var(--line); color:var(--text-secondary);
+}
+.note b { color:var(--text-primary); }
+.empty { color:var(--text-muted); font-size:12.5px; padding:18px 0; }
+
+/* map bits */
+.leaflet-container { background:var(--surface-2); font:inherit; }
+.leaflet-popup-content-wrapper, .leaflet-tooltip {
+  background:var(--surface-1); color:var(--text-primary);
+  border:1px solid var(--line-strong); border-radius:7px; box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+.leaflet-tooltip { font-size:12px; padding:6px 9px; }
+.leaflet-tooltip::before { display:none; }
+.map-legend {
+  background:var(--surface-1); border:1px solid var(--line); border-radius:8px;
+  padding:9px 11px; font-size:11px; color:var(--text-secondary); line-height:1.5;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
+}
+.map-legend .lg-title { font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:600; margin-bottom:5px; }
+.map-legend .sw { display:flex; align-items:center; gap:6px; }
+.map-legend .sw i { width:13px; height:13px; border-radius:3px; display:inline-block; border:1px solid rgba(128,128,128,.35); }
+.hint { position:absolute; bottom:10px; left:10px; z-index:500; font-size:11px; color:var(--text-muted);
+  background:var(--surface-1); border:1px solid var(--line); border-radius:7px; padding:5px 9px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>North Carolina Oceanfront Municipalities — FEMA Hazard Mitigation Funding</h1>
+  <p>Every FEMA Hazard Mitigation Assistance award to an Atlantic-facing barrier-island town in North Carolina.
+     Click towns on the map to compare. Dollars are <b>nominal</b>, not inflation-adjusted.</p>
+</header>
+
+<div class="controls">
+  <div class="ctl">
+    <label for="metric">Map metric</label>
+    <select id="metric">
+      <option value="fed">Federal share obligated ($)</option>
+      <option value="homeownerFed">Homeowner-directed federal $ </option>
+      <option value="nonfed">Non-federal share required ($)</option>
+      <option value="total">Total project cost ($)</option>
+      <option value="count">Number of projects</option>
+      <option value="props">Properties mitigated</option>
+      <option value="avgShare">Avg. federal cost share (%)</option>
+    </select>
+  </div>
+
+  <div class="ctl">
+    <label>Program year range</label>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="range-wrap">
+        <div class="range-track"></div><div class="range-fill" id="rfill"></div>
+        <input type="range" id="y0"><input type="range" id="y1">
+      </div>
+      <span class="range-label mono" id="ylabel"></span>
+    </div>
+    <div class="presets">
+      <button data-preset="all">All</button>
+      <button data-preset="1999">Post-Floyd ’99+</button>
+      <button data-preset="2016">Post-Matthew ’16+</button>
+      <button data-preset="2018">Post-Florence ’18+</button>
+    </div>
+  </div>
+
+  <div class="ctl">
+    <label>Program</label>
+    <div class="chips" id="programs"></div>
+  </div>
+
+  <div class="ctl">
+    <label>Project category</label>
+    <div class="chips" id="cats"></div>
+  </div>
+
+  <div class="ctl">
+    <label>&nbsp;</label>
+    <label class="toggle"><input type="checkbox" id="hoOnly"> Homeowner-directed only</label>
+  </div>
+</div>
+
+<main>
+  <div style="position:relative"><div id="map"></div><div class="hint">Click a town to select · Shift-click to add · Click water to clear</div></div>
+  <aside id="side"></aside>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ==========================================================
+// NC Oceanfront HMA Comparison — dashboard
+// Data built by scripts/build_nc_data.py
+// ==========================================================
+
+const SEQ = ['--seq-100','--seq-200','--seq-300','--seq-450','--seq-550','--seq-700'].map(v=>cssv(v));
+const ZERO = cssv('--zero');
+function cssv(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+// Categorical slots, fixed order — colour follows the entity, never its rank.
+const PROGRAM_COLOR = { HMGP:'--s1', FMA:'--s2', PDM:'--s3', BRIC:'--s4', SRL:'--s5', RFC:'--s6', LPDM:'--s6' };
+const CAT_COLOR = { Acquisition:'--s1', Elevation:'--s2', Reconstruction:'--s3', Planning:'--s4', Infrastructure:'--s5', Other:'--s6' };
+
+const METRICS = {
+  fed:          { label:'Federal share obligated',  fmt:usd,  agg:r=>r.fed },
+  homeownerFed: { label:'Homeowner-directed federal $', fmt:usd, agg:r=>r.homeowner?r.fed:0 },
+  nonfed:       { label:'Non-federal share required',fmt:usd,  agg:r=>r.nonfed },
+  total:        { label:'Total project cost',       fmt:usd,  agg:r=>r.total },
+  count:        { label:'Projects',                 fmt:n=>String(n), agg:()=>1 },
+  props:        { label:'Properties mitigated',     fmt:n=>String(n), agg:r=>r.props },
+  avgShare:     { label:'Avg. federal cost share',  fmt:p=>p?p.toFixed(0)+'%':'—', agg:null },
+};
+
+let DATA, filters, selected = new Set(), map, polyLayer, bubbleLayer;
+
+function usd(v){
+  if(!v) return '$0';
+  if(v>=1e6) return '$'+(v/1e6).toFixed(v>=1e7?1:2)+'M';
+  if(v>=1e3) return '$'+Math.round(v/1e3)+'k';
+  return '$'+Math.round(v);
+}
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- boot ----------
+fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
+  DATA = d;
+  const [lo,hi] = d.meta.fy_range;
+  filters = { y0:lo, y1:hi, programs:new Set(), cats:new Set(), hoOnly:false };
+  readURL(lo,hi);
+  buildControls(lo,hi);
+  initMap();
+  render();
+});
+
+// URL state — makes any view shareable / citable
+function readURL(lo,hi){
+  const q=new URLSearchParams(location.search);
+  q.getAll('town').forEach(t=>{ if(DATA.meta.towns[t]) selected.add(t); });
+  const y=q.get('years');
+  if(y && /^\d{4}-\d{4}$/.test(y)){
+    filters.y0=Math.max(lo,+y.slice(0,4)); filters.y1=Math.min(hi,+y.slice(5));
+  }
+  const m=q.get('metric'); if(m && METRICS[m]) document.getElementById('metric').value=m;
+  if(q.get('homeowner')==='1'){ filters.hoOnly=true; document.getElementById('hoOnly').checked=true; }
+}
+function writeURL(){
+  const q=new URLSearchParams();
+  [...selected].forEach(t=>q.append('town',t));
+  if(filters.y0!==DATA.meta.fy_range[0]||filters.y1!==DATA.meta.fy_range[1]) q.set('years',`${filters.y0}-${filters.y1}`);
+  if(metricKey!=='fed') q.set('metric',metricKey);
+  if(filters.hoOnly) q.set('homeowner','1');
+  const s=q.toString();
+  history.replaceState(null,'',s?`?${s}`:location.pathname);
+}
+
+function buildControls(lo,hi){
+  const progs = [...new Set(DATA.projects.map(p=>p.program).filter(Boolean))]
+    .sort((a,b)=>Object.keys(PROGRAM_COLOR).indexOf(a)-Object.keys(PROGRAM_COLOR).indexOf(b));
+  const cats  = Object.keys(CAT_COLOR).filter(c=>DATA.projects.some(p=>p.cat===c));
+
+  chipSet('programs', progs, PROGRAM_COLOR, filters.programs);
+  chipSet('cats', cats, CAT_COLOR, filters.cats);
+
+  const y0=document.getElementById('y0'), y1=document.getElementById('y1');
+  [y0,y1].forEach(el=>{ el.min=lo; el.max=hi; el.step=1; });
+  y0.value=lo; y1.value=hi;
+  // handles may cross freely; min/max decides which is the lower bound
+  const sync = () => {
+    filters.y0=Math.min(+y0.value,+y1.value);
+    filters.y1=Math.max(+y0.value,+y1.value);
+    paintRange(lo,hi); render();
+  };
+  y0.addEventListener('input',sync); y1.addEventListener('input',sync);
+  paintRange(lo,hi);
+
+  document.querySelectorAll('.presets button').forEach(b=>b.addEventListener('click',()=>{
+    const p=b.dataset.preset;
+    y0.value = p==='all' ? lo : p; y1.value = hi;
+    filters.y0=+y0.value; filters.y1=hi; paintRange(lo,hi); render();
+  }));
+
+  document.getElementById('metric').addEventListener('change',render);
+  document.getElementById('hoOnly').addEventListener('change',e=>{ filters.hoOnly=e.target.checked; render(); });
+}
+
+function paintRange(lo,hi){
+  const span=hi-lo || 1;
+  const f=document.getElementById('rfill');
+  f.style.left = ((filters.y0-lo)/span*100)+'%';
+  f.style.width= ((filters.y1-filters.y0)/span*100)+'%';
+  document.getElementById('ylabel').textContent = filters.y0===filters.y1 ? filters.y0 : `${filters.y0}–${filters.y1}`;
+}
+
+function chipSet(id, values, colorMap, active){
+  const host=document.getElementById(id);
+  host.innerHTML='';
+  values.forEach(v=>{
+    const b=document.createElement('button');
+    b.className='chip'; b.setAttribute('aria-pressed','false');
+    b.innerHTML=`<span class="dot" style="background:${cssv(colorMap[v]||'--s6')}"></span>${esc(v)}`;
+    b.addEventListener('click',()=>{
+      active.has(v)?active.delete(v):active.add(v);
+      b.setAttribute('aria-pressed', active.has(v)?'true':'false');
+      render();
+    });
+    host.appendChild(b);
+  });
+}
+
+// ---------- filtering + aggregation ----------
+function activeProjects(){
+  return DATA.projects.filter(p=>
+    (p.fy==null || (p.fy>=filters.y0 && p.fy<=filters.y1)) &&
+    (!filters.programs.size || filters.programs.has(p.program)) &&
+    (!filters.cats.size || filters.cats.has(p.cat)) &&
+    (!filters.hoOnly || p.homeowner)
+  );
+}
+
+function byTown(rows){
+  const m = new Map(Object.keys(DATA.meta.towns).map(t=>[t,{
+    town:t, island:DATA.meta.towns[t], rows:[],
+    fed:0, nonfed:0, total:0, count:0, props:0, homeownerFed:0, homeownerCount:0, shares:[]
+  }]));
+  rows.forEach(p=>{
+    const t=m.get(p.town); if(!t) return;
+    t.rows.push(p); t.count++; t.fed+=p.fed; t.nonfed+=p.nonfed; t.total+=p.total; t.props+=p.props;
+    if(p.homeowner){ t.homeownerFed+=p.fed; t.homeownerCount++; }
+    if(p.share) t.shares.push(p.share);
+  });
+  m.forEach(t=>{ t.avgShare = t.shares.length ? t.shares.reduce((a,b)=>a+b,0)/t.shares.length*100 : 0; });
+  return m;
+}
+
+function metricValue(t,key){
+  if(key==='avgShare') return t.avgShare;
+  if(key==='count') return t.count;
+  if(key==='props') return t.props;
+  return t[key]||0;
+}
+
+// ---------- map ----------
+function initMap(){
+  map = L.map('map',{ zoomControl:true, scrollWheelZoom:true }).setView([34.9,-76.6], 7);
+  // basemap follows the viewer's theme so the choropleth keeps its contrast
+  const darkMode = document.documentElement.dataset.theme === 'dark' ||
+    (document.documentElement.dataset.theme !== 'light' &&
+     window.matchMedia('(prefers-color-scheme: dark)').matches);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${darkMode?'dark':'light'}_nolabels/{z}/{x}/{y}{r}.png`,
+    { attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:18 }).addTo(map);
+
+  polyLayer = L.geoJSON(DATA.boundaries,{
+    style:()=>({ weight:1, color:'#7a7873', fillOpacity:.85 }),
+    onEachFeature:(f,l)=>{
+      l.on('click',e=>{ toggleTown(f.properties.town, e.originalEvent.shiftKey); L.DomEvent.stop(e); });
+      l.on('mouseover',()=>l.setStyle({weight:2.5,color:cssv('--text-primary')}));
+      l.on('mouseout',()=>styleOne(l,f.properties.town));
+    }
+  }).addTo(map);
+
+  bubbleLayer = L.layerGroup().addTo(map);
+  map.on('click',()=>{ selected.clear(); render(); });
+  map.fitBounds(polyLayer.getBounds(),{ padding:[40,40] });
+  if(selected.size) zoomToSelection();   // honour towns preselected via the URL
+
+  const lg = L.control({position:'bottomright'});
+  lg.onAdd = () => { const d=L.DomUtil.create('div','map-legend'); d.id='maplegend'; return d; };
+  lg.addTo(map);
+}
+
+function colorFor(v, max){
+  if(!v || !max) return ZERO;
+  const t = Math.sqrt(v/max);                     // sqrt so mid-range towns stay legible
+  return SEQ[Math.min(SEQ.length-1, Math.floor(t*SEQ.length))];
+}
+
+let agg, maxV, metricKey;
+function styleOne(layer, town){
+  const t = agg.get(town), v = metricValue(t,metricKey);
+  layer.setStyle({
+    weight: selected.has(town)?3:1,
+    color: selected.has(town)?cssv('--text-primary'):'#7a7873',
+    fillColor: colorFor(v,maxV), fillOpacity:.85
+  });
+}
+
+function drawMap(){
+  polyLayer.eachLayer(l=>styleOne(l,l.feature.properties.town));
+  bubbleLayer.clearLayers();
+  polyLayer.eachLayer(l=>{
+    const town=l.feature.properties.town, t=agg.get(town), v=metricValue(t,metricKey);
+    const c=l.getBounds().getCenter();
+    const r = v&&maxV ? 5+16*Math.sqrt(v/maxV) : 4;
+    const m=L.circleMarker(c,{
+      radius:r, weight: selected.has(town)?2.5:1.5,
+      color: selected.has(town)?cssv('--text-primary'):cssv('--surface-1'),
+      fillColor: v?cssv('--accent'):ZERO, fillOpacity:.9
+    }).addTo(bubbleLayer);
+    m.bindTooltip(`<b>${esc(town)}</b><br>${METRICS[metricKey].label}: <b>${METRICS[metricKey].fmt(v)}</b><br>
+      <span style="color:var(--text-muted)">${t.count} project${t.count===1?'':'s'} · ${t.props} properties</span>`,
+      {direction:'top',offset:[0,-4]});
+    m.on('click',e=>{ toggleTown(town, e.originalEvent.shiftKey); L.DomEvent.stop(e); });
+  });
+
+  const el=document.getElementById('maplegend');
+  if(el) el.innerHTML =
+    `<div class="lg-title">${esc(METRICS[metricKey].label)}</div>` +
+    `<div class="sw"><i style="background:${ZERO}"></i> none / zero</div>` +
+    SEQ.map((c,i)=>`<div class="sw"><i style="background:${c}"></i> ${
+      METRICS[metricKey].fmt(Math.pow((i+1)/SEQ.length,2)*maxV)}</div>`).join('');
+}
+
+function toggleTown(town, additive){
+  if(!additive) { const only = selected.size===1 && selected.has(town); selected.clear(); if(!only) selected.add(town); }
+  else selected.has(town)?selected.delete(town):selected.add(town);
+  zoomToSelection();
+  render();
+}
+
+// barrier-island footprints are invisible at coast scale — frame whatever is selected
+function zoomToSelection(){
+  if(!map) return;
+  const layers=[];
+  polyLayer.eachLayer(l=>{ if(selected.has(l.feature.properties.town)) layers.push(l); });
+  if(!layers.length){ map.flyToBounds(polyLayer.getBounds(),{padding:[40,40],duration:.6}); return; }
+  let b=layers[0].getBounds();
+  layers.slice(1).forEach(l=>b.extend(l.getBounds()));
+  map.flyToBounds(b,{padding:[70,70], maxZoom:13, duration:.6});
+}
+
+// ---------- render ----------
+function render(){
+  metricKey = document.getElementById('metric').value;
+  const rows = activeProjects();
+  agg = byTown(rows);
+  maxV = Math.max(...[...agg.values()].map(t=>metricValue(t,metricKey)), 0);
+  if(map) drawMap();
+  drawSidebar(rows);
+  writeURL();
+}
+
+function barRows(items, key, fmt, opts={}){
+  const max=Math.max(...items.map(i=>i.v),0)||1;
+  return `<div class="bars">`+items.map(i=>`
+    <div class="bar-row ${opts.click?'click':''} ${selected.has(i.name)?'sel':''}" ${opts.click?`data-town="${esc(i.name)}"`:''}>
+      <span class="bar-name" title="${esc(i.name)}">${esc(i.name)}</span>
+      <span class="bar-track"><span class="bar-fill" style="width:${Math.max(i.v/max*100,i.v?1.5:0)}%;background:${i.color||cssv('--s1')}"></span></span>
+      <span class="bar-val mono">${fmt(i.v)}</span>
+    </div>`).join('')+`</div>`;
+}
+
+function drawSidebar(rows){
+  const side=document.getElementById('side');
+  const m=METRICS[metricKey];
+  const sel=[...selected];
+
+  if(sel.length===0)      side.innerHTML = viewOverview(rows,m);
+  else if(sel.length===1) side.innerHTML = viewTown(agg.get(sel[0]),m);
+  else                    side.innerHTML = viewCompare(sel.map(t=>agg.get(t)),m);
+
+  side.querySelectorAll('[data-town]').forEach(el=>
+    el.addEventListener('click',e=>toggleTown(el.dataset.town, e.shiftKey)));
+}
+
+function viewOverview(rows,m){
+  const all=[...agg.values()];
+  const fed=all.reduce((s,t)=>s+t.fed,0), nonfed=all.reduce((s,t)=>s+t.nonfed,0);
+  const hoFed=all.reduce((s,t)=>s+t.homeownerFed,0);
+  const zero=all.filter(t=>t.count===0);
+  const ranked=all.map(t=>({name:t.town,v:metricValue(t,metricKey)})).sort((a,b)=>b.v-a.v);
+
+  return `
+    <div class="side-head"><h2>All oceanfront towns</h2><span class="mono" style="color:var(--text-muted);font-size:11.5px">${filters.y0}–${filters.y1}</span></div>
+    <p class="side-sub">${rows.length} awards across ${all.filter(t=>t.count).length} of ${all.length} municipalities</p>
+
+    <div class="tiles">
+      <div class="tile"><div class="k">Federal obligated</div><div class="v mono">${usd(fed)}</div></div>
+      <div class="tile"><div class="k">Non-federal share</div><div class="v mono">${usd(nonfed)}</div><div class="n">state / local / owner</div></div>
+      <div class="tile"><div class="k">Homeowner-directed</div><div class="v mono">${usd(hoFed)}</div><div class="n">${fed?Math.round(hoFed/fed*100):0}% of federal $</div></div>
+      <div class="tile ${zero.length?'flag':''}"><div class="k">Towns with zero</div><div class="v mono">${zero.length}</div><div class="n">${zero.length?esc(zero.map(t=>t.town).join(', ')):'—'}</div></div>
+    </div>
+
+    <div class="sec">${esc(m.label)} by town</div>
+    ${barRows(ranked, metricKey, m.fmt, {click:true})}
+
+    <div class="note"><b>Cost share.</b> FEMA pays a share of each project — most often 75%, but 90% and 100%
+      appear in this data. The remainder is the non-federal share. This dataset records its <b>size</b>
+      but not <b>who paid it</b>: state, town, or the property owner. Attributing it requires NC Emergency
+      Management sub-grant records.</div>`;
+}
+
+function viewTown(t,m){
+  const rows=[...t.rows].sort((a,b)=>(b.fy||0)-(a.fy||0));
+  const fmtRow = p => `
+    <tr class="${p.homeowner?'ho':''}">
+      <td class="mono">${p.fy??'—'}</td>
+      <td><span class="tag" style="border-color:${cssv(PROGRAM_COLOR[p.program]||'--s6')}">${esc(p.program)}</span></td>
+      <td>${esc((p.type||'').split(':').slice(1).join(':').trim()||p.type||'—')}
+          ${p.props?`<br><span style="color:var(--text-muted)">${p.props} propert${p.props===1?'y':'ies'}</span>`:''}</td>
+      <td class="r mono">${p.fed?usd(p.fed):'<span class="tag z">$0</span>'}</td>
+      <td class="r mono" style="color:var(--text-muted)">${p.share?Math.round(p.share*100)+'%':'—'}</td>
+    </tr>`;
+
+  const progTotals = Object.keys(PROGRAM_COLOR)
+    .map(k=>({name:k, v:t.rows.filter(p=>p.program===k).reduce((s,p)=>s+p.fed,0), color:cssv(PROGRAM_COLOR[k])}))
+    .filter(x=>t.rows.some(p=>p.program===x.name));
+  const catTotals = Object.keys(CAT_COLOR)
+    .map(k=>({name:k, v:t.rows.filter(p=>p.cat===k).reduce((s,p)=>s+p.fed,0), color:cssv(CAT_COLOR[k])}))
+    .filter(x=>t.rows.some(p=>p.cat===x.name));
+
+  const fedPct = t.total ? t.fed/t.total*100 : 0;
+  const zeroObligated = t.rows.filter(p=>!p.fed && p.props);
+
+  return `
+    <div class="side-head"><h2>${esc(t.town)}</h2><span style="color:var(--text-muted);font-size:11.5px">${esc(t.island)}</span></div>
+    <p class="side-sub">${t.count} award${t.count===1?'':'s'} · ${filters.y0}–${filters.y1}</p>
+
+    <div class="tiles">
+      <div class="tile"><div class="k">Federal obligated</div><div class="v mono">${usd(t.fed)}</div></div>
+      <div class="tile"><div class="k">Properties</div><div class="v mono">${t.props}</div></div>
+      <div class="tile ${t.homeownerFed?'':'flag'}"><div class="k">Homeowner-directed</div><div class="v mono">${usd(t.homeownerFed)}</div><div class="n">${t.homeownerCount} of ${t.count} projects</div></div>
+      <div class="tile"><div class="k">Avg. federal share</div><div class="v mono">${t.avgShare?t.avgShare.toFixed(0)+'%':'—'}</div></div>
+    </div>
+
+    ${t.total?`
+      <div class="sec">Who pays — federal vs non-federal</div>
+      <div class="stack">
+        <span style="width:${fedPct}%;background:${cssv('--s1')}"></span>
+        <span style="width:${100-fedPct}%;background:${cssv('--s2')}"></span>
+      </div>
+      <div class="legend">
+        <span><i style="background:${cssv('--s1')}"></i>Federal ${usd(t.fed)} (${fedPct.toFixed(0)}%)</span>
+        <span><i style="background:${cssv('--s2')}"></i>Non-federal ${usd(t.nonfed)} (${(100-fedPct).toFixed(0)}%)</span>
+      </div>`:''}
+
+    ${progTotals.length?`<div class="sec">Federal $ by program</div>${barRows(progTotals,'fed',usd)}`:''}
+    ${catTotals.length?`<div class="sec">Federal $ by project type</div>${barRows(catTotals,'fed',usd)}`:''}
+
+    <div class="sec">All awards</div>
+    ${rows.length?`<table class="proj">
+      <thead><tr><th>FY</th><th>Prog</th><th>Project</th><th class="r">Federal</th><th class="r">Share</th></tr></thead>
+      <tbody>${rows.map(fmtRow).join('')}</tbody></table>
+      <div class="legend"><span><i style="background:${cssv('--s1')}"></i>Left rule = homeowner-directed (private property)</span></div>`
+      :`<p class="empty">No awards match the current filters.</p>`}
+
+    ${zeroObligated.length?`<div class="note"><b>${zeroObligated.length} award${zeroObligated.length===1?'':'s'} list properties but $0 obligated.</b>
+      In this dataset that can mean pending, withdrawn, or cancelled — the distinction matters. Check the
+      <span class="mono">status</span> field and confirm against NCEM records before relying on it.</div>`:''}`;
+}
+
+function viewCompare(towns,m){
+  const items=towns.map(t=>({name:t.town, v:metricValue(t,metricKey)})).sort((a,b)=>b.v-a.v);
+  const maxHo=Math.max(...towns.map(t=>t.homeownerFed),0)||1;
+  return `
+    <div class="side-head"><h2>${towns.length} towns compared</h2>
+      <button class="chip" data-town="__clear" style="cursor:pointer">clear</button></div>
+    <p class="side-sub">${filters.y0}–${filters.y1} · ${towns.reduce((s,t)=>s+t.count,0)} awards</p>
+
+    <div class="sec">${esc(m.label)}</div>
+    ${barRows(items, metricKey, m.fmt, {click:true})}
+
+    ${metricKey==='homeownerFed' ? '' : `
+      <div class="sec">Homeowner-directed federal $</div>
+      ${barRows(towns.map(t=>({name:t.town,v:t.homeownerFed})).sort((a,b)=>b.v-a.v), 'ho', usd, {click:true})}`}
+
+    <div class="sec">Detail</div>
+    <table class="proj">
+      <thead><tr><th>Town</th><th class="r">Awards</th><th class="r">Federal</th><th class="r">Props</th><th class="r">Fed %</th></tr></thead>
+      <tbody>${towns.sort((a,b)=>b.fed-a.fed).map(t=>`<tr>
+        <td>${esc(t.town)}</td><td class="r mono">${t.count}</td>
+        <td class="r mono">${usd(t.fed)}</td><td class="r mono">${t.props}</td>
+        <td class="r mono" style="color:var(--text-muted)">${t.avgShare?t.avgShare.toFixed(0)+'%':'—'}</td></tr>`).join('')}
+      </tbody></table>`;
+}
+
+document.addEventListener('click',e=>{
+  if(e.target.dataset && e.target.dataset.town==='__clear'){ selected.clear(); render(); }
+});
+</script>
+</body>
+</html>
