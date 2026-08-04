@@ -219,6 +219,13 @@ def main():
             "nonfed": round(max(total - fed, 0), 2),
             "share": num(r.get("costSharePercentage")) or None,
             "props": int(num(r.get("numberOfProperties"))),
+            "final": int(num(r.get("numberOfFinalProperties"))),
+            # grant lifecycle dates — NOT deed dates. A buyout's title transfer
+            # falls between obligation and closeout; that is the window to
+            # search at the county Register of Deeds.
+            "obligated": (r.get("initialObligationDate") or "")[:10] or None,
+            "closed": (r.get("dateClosed") or "")[:10] or None,
+            "sponsor": r.get("subrecipient"),
             "county": r.get("county"),
         })
 

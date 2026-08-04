@@ -435,13 +435,13 @@ function byTown(rows){
     if(!inScope(f.properties)) return;
     m.set(f.properties.town,{
       town:f.properties.town, island:f.properties.island, rows:[],
-      fed:0, nonfed:0, total:0, count:0, props:0, homeownerFed:0, homeownerCount:0,
+      fed:0, nonfed:0, total:0, count:0, props:0, finalProps:0, homeownerFed:0, homeownerCount:0,
       nfipFed:0, nfipCount:0, shares:[]
     });
   });
   rows.forEach(p=>{
     const t=m.get(p.town); if(!t) return;
-    t.rows.push(p); t.count++; t.fed+=p.fed; t.nonfed+=p.nonfed; t.total+=p.total; t.props+=p.props;
+    t.rows.push(p); t.count++; t.fed+=p.fed; t.nonfed+=p.nonfed; t.total+=p.total; t.props+=p.props; t.finalProps+=p.final||0;
     if(p.homeowner){ t.homeownerFed+=p.fed; t.homeownerCount++; }
     if(p.nfip==='required'){ t.nfipFed+=p.fed; t.nfipCount++; }
     if(p.share) t.shares.push(p.share);
@@ -637,7 +637,8 @@ function viewTown(t,m){
       <td><span class="tag" style="border-color:${cssv(PROGRAM_COLOR[p.program]||'--s6')}">${esc(p.program)}</span>
           ${p.nfip==='required'?'<span class="nfip-mark" title="NFIP insurance required">⚑</span>':''}</td>
       <td>${esc((p.type||'').split(':').slice(1).join(':').trim()||p.type||'—')}
-          ${p.props?`<br><span style="color:var(--text-muted)">${p.props} propert${p.props===1?'y':'ies'}</span>`:''}
+          ${p.props?`<br><span style="color:var(--text-muted)">${p.final||0} of ${p.props} propert${p.props===1?'y':'ies'} completed</span>`:''}
+          ${p.obligated||p.closed?`<br><span class="pid mono">deed window ${p.obligated||'?'} → ${p.closed||'open'}</span>`:''}
           <br><span class="tag ${UNSUCCESSFUL.has(p.status)?'z':''}">${esc(p.status||'—')}</span>
           <br><span class="pid mono" title="FEMA project identifier — cite this in a records request">${esc(p.id||'')}</span></td>
       <td class="r mono">${p.fed?usd(p.fed):'<span class="tag z">$0</span>'}</td>
@@ -660,7 +661,9 @@ function viewTown(t,m){
 
     <div class="tiles">
       <div class="tile"><div class="k">Federal obligated</div><div class="v mono">${usd(t.fed)}</div></div>
-      <div class="tile"><div class="k">Properties</div><div class="v mono">${t.props}</div></div>
+      <div class="tile ${t.props && !t.finalProps ? 'flag':''}"><div class="k">Properties mitigated</div>
+        <div class="v mono">${t.finalProps}<span style="font-size:12px;color:var(--text-muted);font-weight:400"> / ${t.props} proposed</span></div>
+        <div class="n">completed vs. put forward</div></div>
       <div class="tile ${t.homeownerFed?'':'flag'}"><div class="k">Homeowner-directed</div><div class="v mono">${usd(t.homeownerFed)}</div><div class="n">${t.homeownerCount} of ${t.count} projects</div></div>
       <div class="tile"><div class="k">Avg. federal share</div><div class="v mono">${t.avgShare?t.avgShare.toFixed(0)+'%':'—'}</div></div>
       <div class="tile ${t.nfipCount?'':'flag'}"><div class="k">NFIP-required programs ⚑</div><div class="v mono">${t.nfipCount}</div><div class="n">FMA / SRL / RFC awards${t.nfipCount?` · ${usd(t.nfipFed)}`:' — none'}</div></div>
@@ -699,7 +702,12 @@ function viewTown(t,m){
       you to a specific parcel: (1) <b>acquisitions transfer title to the local government</b> and are recorded
       with the county Register of Deeds, then held as deed-restricted open space in perpetuity, so county parcel
       GIS will show the government as current owner with an acquisition date; (2) a public records request to
-      NCEM citing the <span class="mono">project identifier</span> shown on each row above. Elevations and
+      NCEM citing the <span class="mono">project identifier</span> shown on each row above.
+      The <b>sponsor</b> on each award is the sub-applicant, and FEMA requires the sub-applicant to take title
+      and hold the parcel as open space in perpetuity — so the sponsor is the likely grantee on the deed. The
+      "recipient" in FEMA's records is NC Emergency Management acting as state pass-through, never the transferee.
+      The dataset carries no deed date; the <b>deed window</b> on each row (obligation → closeout) is the range
+      to search. Elevations and
       reconstructions leave the home in private hands and will not appear in deed records — those need route (2).</div>
 
     ${zeroObligated.length?`<div class="note"><b>${zeroObligated.length} award${zeroObligated.length===1?'':'s'} list properties but $0 obligated.</b>
