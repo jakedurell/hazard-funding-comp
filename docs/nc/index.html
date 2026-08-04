@@ -163,6 +163,7 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
 .tag { display:inline-block; font-size:9.5px; padding:1px 5px; border-radius:4px; background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line); }
 .tag.z { color:var(--critical); border-color:var(--critical); }
 .nfip-mark { font-size:10px; opacity:.85; margin-left:1px; }
+.pid { font-size:9.5px; color:var(--text-muted); letter-spacing:-.01em; }
 .chip[aria-pressed="true"] .nfip-mark { opacity:1; }
 
 .note {
@@ -252,6 +253,11 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
   </div>
 
   <div class="ctl">
+    <label>Application outcome</label>
+    <div class="chips" id="statuses"></div>
+  </div>
+
+  <div class="ctl">
     <label>&nbsp;</label>
     <label class="toggle"><input type="checkbox" id="hoOnly"> Homeowner-directed only</label>
   </div>
@@ -277,6 +283,11 @@ function cssv(n){ return getComputedStyle(document.documentElement).getPropertyV
 const PROGRAM_COLOR = { HMGP:'--s1', FMA:'--s2', PDM:'--s3', BRIC:'--s4', SRL:'--s5', RFC:'--s6', LPDM:'--s6' };
 const CAT_COLOR = { Acquisition:'--s1', Elevation:'--s2', Reconstruction:'--s3', Planning:'--s4', Infrastructure:'--s5', Other:'--s6' };
 
+// Outcome ordering: awarded states first, then unsuccessful, then in-flight.
+const STATUS_ORDER = ['Closed','Completed','Obligated','Approved',
+                      'Not Approved / Denied','Not Selected','Withdrawn','Void','Pending'];
+const UNSUCCESSFUL = new Set(['Not Approved / Denied','Not Selected','Withdrawn','Void']);
+
 const METRICS = {
   fed:          { label:'Federal share obligated',  fmt:usd,  agg:r=>r.fed },
   homeownerFed: { label:'Homeowner-directed federal $', fmt:usd, agg:r=>r.homeowner?r.fed:0 },
@@ -301,7 +312,7 @@ const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>'
 fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
   DATA = d;
   const [lo,hi] = d.meta.fy_range;
-  filters = { y0:lo, y1:hi, programs:new Set(), cats:new Set(), hoOnly:false };
+  filters = { y0:lo, y1:hi, programs:new Set(), cats:new Set(), statuses:new Set(), hoOnly:false };
   readURL(lo,hi);
   buildControls(lo,hi);
   initMap();
@@ -338,6 +349,11 @@ function buildControls(lo,hi){
 
   chipSet('programs', progs, PROGRAM_COLOR, filters.programs);
   chipSet('cats', cats, CAT_COLOR, filters.cats);
+
+  // Outcome is a state, not an identity — no categorical hue, plain text chips.
+  const statuses = [...new Set(DATA.projects.map(p=>p.status).filter(Boolean))]
+    .sort((a,b)=>(STATUS_ORDER.indexOf(a)+99)%99-(STATUS_ORDER.indexOf(b)+99)%99);
+  chipSet('statuses', statuses, {}, filters.statuses, {plain:true});
 
   const y0=document.getElementById('y0'), y1=document.getElementById('y1');
   [y0,y1].forEach(el=>{ el.min=lo; el.max=hi; el.step=1; });
@@ -377,7 +393,7 @@ function paintRange(lo,hi){
   document.getElementById('ylabel').textContent = filters.y0===filters.y1 ? filters.y0 : `${filters.y0}–${filters.y1}`;
 }
 
-function chipSet(id, values, colorMap, active){
+function chipSet(id, values, colorMap, active, opts={}){
   const host=document.getElementById(id);
   host.innerHTML='';
   values.forEach(v=>{
@@ -386,8 +402,8 @@ function chipSet(id, values, colorMap, active){
     // ⚑ marks programs that require the property to carry NFIP flood insurance
     const nfip = id==='programs' && DATA.meta.program_nfip[v]==='required';
     if(nfip) b.title='Requires the property to carry NFIP flood insurance';
-    b.innerHTML=`<span class="dot" style="background:${cssv(colorMap[v]||'--s6')}"></span>${esc(v)}${
-      nfip?'<span class="nfip-mark" aria-label="NFIP-insurance required">⚑</span>':''}`;
+    b.innerHTML=(opts.plain?'':`<span class="dot" style="background:${cssv(colorMap[v]||'--s6')}"></span>`)
+      +esc(v)+(nfip?'<span class="nfip-mark" aria-label="NFIP-insurance required">⚑</span>':'');
     b.addEventListener('click',()=>{
       active.has(v)?active.delete(v):active.add(v);
       b.setAttribute('aria-pressed', active.has(v)?'true':'false');
@@ -403,6 +419,7 @@ function activeProjects(){
     (p.fy==null || (p.fy>=filters.y0 && p.fy<=filters.y1)) &&
     (!filters.programs.size || filters.programs.has(p.program)) &&
     (!filters.cats.size || filters.cats.has(p.cat)) &&
+    (!filters.statuses.size || filters.statuses.has(p.status)) &&
     (!filters.hoOnly || p.homeowner)
   );
 }
@@ -617,9 +634,12 @@ function viewTown(t,m){
   const fmtRow = p => `
     <tr class="${p.homeowner?'ho':''}">
       <td class="mono">${p.fy??'—'}</td>
-      <td><span class="tag" style="border-color:${cssv(PROGRAM_COLOR[p.program]||'--s6')}">${esc(p.program)}</span></td>
+      <td><span class="tag" style="border-color:${cssv(PROGRAM_COLOR[p.program]||'--s6')}">${esc(p.program)}</span>
+          ${p.nfip==='required'?'<span class="nfip-mark" title="NFIP insurance required">⚑</span>':''}</td>
       <td>${esc((p.type||'').split(':').slice(1).join(':').trim()||p.type||'—')}
-          ${p.props?`<br><span style="color:var(--text-muted)">${p.props} propert${p.props===1?'y':'ies'}</span>`:''}</td>
+          ${p.props?`<br><span style="color:var(--text-muted)">${p.props} propert${p.props===1?'y':'ies'}</span>`:''}
+          <br><span class="tag ${UNSUCCESSFUL.has(p.status)?'z':''}">${esc(p.status||'—')}</span>
+          <br><span class="pid mono" title="FEMA project identifier — cite this in a records request">${esc(p.id||'')}</span></td>
       <td class="r mono">${p.fed?usd(p.fed):'<span class="tag z">$0</span>'}</td>
       <td class="r mono" style="color:var(--text-muted)">${p.share?Math.round(p.share*100)+'%':'—'}</td>
     </tr>`;
@@ -673,6 +693,14 @@ function viewTown(t,m){
       <tbody>${rows.map(fmtRow).join('')}</tbody></table>
       <div class="legend"><span><i style="background:${cssv('--s1')}"></i>Left rule = homeowner-directed (private property)</span></div>`
       :`<p class="empty">No awards match the current filters.</p>`}
+
+    <div class="note"><b>Identifying the actual property.</b> FEMA publishes no owner names or addresses —
+      these records are project-level, and NFIP policy and claim data is redacted by statute. Two routes get
+      you to a specific parcel: (1) <b>acquisitions transfer title to the local government</b> and are recorded
+      with the county Register of Deeds, then held as deed-restricted open space in perpetuity, so county parcel
+      GIS will show the government as current owner with an acquisition date; (2) a public records request to
+      NCEM citing the <span class="mono">project identifier</span> shown on each row above. Elevations and
+      reconstructions leave the home in private hands and will not appear in deed records — those need route (2).</div>
 
     ${zeroObligated.length?`<div class="note"><b>${zeroObligated.length} award${zeroObligated.length===1?'':'s'} list properties but $0 obligated.</b>
       In this dataset that can mean pending, withdrawn, or cancelled — the distinction matters. Check the
