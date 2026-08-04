@@ -107,6 +107,10 @@ table.ledger td.r, table.ledger th.r { text-align:right; }
 table.ledger tr.subject td { color:var(--critical); font-weight:600; background:var(--critical-soft); }
 table.ledger tr.subject td:first-child { box-shadow:inset 3px 0 0 var(--critical); padding-left:10px; }
 table.ledger tr.fail td { color:var(--critical); }
+table.ledger tr.ref td { border-top:1px solid var(--line-strong); background:var(--surface-2); }
+table.ledger tr.ref td:first-child { box-shadow:inset 3px 0 0 var(--accent); padding-left:10px; }
+.reftag { display:inline-block; margin-left:8px; font-size:9.5px; text-transform:uppercase;
+  letter-spacing:.07em; font-weight:700; color:var(--accent); vertical-align:middle; }
 
 /* ---------- narrative timeline ---------- */
 .events { position:relative; margin-top:8px; padding-left:26px; }
@@ -178,13 +182,16 @@ footer a { color:var(--text-muted); }
 <section>
   <div class="wrap">
     <h2>Everyone else finished what they started</h2>
-    <p class="sub">
-      Counting only projects that mitigate private property — acquisition, elevation, reconstruction. Eight of
-      the ten oceanfront towns that put properties forward completed <b>every single one</b>. North Topsail
-      Beach put forward more than any town that delivered none. A dash means the town never proposed a property
-      project, so it has no delivery record either way.
-    </p>
+    <p class="sub">Acquisition, elevation and reconstruction of private property — what a town does when it
+       intends to mitigate somebody's home.</p>
     <table class="ledger" id="ledger"></table>
+    <div class="note">
+      Eight of the ten oceanfront towns that put properties forward completed <b>every single one</b>. North
+      Topsail Beach put forward more than any town that delivered none. A dash means the town never proposed a
+      property project, so it has no delivery record either way — that is different from trying and failing.
+      The last two rows are not oceanfront municipalities: they are the county that contains North Topsail
+      Beach, and the largest city in that county. Both serve the same residents. Both filed in 2024.
+    </div>
   </div>
 </section>
 
@@ -378,6 +385,15 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
     + `filed — nothing obligated</span>`;
 
   // ---- ledger ----------------------------------------------------
+  const REF = ["Jacksonville","Onslow County"];
+  const refPool = (d.reference||[]).concat(d.projects.filter(p=>REF.includes(p.town)));
+  const statFor = ps => {
+    const prop = ps.filter(p=>p.homeowner);
+    const fwd = sum(prop,p=>p.props), done = sum(prop,p=>p.final);
+    return { nprop:prop.length, fwd, done, rate: fwd?done/fwd:null,
+             fed:sum(ps,p=>p.fed), last: ps.length?Math.max(...ps.map(p=>p.fy||0)):null };
+  };
+
   const led = order.map(t=>{
     const ps = byTown.get(t)||[];
     const prop = ps.filter(p=>p.homeowner);
@@ -403,6 +419,15 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
         <td class="r mono">${r.fwd?r.done:'—'}</td>
         <td class="r mono">${r.rate===null?'—':Math.round(r.rate*100)+'%'}</td>
         <td class="r mono">${usd(r.fed)}</td><td class="r mono">${r.last??'—'}</td></tr>`;
+      }).join('')
+    + REF.map(name=>{
+        const r = statFor(refPool.filter(p=>p.town===name));
+        if (!r.fed && !r.nprop && !r.last) return '';
+        return `<tr class="ref"><td>${esc(name)}<span class="reftag">same county</span></td>
+          <td class="r mono">${r.nprop||'—'}</td><td class="r mono">${r.fwd||'—'}</td>
+          <td class="r mono">${r.fwd?r.done:'—'}</td>
+          <td class="r mono">${r.rate===null?'—':Math.round(r.rate*100)+'%'}</td>
+          <td class="r mono">${usd(r.fed)}</td><td class="r mono">${r.last??'—'}</td></tr>`;
       }).join('')
     + `</tbody>`;
 

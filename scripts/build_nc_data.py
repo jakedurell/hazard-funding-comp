@@ -92,6 +92,15 @@ OCEANFRONT = {
     "Sunset Beach": "Brunswick",
 }
 
+# Non-municipal subrecipients carried as context rows. Counties are not Census
+# places so they never match the place index, but Onslow County is the body that
+# would serve North Topsail Beach residents if the town itself did not.
+REFERENCE_SUBRECIPIENTS = {
+    "Onslow (County)": "Onslow County",
+    "ONSLOW COUNTY": "Onslow County",
+    "Onslow County*": "Onslow County",
+}
+
 # FEMA activity codes → category. The 200/202/207 families are the ones
 # that mitigate privately owned homes; everything else is municipal asset,
 # planning, or administrative work.
@@ -229,6 +238,31 @@ def main():
             "county": r.get("county"),
         })
 
+    # reference rows — same record shape, kept out of the municipal comparison
+    reference = []
+    for r in nc:
+        label = REFERENCE_SUBRECIPIENTS.get((r.get("subrecipient") or "").strip())
+        if not label:
+            continue
+        total = num(r.get("projectAmount")); fed = num(r.get("federalShareObligated"))
+        program = r.get("programArea")
+        reference.append({
+            "town": label, "geoid": None, "id": r.get("projectIdentifier"),
+            "fy": int(r["programFy"]) if (r.get("programFy") or "").isdigit() else None,
+            "program": program, "nfip": PROGRAM_NFIP.get(program, "community"),
+            "disaster": r.get("disasterNumber") or None, "type": r.get("projectType"),
+            "cat": category(r.get("projectType")),
+            "homeowner": is_homeowner_directed(r.get("projectType")),
+            "status": r.get("status"), "total": round(total, 2), "fed": round(fed, 2),
+            "nonfed": round(max(total - fed, 0), 2),
+            "share": num(r.get("costSharePercentage")) or None,
+            "props": int(num(r.get("numberOfProperties"))),
+            "final": int(num(r.get("numberOfFinalProperties"))),
+            "obligated": (r.get("initialObligationDate") or "")[:10] or None,
+            "closed": (r.get("dateClosed") or "")[:10] or None,
+            "sponsor": r.get("subrecipient"), "county": r.get("county"),
+        })
+
     funded = {p["geoid"] for p in projects}
     print(f"  {len(projects)} of {len(nc)} NC records matched to an incorporated place")
     print(f"  {len(funded)} of {len(places['features'])} places have at least one award")
@@ -274,12 +308,15 @@ def main():
             "program_nfip": PROGRAM_NFIP,
             "oceanfront": OCEANFRONT,
             "nonmunicipal": {"records": nonmunicipal["n"], "fed": round(nonmunicipal["fed"], 2)},
+            "reference_note": "Context rows: bodies other than an oceanfront municipality "
+                              "that serve the same residents.",
             "fy_range": [
                 min((p["fy"] for p in projects if p["fy"]), default=1989),
                 max((p["fy"] for p in projects if p["fy"]), default=2025),
             ],
         },
         "projects": projects,
+        "reference": reference,
         "boundaries": {"type": "FeatureCollection", "features": feats},
     }
 
