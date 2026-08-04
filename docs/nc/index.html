@@ -239,6 +239,7 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
       <button data-preset="1999">Post-Floyd ’99+</button>
       <button data-preset="2016">Post-Matthew ’16+</button>
       <button data-preset="2018">Post-Florence ’18+</button>
+      <button data-preset="2024">Post-Helene ’24+</button>
     </div>
   </div>
 
@@ -666,6 +667,8 @@ function viewTown(t,m){
         <div class="n">completed vs. put forward</div></div>
       <div class="tile ${t.homeownerFed?'':'flag'}"><div class="k">Homeowner-directed</div><div class="v mono">${usd(t.homeownerFed)}</div><div class="n">${t.homeownerCount} of ${t.count} projects</div></div>
       <div class="tile"><div class="k">Avg. federal share</div><div class="v mono">${t.avgShare?t.avgShare.toFixed(0)+'%':'—'}</div></div>
+      <div class="tile"><div class="k">Latest activity</div><div class="v mono">${
+        t.rows.length ? Math.max(...t.rows.map(p=>p.fy||0)) : '—'}</div><div class="n">most recent HMA record</div></div>
       <div class="tile ${t.nfipCount?'':'flag'}"><div class="k">NFIP-required programs ⚑</div><div class="v mono">${t.nfipCount}</div><div class="n">FMA / SRL / RFC awards${t.nfipCount?` · ${usd(t.nfipFed)}`:' — none'}</div></div>
     </div>
 

@@ -62,6 +62,20 @@ other clone must be re-cloned rather than pulled. `filter-repo` also drops the
       list properties but zero federal share. Pending, withdrawn, and cancelled look
       identical in this dataset, and the difference is material to the argument.
       Check the `status` field, then confirm against NCEM records.
+- [ ] **Verify North Topsail Beach's Local Hazard Mitigation Plan status.** HMGP requires the
+      applicant community to have a current FEMA-approved local hazard mitigation plan. This is
+      now the ONLY remaining explanation that would excuse NTB's absence, because availability
+      itself is settled (see below). Check adoption and expiration dates, and whether NTB is a
+      participating jurisdiction in Onslow County's multi-jurisdictional plan. Note Kure Beach
+      applied for a planning grant (91.1) under DR-4827, so these towns actively manage plan
+      currency.
+
+      **Availability is established.** DR-4827 (Helene, 2024) struck western NC but funded
+      projects in 65 counties including all 8 coastal ones — 17 coastal projects from 12
+      applicants, among them Kure Beach, Wrightsville Beach and Southern Shores (all NTB
+      comparison towns), plus Jacksonville and Onslow County itself. NTB filed nothing. Its most
+      recent HMA record of any kind is FY2018.
+
 - [ ] **Verify CBRS unit boundaries** for North Topsail Beach against the FWS CBRS
       mapper. CBRS restricts federal flood insurance availability, and FMA targets
       NFIP-insured properties — so CBRS could independently explain the absence of
