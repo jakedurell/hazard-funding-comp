@@ -86,7 +86,17 @@ other clone must be re-cloned rather than pulled. `filter-repo` also drops the
             was carried unfulfilled through the 2021-2026 cycle. That is the citation that shows
             a stated commitment, the means to act, and no action.
       - [ ] Get Planning Board / Board of Aldermen minutes around 2025-12 for the discussion.
-      - [ ] Watch whether the "scheduled for 2026-27" HMGP-4827 application is actually filed.
+      - [ ] **The DR-4827 window has closed at the local level.** NCEM's Letter of Interest
+            intake shut at 5:00 PM on 2025-10-31. NTB's draft plan is dated 2025-12-05 — five
+            weeks after — and still lists HMGP-4827 projects as "scheduled for 2026-27."
+            Establish whether NTB filed an LOI before the deadline: an LOI the state declined to
+            advance would leave no trace in FEMA's data, so the town's absence there is
+            consistent with both "never filed" and "filed, not selected." This is the single
+            most important records request to NCEM.
+      - [ ] Confirm whether NCEM reopened or extended intake. The state-to-FEMA deadline is 15
+            months from declaration, extendable in 30–120 day increments to 240 days, and FEMA
+            may reopen a closed period — so a later route may exist even though the local window
+            shut.
       - Extracted text: `docs/nc/evidence/ntb_2026_mitigation_actions_extracted.txt`
 
 - [ ] **Verify CBRS unit boundaries** for North Topsail Beach against the FWS CBRS

@@ -6,7 +6,7 @@ A comparative analysis of FEMA hazard mitigation funding in **North Topsail Beac
 
 > **Attribution.** This repository is a derivative work of **[Floodlines](https://github.com/johbry17/Floodlines)** by **Bryan C. Johns**, used and adapted under the MIT License. The entire analytical framework, ETL pipeline, index methodology, and interactive dashboard are his work. See [Attribution & Upstream Project](#attribution--upstream-project) below.
 
-> **Status.** A first North Carolina module is live at **`docs/nc/`** — an interactive map of every FEMA hazard mitigation award to the state's 21 Atlantic-facing barrier-island municipalities, built directly from the FEMA API. The inherited **Vermont** index pipeline (notebooks, `data/cleaned/`, `docs/index.html`) is untouched and still describes Vermont; the need/gap index has not yet been ported to NC.
+> **Status.** A first North Carolina module is live at **`docs/nc/`** — an interactive map of every FEMA hazard mitigation award matched to an NC incorporated place, scoped to either the 21-town oceanfront comparison set or all 552 municipalities, built directly from the FEMA API. The inherited **Vermont** index pipeline (notebooks, `data/cleaned/`, `docs/index.html`) is untouched and still describes Vermont; the need/gap index has not yet been ported to NC.
 
 ## Table of Contents
 
@@ -14,6 +14,7 @@ A comparative analysis of FEMA hazard mitigation funding in **North Topsail Beac
 - [Why This Framework](#why-this-framework)
 - [Comparison Design](#comparison-design)
 - [What This Data Can and Cannot Show](#what-this-data-can-and-cannot-show)
+- [What the Record Currently Shows](#what-the-record-currently-shows)
 - [Roadmap](#roadmap)
 - [Repository Structure](#repository-structure)
 - [Usage](#usage)
@@ -64,21 +65,36 @@ Comps should be matched on hazard exposure, housing stock, population and season
 
 ## What This Data Can and Cannot Show
 
-The FEMA HMA dataset records **approved projects**. It does not record applications filed, applications denied, or assistance a town declined to offer. This is stated as a limitation in the upstream project, and the reframed question here depends on it more heavily than the original did.
+The HMA dataset carries more than awards. Its `status` field records **Not Approved / Denied**, **Not Selected**, **Withdrawn** and **Void** alongside funded states — 184 such records in NC — so applications that were filed and lost are visible, and "never applied" can be distinguished from "applied and was refused."
 
-**The quantitative pipeline can establish:** that North Topsail Beach's mitigation funding record diverges from peer municipalities with comparable risk and vulnerability, that the divergence is robust across model specifications, and its approximate magnitude in inflation-adjusted federal dollars.
+**The quantitative pipeline can establish:** that North Topsail Beach's mitigation record diverges from peer municipalities with comparable exposure; that four properties were put forward and none completed; that no application of any kind appears after FY2018; and that peers and its own county filed under a declaration NTB did not.
 
-**It cannot, by itself, establish:** that the divergence is caused by municipal inaction. A thin funding record is equally consistent with a town that applied and lost, a town whose residents never sought assistance, or a town constrained by CBRS designation.
+**It cannot, by itself, establish** what happened inside the town — why approved projects closed having mitigated nothing, or whether a Letter of Interest was filed with the state but never advanced. An LOI that NCEM did not carry forward would leave no trace in FEMA's data.
 
-Closing that gap requires records this pipeline does not contain:
+Records that would close the remaining gap:
 
-- FEMA and NC Emergency Management sub-application records, including unsuccessful and withdrawn applications
-- Town council minutes, budgets, and staffing records bearing on grant administration capacity
+- NCEM Letter-of-Interest submissions for DR-4827, and sub-application files for each NTB project identifier
+- Town council and planning board minutes, budgets, and grant administration staffing
 - NFIP repetitive-loss and severe-repetitive-loss property counts
 - CRS participation history and class
 - Public communications to homeowners about available mitigation programs
 
-Public records requests to the Town of North Topsail Beach and to NCEM are the natural source. Keep the quantitative finding and the causal claim clearly separated in anything published from this repo.
+Keep the quantitative finding and the causal claim clearly separated in anything published from this repo.
+
+## What the Record Currently Shows
+
+Established from public data and primary sources; see [References](#references) for citations.
+
+| | |
+|---|---|
+| **Availability** | HMGP eligibility runs statewide within a declared state. DR-4827 (Helene, western NC) funded projects in 65 counties, including 17 in the 8 coastal counties — among them Kure Beach, Wrightsville Beach, Southern Shores, Jacksonville, and Onslow County itself. |
+| **Eligibility** | NTB held a current FEMA-approved hazard mitigation plan throughout, as a participating jurisdiction in the 2021 Southeastern NC Regional Plan. NCEM's DR-4827 notice limits eligibility to local governments with such a plan. NTB met the test. |
+| **Stated intent** | The town's own Action **ES6-1** commits it to apply for HMGP to fund property acquisition. Status: **Carried Forward** — held over from the prior cycle, not completed. |
+| **Delivery** | Four properties put forward across four projects; **zero completed**. Carolina Beach completed 43 of 43; Onslow County 7 of 19. |
+| **Activity** | No HMA record of any program since **FY2018**. |
+| **Deadline** | NCEM's DR-4827 Letter of Interest intake closed **5:00 PM, October 31, 2025**. The town's 2026 draft plan, dated 2025-12-05, still lists HMGP-4827 projects as "scheduled for 2026-27." |
+
+Two open questions remain, and both cut against the thesis if unresolved: whether **CBRS** designation independently suppressed eligibility, and whether NTB filed an LOI that the state declined to advance. See [TODO.md](TODO.md).
 
 ## Quickstart
 
@@ -229,6 +245,34 @@ Vermont-specific, replaced in the North Carolina adaptation:
 
 - [Vermont ANR River Corridors](https://www.arcgis.com/home/item.html?id=51797aa9327343b9a04215e5e59e00c5) — no NC analog; coastal substitutes needed
 - Vermont Center for Geographic Information boundaries — state reference boundaries
+
+North Topsail Beach — primary sources:
+
+- [Southeastern NC Regional Hazard Mitigation Plan — NTB participation page](https://www.northtopsailbeachnc.gov/planningzoning/page/southeastern-nc-regional-hazard-mitigation-plan-2025-survey)
+  NTB is a participating jurisdiction with Brunswick, New Hanover, Onslow and Pender counties.
+- [NTB Hazard Mitigation Plan — Annex 3 to Onslow County](https://www.northtopsailbeachnc.gov/sites/default/files/fileattachments/planning_and_zoning/page/2475/ntb_hazard_mitigation_plan.pdf)
+  The town's own annex to the county plan.
+- [Onslow County Hazard Mitigation](https://www.onslowcountync.gov/601/Hazard-Mitigation)
+  Confirms the 2021 Southeastern NC Regional Plan; FEMA approval letters April 16 and May 6, 2021.
+- [Southeastern NC Regional Hazard Mitigation Plan, 2021 final (PDF)](https://www.northtopsailbeachnc.gov/sites/default/files/fileattachments/planning_and_zoning/page/2369/20210107_senc_rhmp_final.pdf)
+- [NTB Mitigation Action Plans 2026 DRAFT — Planning Board packet](https://mccmeetingspublic.blob.core.usgovcloudapi.net/nrthtpslnc-meet-f6200224e48c4e3c8fef199fb4b16b46/ITEM-Attachment-001-07836af9eb0c4bb3aae06fbe04941319.pdf)
+  Contains Action **ES6-1**, committing the town to "apply for grants through programs like the
+  Hazard Mitigation Grant Program (HMGP) to fund projects like property acquisition and
+  infrastructure improvements" — status **CARRIED FORWARD**. Extracted text is kept at
+  [`docs/nc/evidence/`](docs/nc/evidence/).
+- [NC DPS — Hazard Mitigation Plans](https://www.ncdps.gov/our-organization/emergency-management/hazard-mitigation/hazard-mitigation-plans)
+
+DR-4827 (Tropical Storm Helene) funding availability:
+
+- [NCEM — DR-4827-NC Notice of Funding Availability](https://www.ncdps.gov/division/emergency-management/dr-4827-tropical-storm-helene-nofa-final/open)
+  Eligible sub-applicants are local governments **with approved and adopted regional hazard
+  mitigation plans** — a test North Topsail Beach met.
+- [UNC School of Government — "Act Now: October 31 Deadline for Helene Hazard Mitigation Grants"](https://canons.sog.unc.edu/2025/10/act-now-october-31-deadline-for-helene-hazard-mitigation-grants/)
+  NCEM Letter of Interest intake closed 5:00 PM, **October 31, 2025**.
+- [FEMA — North Carolina Tropical Storm Helene (DR-4827-NC)](https://www.fema.gov/disaster/4827)
+- [FEMA — HMGP application period extended to 15 months](https://www.federalregister.gov/documents/2024/08/15/2024-17909/hazard-mitigation-grant-program-application-period-extension)
+  State-to-FEMA deadline is 15 months from declaration, extendable in 30–120 day increments up
+  to 240 days; FEMA may reopen a closed period in certain cases.
 
 To be added for North Carolina:
 
