@@ -5,6 +5,11 @@ node_modules/
 .DS_Store
 *.pyc
 
+# Inherited Vermont data — purged from history 2026-08-03, kept on disk only.
+# Re-downloadable from the sources listed in README References.
+data/raw/
+data/cleaned/
+
 # large files
 VT_river_corridors/
 NRI_TABLE_censusTracts.csv

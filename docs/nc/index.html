@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NC Oceanfront Hazard Mitigation — Funding Comparison</title>
+<title>NC Hazard Mitigation Funding — Municipal Comparison</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 :root {
@@ -162,6 +162,8 @@ table.proj td.r, table.proj th.r { text-align:right; }
 table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-left:7px; }
 .tag { display:inline-block; font-size:9.5px; padding:1px 5px; border-radius:4px; background:var(--surface-2); color:var(--text-secondary); border:1px solid var(--line); }
 .tag.z { color:var(--critical); border-color:var(--critical); }
+.nfip-mark { font-size:10px; opacity:.85; margin-left:1px; }
+.chip[aria-pressed="true"] .nfip-mark { opacity:1; }
 
 .note {
   margin-top:16px; padding:10px 12px; border-radius:8px; font-size:11.5px; line-height:1.55;
@@ -193,12 +195,22 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
 <body>
 
 <header>
-  <h1>North Carolina Oceanfront Municipalities — FEMA Hazard Mitigation Funding</h1>
-  <p>Every FEMA Hazard Mitigation Assistance award to an Atlantic-facing barrier-island town in North Carolina.
-     Click towns on the map to compare. Dollars are <b>nominal</b>, not inflation-adjusted.</p>
+  <h1>North Carolina — FEMA Hazard Mitigation Funding by Municipality</h1>
+  <p>Every FEMA Hazard Mitigation Assistance award matched to an NC incorporated place. Switch scope between the
+     21-town oceanfront comparison set and all 552 municipalities. Click to select, shift-click to compare.
+     ⚑ marks programs that require the property to carry NFIP flood insurance. Dollars are <b>nominal</b>, not
+     inflation-adjusted; awards made to counties and state agencies are excluded.</p>
 </header>
 
 <div class="controls">
+  <div class="ctl">
+    <label for="scope">Scope</label>
+    <select id="scope">
+      <option value="ocean">Oceanfront comparison set (21)</option>
+      <option value="all">All NC municipalities (552)</option>
+    </select>
+  </div>
+
   <div class="ctl">
     <label for="metric">Map metric</label>
     <select id="metric">
@@ -299,12 +311,13 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
 // URL state — makes any view shareable / citable
 function readURL(lo,hi){
   const q=new URLSearchParams(location.search);
-  q.getAll('town').forEach(t=>{ if(DATA.meta.towns[t]) selected.add(t); });
+  q.getAll('town').forEach(t=>{ if(DATA.boundaries.features.some(f=>f.properties.town===t)) selected.add(t); });
   const y=q.get('years');
   if(y && /^\d{4}-\d{4}$/.test(y)){
     filters.y0=Math.max(lo,+y.slice(0,4)); filters.y1=Math.min(hi,+y.slice(5));
   }
   const m=q.get('metric'); if(m && METRICS[m]) document.getElementById('metric').value=m;
+  if(q.get('scope')==='all') document.getElementById('scope').value='all';
   if(q.get('homeowner')==='1'){ filters.hoOnly=true; document.getElementById('hoOnly').checked=true; }
 }
 function writeURL(){
@@ -312,6 +325,7 @@ function writeURL(){
   [...selected].forEach(t=>q.append('town',t));
   if(filters.y0!==DATA.meta.fy_range[0]||filters.y1!==DATA.meta.fy_range[1]) q.set('years',`${filters.y0}-${filters.y1}`);
   if(metricKey!=='fed') q.set('metric',metricKey);
+  if(document.getElementById('scope').value==='all') q.set('scope','all');
   if(filters.hoOnly) q.set('homeowner','1');
   const s=q.toString();
   history.replaceState(null,'',s?`?${s}`:location.pathname);
@@ -345,6 +359,14 @@ function buildControls(lo,hi){
 
   document.getElementById('metric').addEventListener('change',render);
   document.getElementById('hoOnly').addEventListener('change',e=>{ filters.hoOnly=e.target.checked; render(); });
+  document.getElementById('scope').addEventListener('change',()=>{
+    // drop selections that fall outside the new scope, then rebuild the layer
+    const keep=new Set(DATA.boundaries.features.filter(f=>inScope(f.properties)).map(f=>f.properties.town));
+    [...selected].forEach(t=>{ if(!keep.has(t)) selected.delete(t); });
+    buildPolyLayer();
+    if(!selected.size) map.flyToBounds(polyLayer.getBounds(),{padding:[40,40],duration:.6});
+    render();
+  });
 }
 
 function paintRange(lo,hi){
@@ -361,7 +383,11 @@ function chipSet(id, values, colorMap, active){
   values.forEach(v=>{
     const b=document.createElement('button');
     b.className='chip'; b.setAttribute('aria-pressed','false');
-    b.innerHTML=`<span class="dot" style="background:${cssv(colorMap[v]||'--s6')}"></span>${esc(v)}`;
+    // ⚑ marks programs that require the property to carry NFIP flood insurance
+    const nfip = id==='programs' && DATA.meta.program_nfip[v]==='required';
+    if(nfip) b.title='Requires the property to carry NFIP flood insurance';
+    b.innerHTML=`<span class="dot" style="background:${cssv(colorMap[v]||'--s6')}"></span>${esc(v)}${
+      nfip?'<span class="nfip-mark" aria-label="NFIP-insurance required">⚑</span>':''}`;
     b.addEventListener('click',()=>{
       active.has(v)?active.delete(v):active.add(v);
       b.setAttribute('aria-pressed', active.has(v)?'true':'false');
@@ -381,15 +407,26 @@ function activeProjects(){
   );
 }
 
+// which places are in play — the oceanfront comp set, or every NC municipality
+function inScope(props){
+  return document.getElementById('scope').value === 'all' || !!props.island;
+}
+
 function byTown(rows){
-  const m = new Map(Object.keys(DATA.meta.towns).map(t=>[t,{
-    town:t, island:DATA.meta.towns[t], rows:[],
-    fed:0, nonfed:0, total:0, count:0, props:0, homeownerFed:0, homeownerCount:0, shares:[]
-  }]));
+  const m = new Map();
+  DATA.boundaries.features.forEach(f=>{
+    if(!inScope(f.properties)) return;
+    m.set(f.properties.town,{
+      town:f.properties.town, island:f.properties.island, rows:[],
+      fed:0, nonfed:0, total:0, count:0, props:0, homeownerFed:0, homeownerCount:0,
+      nfipFed:0, nfipCount:0, shares:[]
+    });
+  });
   rows.forEach(p=>{
     const t=m.get(p.town); if(!t) return;
     t.rows.push(p); t.count++; t.fed+=p.fed; t.nonfed+=p.nonfed; t.total+=p.total; t.props+=p.props;
     if(p.homeowner){ t.homeownerFed+=p.fed; t.homeownerCount++; }
+    if(p.nfip==='required'){ t.nfipFed+=p.fed; t.nfipCount++; }
     if(p.share) t.shares.push(p.share);
   });
   m.forEach(t=>{ t.avgShare = t.shares.length ? t.shares.reduce((a,b)=>a+b,0)/t.shares.length*100 : 0; });
@@ -413,15 +450,7 @@ function initMap(){
   L.tileLayer(`https://{s}.basemaps.cartocdn.com/${darkMode?'dark':'light'}_nolabels/{z}/{x}/{y}{r}.png`,
     { attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:18 }).addTo(map);
 
-  polyLayer = L.geoJSON(DATA.boundaries,{
-    style:()=>({ weight:1, color:'#7a7873', fillOpacity:.85 }),
-    onEachFeature:(f,l)=>{
-      l.on('click',e=>{ toggleTown(f.properties.town, e.originalEvent.shiftKey); L.DomEvent.stop(e); });
-      l.on('mouseover',()=>l.setStyle({weight:2.5,color:cssv('--text-primary')}));
-      l.on('mouseout',()=>styleOne(l,f.properties.town));
-    }
-  }).addTo(map);
-
+  buildPolyLayer();
   bubbleLayer = L.layerGroup().addTo(map);
   map.on('click',()=>{ selected.clear(); render(); });
   map.fitBounds(polyLayer.getBounds(),{ padding:[40,40] });
@@ -430,6 +459,21 @@ function initMap(){
   const lg = L.control({position:'bottomright'});
   lg.onAdd = () => { const d=L.DomUtil.create('div','map-legend'); d.id='maplegend'; return d; };
   lg.addTo(map);
+}
+
+// rebuilt whenever the scope changes — Leaflet's geoJSON filter runs at
+// construction only, so switching 21 ↔ 552 places means a fresh layer
+function buildPolyLayer(){
+  if(polyLayer) map.removeLayer(polyLayer);
+  polyLayer = L.geoJSON(DATA.boundaries,{
+    filter:f=>inScope(f.properties),
+    style:()=>({ weight:1, color:'#7a7873', fillOpacity:.85 }),
+    onEachFeature:(f,l)=>{
+      l.on('click',e=>{ toggleTown(f.properties.town, e.originalEvent.shiftKey); L.DomEvent.stop(e); });
+      l.on('mouseover',()=>l.setStyle({weight:2.5,color:cssv('--text-primary')}));
+      l.on('mouseout',()=>styleOne(l,f.properties.town));
+    }
+  }).addTo(map);
 }
 
 function colorFor(v, max){
@@ -451,8 +495,11 @@ function styleOne(layer, town){
 function drawMap(){
   polyLayer.eachLayer(l=>styleOne(l,l.feature.properties.town));
   bubbleLayer.clearLayers();
+  const statewide = document.getElementById('scope').value === 'all';
   polyLayer.eachLayer(l=>{
-    const town=l.feature.properties.town, t=agg.get(town), v=metricValue(t,metricKey);
+    const town=l.feature.properties.town, t=agg.get(town); if(!t) return;
+    const v=metricValue(t,metricKey);
+    if(statewide && !v) return;          // 552 empty markers would drown the map
     const c=l.getBounds().getCenter();
     const r = v&&maxV ? 5+16*Math.sqrt(v/maxV) : 4;
     const m=L.circleMarker(c,{
@@ -531,26 +578,38 @@ function viewOverview(rows,m){
   const fed=all.reduce((s,t)=>s+t.fed,0), nonfed=all.reduce((s,t)=>s+t.nonfed,0);
   const hoFed=all.reduce((s,t)=>s+t.homeownerFed,0);
   const zero=all.filter(t=>t.count===0);
+  const statewide = document.getElementById('scope').value === 'all';
   const ranked=all.map(t=>({name:t.town,v:metricValue(t,metricKey)})).sort((a,b)=>b.v-a.v);
+  const shown = statewide ? ranked.filter(r=>r.v>0).slice(0,25) : ranked;
 
   return `
-    <div class="side-head"><h2>All oceanfront towns</h2><span class="mono" style="color:var(--text-muted);font-size:11.5px">${filters.y0}–${filters.y1}</span></div>
+    <div class="side-head"><h2>${statewide?'All NC municipalities':'Oceanfront comparison set'}</h2><span class="mono" style="color:var(--text-muted);font-size:11.5px">${filters.y0}–${filters.y1}</span></div>
     <p class="side-sub">${rows.length} awards across ${all.filter(t=>t.count).length} of ${all.length} municipalities</p>
 
     <div class="tiles">
       <div class="tile"><div class="k">Federal obligated</div><div class="v mono">${usd(fed)}</div></div>
       <div class="tile"><div class="k">Non-federal share</div><div class="v mono">${usd(nonfed)}</div><div class="n">state / local / owner</div></div>
       <div class="tile"><div class="k">Homeowner-directed</div><div class="v mono">${usd(hoFed)}</div><div class="n">${fed?Math.round(hoFed/fed*100):0}% of federal $</div></div>
-      <div class="tile ${zero.length?'flag':''}"><div class="k">Towns with zero</div><div class="v mono">${zero.length}</div><div class="n">${zero.length?esc(zero.map(t=>t.town).join(', ')):'—'}</div></div>
+      <div class="tile ${zero.length?'flag':''}"><div class="k">Towns with zero</div><div class="v mono">${zero.length}</div><div class="n">${
+        zero.length ? (statewide ? `of ${all.length} municipalities` : esc(zero.map(t=>t.town).join(', '))) : '—'}</div></div>
     </div>
 
-    <div class="sec">${esc(m.label)} by town</div>
-    ${barRows(ranked, metricKey, m.fmt, {click:true})}
+    <div class="sec">${esc(m.label)} ${statewide?'— top 25':'by town'}</div>
+    ${barRows(shown, metricKey, m.fmt, {click:true})}
 
     <div class="note"><b>Cost share.</b> FEMA pays a share of each project — most often 75%, but 90% and 100%
       appear in this data. The remainder is the non-federal share. This dataset records its <b>size</b>
       but not <b>who paid it</b>: state, town, or the property owner. Attributing it requires NC Emergency
-      Management sub-grant records.</div>`;
+      Management sub-grant records.</div>
+
+    <div class="note"><b>⚑ NFIP dependency.</b> ${esc(DATA.meta.nfip_note)}</div>
+
+    <div class="note"><b>Municipalities only.</b> ${DATA.meta.nonmunicipal.records} NC awards
+      (${usd(DATA.meta.nonmunicipal.fed)} federal) went to counties, agencies, and universities rather than
+      to a municipality, and are excluded here. That matters: a county can act as sub-applicant for
+      properties inside a town, so a thin municipal record does not prove residents received nothing.
+      Onslow County has run its own acquisitions. Property-level records are needed to tell whether any
+      sat in North Topsail Beach.</div>`;
 }
 
 function viewTown(t,m){
@@ -584,7 +643,15 @@ function viewTown(t,m){
       <div class="tile"><div class="k">Properties</div><div class="v mono">${t.props}</div></div>
       <div class="tile ${t.homeownerFed?'':'flag'}"><div class="k">Homeowner-directed</div><div class="v mono">${usd(t.homeownerFed)}</div><div class="n">${t.homeownerCount} of ${t.count} projects</div></div>
       <div class="tile"><div class="k">Avg. federal share</div><div class="v mono">${t.avgShare?t.avgShare.toFixed(0)+'%':'—'}</div></div>
+      <div class="tile ${t.nfipCount?'':'flag'}"><div class="k">NFIP-required programs ⚑</div><div class="v mono">${t.nfipCount}</div><div class="n">FMA / SRL / RFC awards${t.nfipCount?` · ${usd(t.nfipFed)}`:' — none'}</div></div>
     </div>
+
+    ${t.nfipCount ? '' : `<div class="note"><b>No FMA, SRL, or RFC award on record.</b>
+      Those are the programs that require the property to carry NFIP flood insurance, and they are
+      the standing, non-disaster route to elevating or acquiring a private home. Two very different
+      explanations fit: the town never applied, or its properties could not qualify — which is what
+      CBRS designation would cause, since CBRS bars new federal flood insurance and these programs
+      target NFIP-insured structures. Resolve CBRS status before drawing the inference.</div>`}
 
     ${t.total?`
       <div class="sec">Who pays — federal vs non-federal</div>

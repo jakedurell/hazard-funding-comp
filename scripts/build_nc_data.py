@@ -37,9 +37,38 @@ TIGERWEB = (
     "Places_CouSub_ConCity_SubMCD/MapServer/4/query"
 )
 
-# NC Atlantic-facing barrier island municipalities — the comparison frame.
+# Statewide: every NC incorporated place is included. Geometry is generalized
+# server-side (maxAllowableOffset) — full resolution is 28 MB, too heavy for a
+# web payload; 0.0005 deg holds shape well at 1.8 MB.
+GEOM_OFFSET = "0.0005"
+
+# NFIP dependency by program. This drives the "could this town even have
+# applied?" question, which matters wherever CBRS restricts flood insurance.
+#
+#   required  — the property itself must carry an NFIP policy to be eligible.
+#               FMA is funded from the National Flood Insurance Fund and
+#               targets NFIP-insured structures; SRL and RFC were separate
+#               programs on the same basis, folded into FMA after BW-12 (2012).
+#   community — no property-level insurance requirement, but the community must
+#               be participating in the NFIP and in good standing for projects
+#               in a Special Flood Hazard Area.
+#
+# Verify against the current fiscal year's HMA guidance / NOFO before relying
+# on this in an argument — eligibility rules are revised year to year.
+PROGRAM_NFIP = {
+    "FMA":  "required",
+    "SRL":  "required",
+    "RFC":  "required",
+    "HMGP": "community",
+    "PDM":  "community",
+    "BRIC": "community",
+    "LPDM": "community",
+}
+
+# NC Atlantic-facing barrier island municipalities — the original comparison
+# frame, now retained as a flag so the UI can filter statewide data down to it.
 # Grouped by island system so the UI can offer "same island" comps.
-TOWNS = {
+OCEANFRONT = {
     "Duck": "Currituck Banks",
     "Southern Shores": "Currituck Banks",
     "Kitty Hawk": "Bodie Island",
@@ -61,12 +90,6 @@ TOWNS = {
     "Holden Beach": "Brunswick",
     "Ocean Isle Beach": "Brunswick",
     "Sunset Beach": "Brunswick",
-}
-
-# Coastal counties, used only to scope the unmatched-subrecipient audit.
-COASTAL_COUNTIES = {
-    "Currituck", "Dare", "Hyde", "Carteret", "Onslow",
-    "Pender", "New Hanover", "Brunswick",
 }
 
 # FEMA activity codes → category. The 200/202/207 families are the ones
@@ -139,34 +162,53 @@ def main():
             "outFields": "GEOID,NAME,BASENAME",
             "returnGeometry": "true",
             "outSR": "4326",
+            "maxAllowableOffset": GEOM_OFFSET,
             "f": "geojson",
         },
-        label="Census TIGERweb NC incorporated places",
+        label="Census TIGERweb NC incorporated places (generalized)",
     )
 
-    lookup = {normalize(t): t for t in TOWNS}
+    # ---- Places: every NC incorporated place is a candidate ----------
+    with open(places_path, encoding="utf-8") as fh:
+        places = json.load(fh)
+
+    # Census suffixes the legal type onto NAME ("Emerald Isle town"); BASENAME
+    # is the bare name. Index both so free-text subrecipients match either way.
+    by_name = {}
+    for f in places["features"]:
+        pr = f["properties"]
+        for variant in (pr.get("BASENAME"), pr.get("NAME")):
+            if variant:
+                by_name.setdefault(normalize(variant), f)
 
     # ---- HMA records -------------------------------------------------
-    print("\nMatching HMA subrecipients:")
+    print("\nMatching HMA subrecipients statewide:")
     with open(hma_path, newline="", encoding="utf-8") as fh:
         nc = [r for r in csv.DictReader(fh) if r["state"] == "North Carolina"]
 
     projects, unmatched = [], {}
+    nonmunicipal = {"n": 0, "fed": 0.0}
     for r in nc:
-        key = normalize(r.get("subrecipient"))
-        town = lookup.get(key)
-        if not town:
-            if r.get("county") in COASTAL_COUNTIES and r.get("subrecipient"):
-                unmatched.setdefault(r["subrecipient"], {"county": r["county"], "n": 0})
-                unmatched[r["subrecipient"]]["n"] += 1
+        sub = r.get("subrecipient") or ""
+        hit = by_name.get(normalize(sub))
+        if not hit:
+            if sub:
+                unmatched.setdefault(sub, {"county": r.get("county") or "", "n": 0})
+                unmatched[sub]["n"] += 1
+                nonmunicipal["n"] += 1
+                nonmunicipal["fed"] += num(r.get("federalShareObligated"))
             continue
+        town = hit["properties"]["BASENAME"] or hit["properties"]["NAME"]
         total = num(r.get("projectAmount"))
         fed = num(r.get("federalShareObligated"))
+        program = r.get("programArea")
         projects.append({
             "town": town,
+            "geoid": hit["properties"]["GEOID"],
             "id": r.get("projectIdentifier"),
             "fy": int(r["programFy"]) if (r.get("programFy") or "").isdigit() else None,
-            "program": r.get("programArea"),
+            "program": program,
+            "nfip": PROGRAM_NFIP.get(program, "community"),
             "disaster": r.get("disasterNumber") or None,
             "type": r.get("projectType"),
             "cat": category(r.get("projectType")),
@@ -177,40 +219,37 @@ def main():
             "nonfed": round(max(total - fed, 0), 2),
             "share": num(r.get("costSharePercentage")) or None,
             "props": int(num(r.get("numberOfProperties"))),
-            "final_props": int(num(r.get("numberOfFinalProperties"))),
             "county": r.get("county"),
         })
 
-    matched_towns = {p["town"] for p in projects}
-    for t in sorted(TOWNS):
-        n = sum(1 for p in projects if p["town"] == t)
-        flag = "" if n else "   <-- NO HMA RECORDS"
-        print(f"  {t:22} {n:3d} projects{flag}")
+    funded = {p["geoid"] for p in projects}
+    print(f"  {len(projects)} of {len(nc)} NC records matched to an incorporated place")
+    print(f"  {len(funded)} of {len(places['features'])} places have at least one award")
+    print(f"  {nonmunicipal['n']} records went to counties/agencies/other "
+          f"(${nonmunicipal['fed']:,.0f} federal) — see unmatched.csv")
 
-    # ---- Boundaries --------------------------------------------------
-    with open(places_path, encoding="utf-8") as fh:
-        places = json.load(fh)
+    print("\n  Oceanfront comparison set:")
+    for t in sorted(OCEANFRONT):
+        n = sum(1 for p in projects if normalize(p["town"]) == normalize(t))
+        print(f"    {t:22} {n:3d} projects{'' if n else '   <-- NO HMA RECORDS'}")
 
-    # index by normalized name once — the loop below rewrites properties,
-    # so scanning the raw feature list per town would lose the NAME field
-    by_name = {normalize(f["properties"]["NAME"]): f for f in places["features"]}
-
-    feats, missing_geo = [], []
-    for town in TOWNS:
-        hit = by_name.get(normalize(town))
-        if not hit:
-            missing_geo.append(town)
-            continue
+    # ---- Boundaries: all places, flagged by role ---------------------
+    ocean_norm = {normalize(t): isl for t, isl in OCEANFRONT.items()}
+    feats = []
+    for f in places["features"]:
+        pr = f["properties"]
+        name = pr.get("BASENAME") or pr.get("NAME")
         feats.append({
             "type": "Feature",
-            "geometry": hit["geometry"],
+            "geometry": f["geometry"],
             "properties": {
-                "town": town,
-                "geoid": hit["properties"]["GEOID"],
-                "island": TOWNS[town],
+                "town": name,
+                "geoid": pr["GEOID"],
+                "island": ocean_norm.get(normalize(name)),   # null unless oceanfront
             },
         })
 
+    missing_geo = [t for t in OCEANFRONT if normalize(t) not in by_name]
     if missing_geo:
         print("\n  WARNING no boundary matched:", ", ".join(missing_geo))
 
@@ -221,7 +260,13 @@ def main():
                     "federalShareObligated reflects obligated federal funds; "
                     "non-federal share is derived (projectAmount - federalShareObligated) "
                     "and the dataset does NOT identify who paid it.",
-            "towns": TOWNS,
+            "nfip_note": "FMA/SRL/RFC require the property to carry NFIP flood "
+                         "insurance. HMGP/PDM/BRIC do not, though the community must "
+                         "participate in the NFIP for projects in an SFHA. Verify "
+                         "against the current fiscal year's HMA guidance.",
+            "program_nfip": PROGRAM_NFIP,
+            "oceanfront": OCEANFRONT,
+            "nonmunicipal": {"records": nonmunicipal["n"], "fed": round(nonmunicipal["fed"], 2)},
             "fy_range": [
                 min((p["fy"] for p in projects if p["fy"]), default=1989),
                 max((p["fy"] for p in projects if p["fy"]), default=2025),
@@ -243,7 +288,7 @@ def main():
             w.writerow([name, info["county"], info["n"]])
 
     print(f"\nWrote {out_json} ({os.path.getsize(out_json)/1e6:.1f} MB)")
-    print(f"  {len(projects)} projects across {len(matched_towns)} towns, {len(feats)} boundaries")
+    print(f"  {len(projects)} projects · {len(funded)} funded places · {len(feats)} boundaries")
     print(f"Wrote {out_audit} — {len(unmatched)} unmatched coastal-county subrecipients to review")
 
 
