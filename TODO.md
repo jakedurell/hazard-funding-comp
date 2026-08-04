@@ -76,9 +76,12 @@ other clone must be re-cloned rather than pulled. `filter-repo` also drops the
 - [ ] **Add ACS demographics** (needs a free Census API key) so funding can be
       normalized per capita and per housing unit.
 - [ ] **Public records requests** to the Town of North Topsail Beach and NCEM for
-      sub-application records including unsuccessful and withdrawn applications,
-      grant administration staffing, and homeowner communications. The HMA dataset
-      records approved projects only and cannot show inaction on its own.
+      grant administration staffing and homeowner communications — and, for each NTB
+      project identifier, why properties put forward were never mitigated. Note the
+      HMA dataset *does* carry unsuccessful applications in its `status` field
+      (Denied / Not Selected / Withdrawn / Void), so the records request is narrower
+      than first assumed: it is about why approved projects delivered nothing, not
+      about whether applications existed.
 - [ ] **Isolate the $1.37M Raleigh FMA property.** The 2017 deed cluster is confirmed HMGP
       (Wake Co. 016808-02777 recites Stafford Act § 5170c). The single FMA property is among
       the other ~20 individual-owner conveyances in the 2015-05-22 → 2018-09-13 window; its
