@@ -62,19 +62,32 @@ other clone must be re-cloned rather than pulled. `filter-repo` also drops the
       list properties but zero federal share. Pending, withdrawn, and cancelled look
       identical in this dataset, and the difference is material to the argument.
       Check the `status` field, then confirm against NCEM records.
-- [ ] **Verify North Topsail Beach's Local Hazard Mitigation Plan status.** HMGP requires the
-      applicant community to have a current FEMA-approved local hazard mitigation plan. This is
-      now the ONLY remaining explanation that would excuse NTB's absence, because availability
-      itself is settled (see below). Check adoption and expiration dates, and whether NTB is a
-      participating jurisdiction in Onslow County's multi-jurisdictional plan. Note Kure Beach
-      applied for a planning grant (91.1) under DR-4827, so these towns actively manage plan
-      currency.
+- [x] **NTB's hazard mitigation plan — RESOLVED. The eligibility defense fails.**
+      North Topsail Beach is a participating jurisdiction in the **2021 Southeastern North
+      Carolina Regional Hazard Mitigation Plan** (Brunswick, New Hanover, Onslow and Pender
+      counties plus their municipalities). FEMA approval letters dated April 16 and May 6, 2021;
+      the plan runs to April 2026. NTB hosts its own annex ("Hazard Mitigation Plan Annex 3 to
+      Onslow County") and had separately adopted a jurisdictional plan on April 12, 2016. It is
+      an active participant in the 2026 update.
 
-      **Availability is established.** DR-4827 (Helene, 2024) struck western NC but funded
-      projects in 65 counties including all 8 coastal ones — 17 coastal projects from 12
-      applicants, among them Kure Beach, Wrightsville Beach and Southern Shores (all NTB
-      comparison towns), plus Jacksonville and Onslow County itself. NTB filed nothing. Its most
-      recent HMA record of any kind is FY2018.
+      **So NTB held a current FEMA-approved plan continuously across the entire DR-4827
+      window.** It was eligible and did not apply.
+
+      **Stronger still — the town's own plan commits to exactly this.** Action ES6-1 of the
+      *North Topsail Beach Mitigation Action Plans 2026 DRAFT* (Planning Board packet, document
+      dated 2025-12-05) reads: "apply for grants through programs like the Hazard Mitigation
+      Grant Program (HMGP) to fund projects like **property acquisition** and infrastructure
+      improvements." Lead: Planning / Fire / Police. Funding: Local, FEMA Grant. Status:
+      **CARRIED FORWARD** — i.e. present in the prior plan cycle and not completed. The status
+      note adds "HMGP 4827 projects scheduled for 2026-27."
+
+      Follow-ups:
+      - [ ] Obtain the **2021 plan's** version of this action to confirm the identical commitment
+            was carried unfulfilled through the 2021-2026 cycle. That is the citation that shows
+            a stated commitment, the means to act, and no action.
+      - [ ] Get Planning Board / Board of Aldermen minutes around 2025-12 for the discussion.
+      - [ ] Watch whether the "scheduled for 2026-27" HMGP-4827 application is actually filed.
+      - Extracted text: `docs/nc/evidence/ntb_2026_mitigation_actions_extracted.txt`
 
 - [ ] **Verify CBRS unit boundaries** for North Topsail Beach against the FWS CBRS
       mapper. CBRS restricts federal flood insurance availability, and FMA targets
