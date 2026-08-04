@@ -99,6 +99,25 @@ other clone must be re-cloned rather than pulled. `filter-repo` also drops the
             shut.
       - Extracted text: `docs/nc/evidence/ntb_2026_mitigation_actions_extracted.txt`
 
+- [ ] **Follow the NCEM correspondence thread (see `research/`, gitignored).** Contemporaneous
+      email with NCEM Hazard Mitigation establishes, as of Nov 2025, that (a) DR-4827 HMGP was
+      NOT closed — an extension was approved and a second-round intake was expected, (b) NCEM
+      was actively tracking a Topsail Reef project and would accept it into round 2 once the
+      TOWN provided sponsorship and a Benefit-Cost Analysis, and (c) the non-federal share
+      was covered by the state, with the sub-applicant retaining 5% management costs. Open
+      items:
+      - [ ] Confirm with NCEM whether round 2 opened, its actual deadline, and whether North
+            Topsail Beach ever filed. This supersedes the earlier assumption that the
+            2025-10-31 close ended the matter.
+      - [ ] Obtain NTB Board of Aldermen agendas and minutes from Dec 2025 forward. Whether the
+            item was ever agendized, and how it was disposed of, is the decisive record.
+      - [ ] Note for any published work: the author is a party in interest (Topsail Reef HOA).
+            That must be disclosed. It does not weaken the documentary record but an
+            undisclosed conflict would be the first thing attacked.
+      - [ ] Distinguish project types. The Reef matter is shore protection / revetment —
+            infrastructure — which is a different category from the acquisition and elevation
+            metric the dashboard tracks. Do not conflate them.
+
 - [ ] **Verify CBRS unit boundaries** for North Topsail Beach against the FWS CBRS
       mapper. CBRS restricts federal flood insurance availability, and FMA targets
       NFIP-insured properties — so CBRS could independently explain the absence of
