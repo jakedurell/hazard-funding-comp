@@ -79,6 +79,13 @@ other clone must be re-cloned rather than pulled. `filter-repo` also drops the
       sub-application records including unsuccessful and withdrawn applications,
       grant administration staffing, and homeowner communications. The HMA dataset
       records approved projects only and cannot show inaction on its own.
+- [ ] **Isolate the $1.37M Raleigh FMA property.** The 2017 deed cluster is confirmed HMGP
+      (Wake Co. 016808-02777 recites Stafford Act § 5170c). The single FMA property is among
+      the other ~20 individual-owner conveyances in the 2015-05-22 → 2018-09-13 window; its
+      deed should recite 42 U.S.C. § 4104c instead. Excise stamps ($2 per $1,000) confirm price.
+- [ ] **Pull Onslow County's 7 completed acquisitions** from the Onslow Register of Deeds and
+      check whether any parcel sat inside North Topsail Beach town limits. NTB completed zero
+      itself, so the county is the only place its residents could have been served.
 - [ ] **Re-check `docs/nc/data/unmatched.csv`** after every data rebuild. A comp town
       silently dropping to zero from a subrecipient spelling variant is the failure
       mode that would most damage the analysis.
