@@ -116,6 +116,11 @@ table.ledger tr.subject td:first-child { box-shadow:inset 3px 0 0 var(--critical
          background:var(--surface-1); border-radius:0 8px 8px 0; font-size:13px; color:var(--text-secondary); }
 .ev.miss .t { color:var(--critical); font-weight:600; }
 
+.scope { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:14px; margin-top:6px; }
+.sc { background:var(--surface-1); border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+.sc .sh { font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--accent); font-weight:700; }
+.sc p { margin:10px 0 0; font-size:14px; color:var(--text-secondary); }
+.sc b { color:var(--text-primary); }
 .note { margin-top:26px; padding:14px 16px; border-radius:10px; background:var(--surface-2);
         border:1px solid var(--line); font-size:13px; color:var(--text-secondary); }
 .note b { color:var(--text-primary); }
@@ -162,6 +167,50 @@ footer a { color:var(--text-muted); }
 
 <section>
   <div class="wrap">
+    <h2>The Reef threw the pass. The town never turned around.</h2>
+    <p class="sub">
+      This was not an HOA asking the town to fund its own seawall. The filing position the Reef created in 2024
+      was one the town could have used for miles of shoreline.
+    </p>
+    <div class="scope">
+      <div class="sc">
+        <div class="sh">A private HOA paid for the groundwork</div>
+        <p>Topsail Reef — 239 units, most of them 532 square feet, among the last affordable housing on the
+        island — put <b>more than $2 million of its own money</b> into its sandbag line beginning in 2022, and
+        is still paying interest on the loans. It then approached the state, was told the town had to be the
+        applicant, and spent eighteen months trying to hand the town something it had already built.</p>
+      </div>
+      <div class="sc">
+        <div class="sh">The scope was never limited to the Reef</div>
+        <p>Asked directly whether the project area had limits — whether it could run south to the firehouse and
+        north across other vulnerable homes, taking in the St. Regis buildings — the state's answer was
+        <b>“No.”</b> Coastal engineering favours it: the wider the stretch you protect around a property, the
+        longer the protection holds. As the request itself put it, <b>“HMGP is about more beach than the
+        Reef.”</b></p>
+      </div>
+      <div class="sc">
+        <div class="sh">Flood insurance was not the obstacle</div>
+        <p>The Reef is NFIP-insured, but the state advised that this was not the operative question for the
+        HMGP route, which carries no property-level flood-insurance requirement. The eligibility test that
+        mattered was the one the town already passed: a current FEMA-approved hazard mitigation plan.</p>
+      </div>
+      <div class="sc">
+        <div class="sh">What the town was asked to do</div>
+        <p>Sponsor the application. Not fund it — the federal share was 75%, the state covered the remaining
+        25%, and the town would have retained <b>5% in management costs</b>. A regional council of government
+        had offered to help prepare the paperwork for free. The ask was a motion, an agenda item, a signature.</p>
+      </div>
+    </div>
+    <div class="note" style="border-left:3px solid var(--critical)">
+      <b>It never reached a vote.</b> The item was not placed on an agenda. No motion was made. Nothing was
+      filed. The state's second-round window came and went with the project still sitting in NCEM's tracker,
+      waiting on a sponsor that never signed.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
     <h2>The part that isn't in FEMA's data</h2>
     <p class="sub">
       Correspondence with NC Emergency Management and the Town of North Topsail Beach, 2024–2026. State agency
@@ -169,10 +218,12 @@ footer a { color:var(--text-muted); }
     </p>
     <div class="events" id="events"></div>
     <div class="note">
-      <b>Disclosure.</b> This record was assembled by a property owner at Topsail Reef, an HOA that sought the
-      town's sponsorship for a mitigation project. That interest is disclosed deliberately. The FEMA award data
-      above is public and independently verifiable; the correspondence above is quoted from state emails carrying
-      the G.S. 132-1 public-records notice. Readers should weigh the source and check the record.
+      <b>Disclosure.</b> This record was assembled by a property owner at Topsail Reef, the HOA that sought the
+      town's sponsorship. That interest is disclosed deliberately — and it cuts both ways: the Reef stood to
+      benefit, and so did every property along the stretch the project could have covered, which is why the
+      state confirmed the area had no limit. The FEMA award data above is public and independently verifiable;
+      the correspondence is quoted from state emails carrying the G.S. 132-1 public-records notice. Weigh the
+      source and check the record.
     </div>
     <div class="note">
       <b>What this page does not claim.</b> A shore-protection project is not the same as a property buyout, and
@@ -220,7 +271,8 @@ const EVENTS = [
   { d:"31 Oct 2025", cls:"miss",
     t:"NCEM's first-round intake for Helene (DR-4827) hazard mitigation funding closes. North Topsail Beach has filed nothing." },
   { d:"18 Nov 2025", cls:"act",
-    t:"The mayor-elect and an alderman-elect are notified in writing. Both are reported supportive. The response: “Thanks. I passed it along and will follow-up.”" },
+    t:"A sitting alderman — simultaneously the mayor-elect, and now the mayor — is notified in writing at two addresses, one of them his official town account. An alderman-elect is told in person. Both are reported supportive.",
+    q:"“Thanks. I passed it along and will follow-up.”" },
   { d:"21 Nov 2025", cls:"act",
     t:"NCEM confirms an extension, a second funding round, and that it is holding the project open.",
     q:"“We are tracking your project and can allow it to come into HMGP in the proposed round 2.”<br><br>“…once you have both the local support and the Benefit-Cost Analysis in place.”" },
