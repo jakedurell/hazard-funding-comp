@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Thirty Years of Nothing — North Topsail Beach and Its Neighbours</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0:#f4f3f0; --surface-1:#fcfcfb; --surface-2:#eceae5; --surface-3:#e2e0da;
+  --line:#dedbd4; --line-strong:#c6c2b8;
+  --text-primary:#0b0b0b; --text-secondary:#52514e; --text-muted:#7a7873;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+  --accent:#2a78d6; --critical:#c0322f; --critical-soft:#f7e9e8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-0:#131312; --surface-1:#1a1a19; --surface-2:#242422; --surface-3:#2e2e2b;
+    --line:#33332f; --line-strong:#48473f;
+    --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8f8e84;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+    --accent:#3987e5; --critical:#e66767; --critical-soft:#2a1a1a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0:#131312; --surface-1:#1a1a19; --surface-2:#242422; --surface-3:#2e2e2b;
+  --line:#33332f; --line-strong:#48473f;
+  --text-primary:#ffffff; --text-secondary:#c3c2b7; --text-muted:#8f8e84;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+  --accent:#3987e5; --critical:#e66767; --critical-soft:#2a1a1a;
+}
+
+*,*::before,*::after { box-sizing:border-box; }
+body {
+  margin:0; background:var(--surface-0); color:var(--text-primary);
+  font:15px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-variant-numeric:tabular-nums; }
+.wrap { max-width:1180px; margin:0 auto; padding:0 24px; }
+a { color:var(--accent); }
+
+/* ---------- hero ---------- */
+header { padding:64px 0 40px; border-bottom:1px solid var(--line); background:var(--surface-1); }
+.eyebrow { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-muted); font-weight:600; }
+h1 { margin:12px 0 0; font-size:clamp(30px,5vw,50px); line-height:1.08; letter-spacing:-0.03em; font-weight:600; }
+.lede { margin:18px 0 0; font-size:17px; color:var(--text-secondary); max-width:62ch; }
+
+/* ---------- zeros ---------- */
+.zeros { display:grid; grid-template-columns:repeat(auto-fit,minmax(178px,1fr)); gap:12px; margin:34px 0 0; }
+.zero {
+  background:var(--surface-1); border:1px solid var(--line); border-left:3px solid var(--critical);
+  border-radius:10px; padding:16px 18px;
+}
+.zero .n { font-size:44px; font-weight:600; letter-spacing:-0.04em; color:var(--critical); line-height:1; }
+.zero .l { font-size:12.5px; color:var(--text-secondary); margin-top:8px; }
+
+section { padding:52px 0; border-bottom:1px solid var(--line); }
+h2 { font-size:24px; letter-spacing:-0.02em; margin:0 0 6px; font-weight:600; }
+.sub { color:var(--text-muted); font-size:13.5px; margin:0 0 26px; max-width:64ch; }
+
+/* ---------- swimlanes ---------- */
+.chart { background:var(--surface-1); border:1px solid var(--line); border-radius:12px; padding:20px 20px 12px; overflow-x:auto; }
+.lanes { min-width:820px; }
+.axis { display:grid; grid-template-columns:158px 1fr; align-items:end; margin-bottom:8px; }
+.ticks { position:relative; height:20px; }
+.tick { position:absolute; transform:translateX(-50%); font-size:10.5px; color:var(--text-muted); }
+.lane { display:grid; grid-template-columns:158px 1fr; align-items:center; gap:0; }
+.lane + .lane { margin-top:3px; }
+.lane-name {
+  font-size:12.5px; color:var(--text-secondary); padding-right:14px; text-align:right;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.lane-track { position:relative; height:26px; border-radius:5px; background:var(--surface-2); }
+.lane.subject .lane-track { background:var(--critical-soft); box-shadow:inset 0 0 0 1px var(--critical); }
+.lane.subject .lane-name { color:var(--critical); font-weight:700; }
+.mark {
+  position:absolute; top:50%; transform:translate(-50%,-50%); border-radius:50%;
+  border:1.5px solid var(--surface-1); cursor:default;
+}
+.mark:hover { outline:2px solid var(--text-primary); outline-offset:1px; }
+.gapnote {
+  position:absolute; top:50%; transform:translateY(-50%); font-size:10.5px;
+  color:var(--critical); font-weight:600; letter-spacing:.04em; white-space:nowrap;
+}
+.legend { display:flex; flex-wrap:wrap; gap:16px; margin-top:16px; font-size:12px; color:var(--text-secondary); }
+.legend i { width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+.scalenote { font-size:11.5px; color:var(--text-muted); margin-top:10px; }
+
+/* ---------- ledger ---------- */
+table.ledger { width:100%; border-collapse:collapse; font-size:13.5px; margin-top:8px; }
+table.ledger th {
+  text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--text-muted); font-weight:600; padding:8px 10px 8px 0; border-bottom:1px solid var(--line-strong);
+}
+table.ledger td { padding:10px 10px 10px 0; border-bottom:1px solid var(--line); color:var(--text-secondary); }
+table.ledger td.r, table.ledger th.r { text-align:right; }
+table.ledger tr.subject td { color:var(--critical); font-weight:600; background:var(--critical-soft); }
+table.ledger tr.subject td:first-child { box-shadow:inset 3px 0 0 var(--critical); padding-left:10px; }
+
+/* ---------- narrative timeline ---------- */
+.events { position:relative; margin-top:8px; padding-left:26px; }
+.events::before { content:""; position:absolute; left:6px; top:6px; bottom:6px; width:2px; background:var(--line-strong); }
+.ev { position:relative; padding:0 0 26px 18px; }
+.ev::before {
+  content:""; position:absolute; left:-26px; top:5px; width:11px; height:11px; border-radius:50%;
+  background:var(--surface-1); border:2.5px solid var(--text-muted);
+}
+.ev.act::before { border-color:var(--s1); background:var(--s1); }
+.ev.miss::before { border-color:var(--critical); background:var(--critical); }
+.ev .d { font-size:11.5px; color:var(--text-muted); font-weight:600; letter-spacing:.03em; }
+.ev .t { font-size:14.5px; margin-top:3px; }
+.ev .q { margin-top:8px; padding:10px 14px; border-left:2px solid var(--line-strong);
+         background:var(--surface-1); border-radius:0 8px 8px 0; font-size:13px; color:var(--text-secondary); }
+.ev.miss .t { color:var(--critical); font-weight:600; }
+
+.note { margin-top:26px; padding:14px 16px; border-radius:10px; background:var(--surface-2);
+        border:1px solid var(--line); font-size:13px; color:var(--text-secondary); }
+.note b { color:var(--text-primary); }
+footer { padding:36px 0 70px; color:var(--text-muted); font-size:12.5px; }
+footer a { color:var(--text-muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">North Topsail Beach · FEMA Hazard Mitigation Assistance</div>
+    <h1>Four properties put forward.<br>None mitigated.<br>Nothing filed since 2018.</h1>
+    <p class="lede">
+      FEMA mitigation money never reaches a homeowner directly — the town has to apply. North Topsail Beach
+      was told the money carried no local cost, that the state would cover the match, and that it would be
+      paid 5% to administer it. Here is what it did with that, next to what its neighbours did.
+    </p>
+    <div class="zeros" id="zeros"></div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Three decades of awards — and where North Topsail Beach stops</h2>
+    <p class="sub">
+      Every FEMA Hazard Mitigation Assistance award to a North Carolina oceanfront municipality. Each circle is
+      one award, sized by federal dollars obligated and coloured by what it paid for. Hover for detail.
+    </p>
+    <div class="chart"><div class="lanes" id="lanes"></div>
+      <div class="legend" id="legend"></div>
+      <div class="scalenote">Circle area is proportional to federal share obligated. Awards with no obligation appear at minimum size.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What the neighbours collected</h2>
+    <p class="sub">Same coast, same storms, same programmes, same state agency administering them.</p>
+    <table class="ledger" id="ledger"></table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>The part that isn't in FEMA's data</h2>
+    <p class="sub">
+      Correspondence with NC Emergency Management and the Town of North Topsail Beach, 2024–2026. State agency
+      email is subject to the North Carolina Public Records Law, G.S. 132-1.
+    </p>
+    <div class="events" id="events"></div>
+    <div class="note">
+      <b>Disclosure.</b> This record was assembled by a property owner at Topsail Reef, an HOA that sought the
+      town's sponsorship for a mitigation project. That interest is disclosed deliberately. The FEMA award data
+      above is public and independently verifiable; the correspondence above is quoted from state emails carrying
+      the G.S. 132-1 public-records notice. Readers should weigh the source and check the record.
+    </div>
+    <div class="note">
+      <b>What this page does not claim.</b> A shore-protection project is not the same as a property buyout, and
+      the two should not be merged. Coastal Barrier Resources System designation covers part of North Topsail
+      Beach and restricts some federal flood insurance, which bears on eligibility for insurance-linked
+      programmes. Neither point explains a town declining to apply for money that carried no local cost.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Source: <a href="https://www.fema.gov/openfema-data-page/hazard-mitigation-assistance-projects-v4">FEMA OpenFEMA Hazard Mitigation Assistance Projects v4</a>,
+    matched to Census incorporated places. Dollars are nominal, not inflation-adjusted.
+    · <a href="./index.html">Interactive map</a>
+    · <a href="../">Vermont dashboard</a>
+  </div>
+</footer>
+
+<script>
+// ==========================================================
+// Timeline — NTB against the oceanfront comparison set
+// Reads the same payload as index.html; no build step.
+// ==========================================================
+const SUBJECT = "North Topsail Beach";
+const CAT_COLOR = { Acquisition:'--s1', Elevation:'--s2', Reconstruction:'--s3',
+                    Planning:'--s4', Infrastructure:'--s5', Other:'--s6' };
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const usd = v => !v ? '$0' : v>=1e6 ? '$'+(v/1e6).toFixed(2)+'M' : v>=1e3 ? '$'+Math.round(v/1e3)+'k' : '$'+Math.round(v);
+
+// Correspondence record. Dates and quotations from the source emails.
+const EVENTS = [
+  { d:"21 May 2024", cls:"act",
+    t:"Topsail Reef asks NC Emergency Management about flood mitigation funding. The Town Manager of North Topsail Beach is copied on the thread." },
+  { d:"22 May 2024", cls:"act",
+    t:"Eastern Carolina Council of Government offers free application assistance and addresses the Town Manager directly.",
+    q:"“My role will be assisting municipalities with their 2024 FMA applications… that is something I am able to assist with.”" },
+  { d:"29 May 2024", cls:"miss",
+    t:"NCEM confirms only the town can apply — and that it never engaged.",
+    q:"“Your main hurdle there is that the local government is the eligible applicant.”<br><br>“We have not spoken to the local government.”" },
+  { d:"29 May 2024", cls:"act",
+    t:"NCEM confirms sponsorship would cost the town nothing, and would pay it.",
+    q:"“It is not a requirement that the city provide financial support. In fact, they get to keep 5% management costs.”" },
+  { d:"31 Oct 2025", cls:"miss",
+    t:"NCEM's first-round intake for Helene (DR-4827) hazard mitigation funding closes. North Topsail Beach has filed nothing." },
+  { d:"18 Nov 2025", cls:"act",
+    t:"The mayor-elect and an alderman-elect are notified in writing. Both are reported supportive. The response: “Thanks. I passed it along and will follow-up.”" },
+  { d:"21 Nov 2025", cls:"act",
+    t:"NCEM confirms an extension, a second funding round, and that it is holding the project open.",
+    q:"“We are tracking your project and can allow it to come into HMGP in the proposed round 2.”<br><br>“…once you have both the local support and the Benefit-Cost Analysis in place.”" },
+  { d:"5 Dec 2025", cls:"miss",
+    t:"The town's own draft mitigation plan carries forward Action ES6-1 — apply for HMGP to fund property acquisition — uncompleted from the previous five-year cycle." },
+  { d:"2026", cls:"miss",
+    t:"The item is never placed on an agenda. No motion is made. No vote is taken. The town files nothing." },
+];
+
+fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
+  const ocean = d.meta.oceanfront;
+  const rows  = d.projects.filter(p => p.town in ocean && p.fy);
+  const years = rows.map(p=>p.fy);
+  const Y0 = Math.min(...years), Y1 = Math.max(2026, ...years);
+  const span = Y1 - Y0;
+  const pct = y => 2.5 + ((y - Y0) / span) * 95;   // inset so edge marks are not clipped
+
+  const byTown = new Map(Object.keys(ocean).map(t=>[t,[]]));
+  rows.forEach(p => byTown.get(p.town)?.push(p));
+  const sum = (a,f) => a.reduce((s,x)=>s+(f(x)||0),0);
+  const maxFed = Math.max(...[...byTown.values()].map(a=>Math.max(0,...a.map(p=>p.fed))));
+
+  // ---- the zeros -------------------------------------------------
+  const me = byTown.get(SUBJECT) || [];
+  const zeros = [
+    [sum(me,p=>p.final), "properties actually mitigated, from four put forward"],
+    [me.filter(p=>p.nfip==='required').length, "awards from programmes built for flood-insured homes"],
+    [2026-2018, "years since its last application of any kind"],
+    [0, "motions, votes, or filings after being told the money was free"],
+  ];
+  document.getElementById('zeros').innerHTML = zeros.map(([n,l])=>
+    `<div class="zero"><div class="n mono">${n}</div><div class="l">${esc(l)}</div></div>`).join('');
+
+  // ---- swimlanes -------------------------------------------------
+  const order = [...byTown.entries()]
+    .sort((a,b)=> sum(b[1],p=>p.fed) - sum(a[1],p=>p.fed))
+    .map(([t])=>t)
+    .filter(t=>t!==SUBJECT);
+  order.unshift(SUBJECT);
+
+  let ticks = '';
+  for (let y=Math.ceil(Y0/5)*5; y<=Y1; y+=5) ticks += `<div class="tick" style="left:${pct(y)}%">${y}</div>`;
+  let html = `<div class="axis"><div></div><div class="ticks">${ticks}</div></div>`;
+
+  order.forEach(t => {
+    const ps = byTown.get(t) || [];
+    const marks = ps.map(p => {
+      const r = 4 + 13*Math.sqrt((p.fed||0)/(maxFed||1));
+      const tip = `${t} · FY${p.fy}\n${p.program} — ${p.cat}\n${usd(p.fed)} obligated`
+                + `\n${p.final||0} of ${p.props||0} properties completed\n${p.status}`;
+      return `<span class="mark" title="${esc(tip)}" style="left:${pct(p.fy)}%;width:${r*2}px;height:${r*2}px;`
+           + `background:${cssv(CAT_COLOR[p.cat]||'--s6')};opacity:${p.fed?0.92:0.4}"></span>`;
+    }).join('');
+    const last = ps.length ? Math.max(...ps.map(p=>p.fy)) : null;
+    let gap = '';
+    if (t===SUBJECT && last)
+      gap = `<span class="gapnote" style="left:${pct(last)+2}%">nothing since ${last} &rarr;</span>`;
+    else if (!ps.length)
+      gap = `<span class="gapnote" style="left:2.5%;color:var(--text-muted);font-weight:400">no award on record</span>`;
+    html += `<div class="lane ${t===SUBJECT?'subject':''}">
+      <div class="lane-name" title="${esc(t)}">${esc(t)}</div>
+      <div class="lane-track">${marks}${gap}</div></div>`;
+  });
+  document.getElementById('lanes').innerHTML = html;
+  document.getElementById('legend').innerHTML = Object.entries(CAT_COLOR)
+    .filter(([c])=>rows.some(p=>p.cat===c))
+    .map(([c,v])=>`<span><i style="background:${cssv(v)}"></i>${c}</span>`).join('');
+
+  // ---- ledger ----------------------------------------------------
+  const led = order.map(t=>{
+    const ps = byTown.get(t)||[];
+    return { t, n:ps.length, fed:sum(ps,p=>p.fed), props:sum(ps,p=>p.final),
+             ho:sum(ps,p=>p.homeowner?p.fed:0), last: ps.length?Math.max(...ps.map(p=>p.fy)):null };
+  }).sort((a,b)=>b.fed-a.fed);
+  document.getElementById('ledger').innerHTML =
+    `<thead><tr><th>Municipality</th><th class="r">Awards</th><th class="r">Federal $</th>
+     <th class="r">Properties mitigated</th><th class="r">Homeowner-directed $</th><th class="r">Last filing</th></tr></thead><tbody>`
+    + led.map(r=>`<tr class="${r.t===SUBJECT?'subject':''}">
+        <td>${esc(r.t)}</td><td class="r mono">${r.n}</td><td class="r mono">${usd(r.fed)}</td>
+        <td class="r mono">${r.props}</td><td class="r mono">${usd(r.ho)}</td>
+        <td class="r mono">${r.last??'—'}</td></tr>`).join('')
+    + `</tbody>`;
+
+  // ---- events ----------------------------------------------------
+  document.getElementById('events').innerHTML = EVENTS.map(e=>
+    `<div class="ev ${e.cls}"><div class="d">${esc(e.d)}</div><div class="t">${e.t}</div>`
+    + (e.q?`<div class="q">${e.q}</div>`:'') + `</div>`).join('');
+});
+</script>
+</body>
+</html>

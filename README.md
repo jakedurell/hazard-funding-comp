@@ -104,7 +104,9 @@ npm run build   # fetch FEMA + Census data, build the map payload
 npm start       # serve at http://localhost:8000
 ```
 
-Then open **http://localhost:8000/nc/** — the North Carolina comparison map.
+Then open:
+- **http://localhost:8000/nc/** — the interactive North Carolina comparison map
+- **http://localhost:8000/nc/timeline.html** — the North Topsail Beach timeline and record
 (http://localhost:8000/ is the inherited Vermont dashboard.)
 
 | Command | What it does |
