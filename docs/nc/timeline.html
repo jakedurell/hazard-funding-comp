@@ -182,15 +182,30 @@ footer a { color:var(--text-muted); }
 <section>
   <div class="wrap">
     <h2>Everyone else finished what they started</h2>
-    <p class="sub">Acquisition, elevation and reconstruction of private property — what a town does when it
-       intends to mitigate somebody's home.</p>
+    <p class="sub">
+      Acquisition, elevation and reconstruction of private property — what a town does when it intends to
+      mitigate somebody's home. Eight of the ten oceanfront towns that put properties forward completed
+      <b>every single one</b>. North Topsail Beach put forward more than any town that delivered none. A dash
+      means the town never proposed a property project, so it has no delivery record either way — different
+      from trying and failing.
+    </p>
     <table class="ledger" id="ledger"></table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Its own county, same table</h2>
+    <p class="sub">
+      Every municipality in Onslow County, plus the county itself — the body that applies on behalf of
+      residents when a town does not. Same programmes, same state agency, same deadlines.
+    </p>
+    <table class="ledger" id="county"></table>
     <div class="note">
-      Eight of the ten oceanfront towns that put properties forward completed <b>every single one</b>. North
-      Topsail Beach put forward more than any town that delivered none. A dash means the town never proposed a
-      property project, so it has no delivery record either way — that is different from trying and failing.
-      The last two rows are not oceanfront municipalities: they are the county that contains North Topsail
-      Beach, and the largest city in that county. Both serve the same residents. Both filed in 2024.
+      Jacksonville's sixteen properties came from a single project, so its 100% reflects one buyout carried
+      through rather than a sustained programme. Onslow County's 43% across ten projects is the steadier
+      number. Both filed in 2024. North Topsail Beach last filed anything in 2018. Surf City appears in both
+      tables — it is oceanfront and it straddles the Onslow–Pender line.
     </div>
   </div>
 </section>
@@ -385,8 +400,9 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
     + `filed — nothing obligated</span>`;
 
   // ---- ledger ----------------------------------------------------
-  const REF = ["Jacksonville","Onslow County"];
-  const refPool = (d.reference||[]).concat(d.projects.filter(p=>REF.includes(p.town)));
+  // one pool, no overlap — d.reference holds only non-place bodies (counties),
+  // d.projects holds only matched municipalities, so concatenating is safe
+  const ALL = d.projects.concat(d.reference || []);
   const statFor = ps => {
     const prop = ps.filter(p=>p.homeowner);
     const fwd = sum(prop,p=>p.props), done = sum(prop,p=>p.final);
@@ -420,10 +436,26 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
         <td class="r mono">${r.rate===null?'—':Math.round(r.rate*100)+'%'}</td>
         <td class="r mono">${usd(r.fed)}</td><td class="r mono">${r.last??'—'}</td></tr>`;
       }).join('')
-    + REF.map(name=>{
-        const r = statFor(refPool.filter(p=>p.town===name));
-        if (!r.fed && !r.nprop && !r.last) return '';
-        return `<tr class="ref"><td>${esc(name)}<span class="reftag">same county</span></td>
+    + `</tbody>`;
+
+  // ---- Onslow County table ---------------------------------------
+  const ONSLOW = ["Jacksonville","North Topsail Beach","Surf City","Holly Ridge","Richlands","Swansboro"];
+  const countyRows = ONSLOW.map(t=>({ t, ...statFor(ALL.filter(p=>p.town===t)) }))
+    .sort((a,b)=>{
+      if ((a.fwd>0) !== (b.fwd>0)) return b.fwd>0 ? 1 : -1;
+      if (a.fwd>0) return (b.rate-a.rate) || (b.fwd-a.fwd);
+      return b.fed-a.fed;
+    });
+  countyRows.push({ t:"Onslow County", county:true, ...statFor(ALL.filter(p=>p.town==="Onslow County")) });
+
+  document.getElementById('county').innerHTML =
+    `<thead><tr><th>Onslow County</th><th class="r">Property projects</th><th class="r">Properties put forward</th>
+     <th class="r">Mitigated</th><th class="r">Delivered</th><th class="r">Total federal $</th>
+     <th class="r">Last filing</th></tr></thead><tbody>`
+    + countyRows.map(r=>{
+        const fail = r.fwd>0 && !r.done;
+        const cls = r.t===SUBJECT ? 'subject' : r.county ? 'ref' : fail ? 'fail' : '';
+        return `<tr class="${cls}"><td>${esc(r.t)}${r.county?'<span class="reftag">the county itself</span>':''}</td>
           <td class="r mono">${r.nprop||'—'}</td><td class="r mono">${r.fwd||'—'}</td>
           <td class="r mono">${r.fwd?r.done:'—'}</td>
           <td class="r mono">${r.rate===null?'—':Math.round(r.rate*100)+'%'}</td>
