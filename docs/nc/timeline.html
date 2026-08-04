@@ -106,6 +106,7 @@ table.ledger td { padding:10px 10px 10px 0; border-bottom:1px solid var(--line);
 table.ledger td.r, table.ledger th.r { text-align:right; }
 table.ledger tr.subject td { color:var(--critical); font-weight:600; background:var(--critical-soft); }
 table.ledger tr.subject td:first-child { box-shadow:inset 3px 0 0 var(--critical); padding-left:10px; }
+table.ledger tr.fail td { color:var(--critical); }
 
 /* ---------- narrative timeline ---------- */
 .events { position:relative; margin-top:8px; padding-left:26px; }
@@ -176,8 +177,13 @@ footer a { color:var(--text-muted); }
 
 <section>
   <div class="wrap">
-    <h2>What the neighbours collected</h2>
-    <p class="sub">Same coast, same storms, same programmes, same state agency administering them.</p>
+    <h2>Everyone else finished what they started</h2>
+    <p class="sub">
+      Counting only projects that mitigate private property — acquisition, elevation, reconstruction. Eight of
+      the ten oceanfront towns that put properties forward completed <b>every single one</b>. North Topsail
+      Beach put forward more than any town that delivered none. A dash means the town never proposed a property
+      project, so it has no delivery record either way.
+    </p>
     <table class="ledger" id="ledger"></table>
   </div>
 </section>
@@ -374,16 +380,30 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
   // ---- ledger ----------------------------------------------------
   const led = order.map(t=>{
     const ps = byTown.get(t)||[];
-    return { t, n:ps.length, fed:sum(ps,p=>p.fed), props:sum(ps,p=>p.final),
-             ho:sum(ps,p=>p.homeowner?p.fed:0), last: ps.length?Math.max(...ps.map(p=>p.fy)):null };
-  }).sort((a,b)=>b.fed-a.fed);
+    const prop = ps.filter(p=>p.homeowner);
+    const fwd = sum(prop,p=>p.props), done = sum(prop,p=>p.final);
+    return { t, nprop:prop.length, fwd, done,
+             rate: fwd ? done/fwd : null,
+             fed:sum(ps,p=>p.fed), last: ps.length?Math.max(...ps.map(p=>p.fy)):null };
+  }).sort((a,b)=>{
+    // towns that actually proposed property work first, best delivery at the top
+    if ((a.fwd>0) !== (b.fwd>0)) return b.fwd>0 ? 1 : -1;
+    if (a.fwd>0) return (b.rate-a.rate) || (b.fwd-a.fwd);
+    return b.fed-a.fed;
+  });
+
   document.getElementById('ledger').innerHTML =
-    `<thead><tr><th>Municipality</th><th class="r">Awards</th><th class="r">Federal $</th>
-     <th class="r">Properties mitigated</th><th class="r">Homeowner-directed $</th><th class="r">Last filing</th></tr></thead><tbody>`
-    + led.map(r=>`<tr class="${r.t===SUBJECT?'subject':''}">
-        <td>${esc(r.t)}</td><td class="r mono">${r.n}</td><td class="r mono">${usd(r.fed)}</td>
-        <td class="r mono">${r.props}</td><td class="r mono">${usd(r.ho)}</td>
-        <td class="r mono">${r.last??'—'}</td></tr>`).join('')
+    `<thead><tr><th>Municipality</th><th class="r">Property projects</th><th class="r">Properties put forward</th>
+     <th class="r">Mitigated</th><th class="r">Delivered</th><th class="r">Total federal $</th>
+     <th class="r">Last filing</th></tr></thead><tbody>`
+    + led.map(r=>{
+        const fail = r.fwd>0 && !r.done;
+        return `<tr class="${r.t===SUBJECT?'subject':fail?'fail':''}">
+        <td>${esc(r.t)}</td><td class="r mono">${r.nprop||'—'}</td><td class="r mono">${r.fwd||'—'}</td>
+        <td class="r mono">${r.fwd?r.done:'—'}</td>
+        <td class="r mono">${r.rate===null?'—':Math.round(r.rate*100)+'%'}</td>
+        <td class="r mono">${usd(r.fed)}</td><td class="r mono">${r.last??'—'}</td></tr>`;
+      }).join('')
     + `</tbody>`;
 
   // ---- events ----------------------------------------------------
