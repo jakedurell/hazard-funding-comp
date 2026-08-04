@@ -81,6 +81,13 @@ h2 { font-size:24px; letter-spacing:-0.02em; margin:0 0 6px; font-weight:600; }
   border:1.5px solid var(--surface-1); cursor:default;
 }
 .mark:hover { outline:2px solid var(--text-primary); outline-offset:1px; }
+.mark.ring {
+  width:15px; height:15px; background:none; border-width:2.5px; border-style:solid;
+}
+.vrule { position:absolute; top:0; bottom:0; width:1px; background:var(--line-strong); opacity:.9; }
+.helene { position:relative; height:16px; margin-bottom:2px; }
+.helene span { position:absolute; transform:translateX(-50%); font-size:10px; letter-spacing:.06em;
+  text-transform:uppercase; font-weight:700; color:var(--text-muted); white-space:nowrap; }
 .gapnote {
   position:absolute; top:50%; transform:translateY(-50%); font-size:10.5px;
   color:var(--critical); font-weight:600; letter-spacing:.04em; white-space:nowrap;
@@ -152,7 +159,17 @@ footer a { color:var(--text-muted); }
     </p>
     <div class="chart"><div class="lanes" id="lanes"></div>
       <div class="legend" id="legend"></div>
-      <div class="scalenote">Circle area is proportional to federal share obligated. Awards with no obligation appear at minimum size.</div>
+      <div class="scalenote">
+        Solid circles are scaled to federal dollars obligated. <b>Open rings are filings that obligated
+        nothing</b> — pending, denied, or closed empty — drawn at a fixed size so an application never
+        disappears just because no money followed it.
+      </div>
+      <div class="note" style="border-left:3px solid var(--critical);margin-top:14px">
+        <b>Look at 2024.</b> Helene struck western North Carolina, and hazard mitigation money became available
+        statewide. <b>Kure Beach, Southern Shores and Wrightsville Beach each filed</b> — three of the towns on
+        this chart, for a storm that never touched them. So did Jacksonville, and Onslow County, North Topsail
+        Beach's own county. North Topsail Beach's lane is empty.
+      </div>
     </div>
   </div>
 </section>
@@ -315,17 +332,28 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
 
   let ticks = '';
   for (let y=Math.ceil(Y0/5)*5; y<=Y1; y+=5) ticks += `<div class="tick" style="left:${pct(y)}%">${y}</div>`;
-  let html = `<div class="axis"><div></div><div class="ticks">${ticks}</div></div>`;
+  let html = `<div class="axis"><div></div><div class="ticks">${ticks}</div></div>`
+            + `<div class="axis"><div></div><div class="helene">`
+            + `<span style="left:${pct(2024)}%">&darr; Helene round (DR-4827)</span></div></div>`;
 
   order.forEach(t => {
     const ps = byTown.get(t) || [];
     const marks = ps.map(p => {
-      const r = 4 + 13*Math.sqrt((p.fed||0)/(maxFed||1));
-      const tip = `${t} · FY${p.fy}\n${p.program} — ${p.cat}\n${usd(p.fed)} obligated`
+      const col = cssv(CAT_COLOR[p.cat]||'--s6');
+      const tip = `${t} · FY${p.fy}\n${p.program} — ${p.cat}\n${p.fed?usd(p.fed)+' obligated':'filed — nothing obligated'}`
                 + `\n${p.final||0} of ${p.props||0} properties completed\n${p.status}`;
-      return `<span class="mark" title="${esc(tip)}" style="left:${pct(p.fy)}%;width:${r*2}px;height:${r*2}px;`
-           + `background:${cssv(CAT_COLOR[p.cat]||'--s6')};opacity:${p.fed?0.92:0.4}"></span>`;
+      // A filing is an event whether or not money followed it. Funded awards are
+      // solid and scaled by dollars; filings with nothing obligated are open rings
+      // at a fixed legible size, so "they applied" never disappears behind "$0".
+      if (p.fed > 0) {
+        const r = 5 + 12*Math.sqrt(p.fed/(maxFed||1));
+        return `<span class="mark" title="${esc(tip)}" style="left:${pct(p.fy)}%;width:${r*2}px;`
+             + `height:${r*2}px;background:${col}"></span>`;
+      }
+      return `<span class="mark ring" title="${esc(tip)}" style="left:${pct(p.fy)}%;`
+           + `border-color:${col}"></span>`;
     }).join('');
+    const rule = `<span class="vrule" style="left:${pct(2024)}%"></span>`;
     const last = ps.length ? Math.max(...ps.map(p=>p.fy)) : null;
     let gap = '';
     if (t===SUBJECT && last)
@@ -334,12 +362,14 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
       gap = `<span class="gapnote" style="left:2.5%;color:var(--text-muted);font-weight:400">no award on record</span>`;
     html += `<div class="lane ${t===SUBJECT?'subject':''}">
       <div class="lane-name" title="${esc(t)}">${esc(t)}</div>
-      <div class="lane-track">${marks}${gap}</div></div>`;
+      <div class="lane-track">${rule}${marks}${gap}</div></div>`;
   });
   document.getElementById('lanes').innerHTML = html;
   document.getElementById('legend').innerHTML = Object.entries(CAT_COLOR)
     .filter(([c])=>rows.some(p=>p.cat===c))
-    .map(([c,v])=>`<span><i style="background:${cssv(v)}"></i>${c}</span>`).join('');
+    .map(([c,v])=>`<span><i style="background:${cssv(v)}"></i>${c}</span>`).join('')
+    + `<span style="margin-left:6px"><i style="background:none;border:2.5px solid var(--text-muted)"></i>`
+    + `filed — nothing obligated</span>`;
 
   // ---- ledger ----------------------------------------------------
   const led = order.map(t=>{
