@@ -20,6 +20,7 @@
 # ==========================================================
 
 import csv
+import datetime
 import json
 import os
 import re
@@ -310,6 +311,9 @@ def main():
             "nonmunicipal": {"records": nonmunicipal["n"], "fed": round(nonmunicipal["fed"], 2)},
             "reference_note": "Context rows: bodies other than an oceanfront municipality "
                               "that serve the same residents.",
+            "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
+            "fetched": datetime.datetime.fromtimestamp(
+                os.path.getmtime(hma_path), datetime.timezone.utc).strftime("%Y-%m-%d"),
             "fy_range": [
                 min((p["fy"] for p in projects if p["fy"]), default=1989),
                 max((p["fy"] for p in projects if p["fy"]), default=2025),

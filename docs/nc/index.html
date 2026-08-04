@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>NC Hazard Mitigation Funding — Municipal Comparison</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="icon" type="image/png" href="../assets/tabLogo.png" />
+<link rel="stylesheet" href="../assets/reef.css" />
 <style>
 :root {
   color-scheme: light;
@@ -195,6 +197,22 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
 </head>
 <body>
 
+<nav class="reef-nav">
+  <div class="inner">
+    <a class="reef-brand" href="../">
+      <img src="../assets/tabLogo.png" alt="" />
+      <span><span class="bt">Reef Advocate</span><span class="bs">Data · Est. 2026</span></span>
+    </a>
+    <div class="links">
+      <a href="../">Home</a>
+      <a href="./" aria-current="page">Funding map</a>
+      <a href="./timeline.html">NTB timeline</a>
+      <a href="../#sources">Sources</a>
+      <a href="https://reefadvocate.com/">Main site &nearr;</a>
+    </div>
+  </div>
+</nav>
+
 <header>
   <h1>North Carolina — FEMA Hazard Mitigation Funding by Municipality</h1>
   <p>Every FEMA Hazard Mitigation Assistance award matched to an NC incorporated place. Switch scope between the
@@ -202,6 +220,7 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
      ⚑ marks programs that require the property to carry NFIP flood insurance. Dollars are <b>nominal</b>, not
      inflation-adjusted; awards made to counties and state agencies are excluded.
      &nbsp;·&nbsp; <a href="./timeline.html" style="color:var(--accent);font-weight:600">See the North Topsail Beach timeline &rarr;</a></p>
+  <div class="wrap" style="padding:0 20px 12px"><span class="stamp" id="reef-stamp"></span></div>
 </header>
 
 <div class="controls">
@@ -754,5 +773,22 @@ document.addEventListener('click',e=>{
   if(e.target.dataset && e.target.dataset.town==='__clear'){ selected.clear(); render(); }
 });
 </script>
+
+<div class="wrap" style="margin-top:40px"><div class="disclaimer" id="reef-disclaimer"></div></div>
+<footer class="reef-footer">
+  <div class="wrap">
+    <p>© 2026 Reef Advocate. Defending the Coast. Framework adapted from
+       <a href="https://johbry17.github.io/Floodlines/">Floodlines</a> by
+       <a href="https://informedwanderer.com/">Bryan C. Johns</a>, MIT licensed.</p>
+    <div class="fl">
+      <a href="https://reefadvocate.com/legalprivacy">Legal/Privacy Terms</a>
+      <span>·</span><a href="../#sources">Data sources</a>
+      <span>·</span><span>Not affiliated with Topsail Reef HOA</span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/reef.js"></script>
+<script>reefStamp('#reef-stamp','./data/nc_hma.json'); reefDisclaimer('#reef-disclaimer');</script>
+
 </body>
 </html>

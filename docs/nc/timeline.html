@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Thirty Years of Nothing — North Topsail Beach and Its Neighbours</title>
+<link rel="icon" type="image/png" href="../assets/tabLogo.png" />
+<link rel="stylesheet" href="../assets/reef.css" />
 <style>
 :root {
   color-scheme: light;
@@ -142,6 +144,22 @@ footer a { color:var(--text-muted); }
 </head>
 <body>
 
+<nav class="reef-nav">
+  <div class="inner">
+    <a class="reef-brand" href="../">
+      <img src="../assets/tabLogo.png" alt="" />
+      <span><span class="bt">Reef Advocate</span><span class="bs">Data · Est. 2026</span></span>
+    </a>
+    <div class="links">
+      <a href="../">Home</a>
+      <a href="./">Funding map</a>
+      <a href="./timeline.html" aria-current="page">NTB timeline</a>
+      <a href="../#sources">Sources</a>
+      <a href="https://reefadvocate.com/">Main site &nearr;</a>
+    </div>
+  </div>
+</nav>
+
 <header>
   <div class="wrap">
     <div class="eyebrow">North Topsail Beach · FEMA Hazard Mitigation Assistance</div>
@@ -151,6 +169,7 @@ footer a { color:var(--text-muted); }
       was told the money carried no local cost, that the state would cover the match, and that it would be
       paid 5% to administer it. Here is what it did with that, next to what its neighbours did.
     </p>
+    <div class="stamp" id="reef-stamp" style="margin-top:22px"></div>
     <div class="zeros" id="zeros"></div>
   </div>
 </header>
@@ -279,7 +298,7 @@ footer a { color:var(--text-muted); }
   </div>
 </section>
 
-<footer>
+<footer class="oldfoot">
   <div class="wrap">
     Source: <a href="https://www.fema.gov/openfema-data-page/hazard-mitigation-assistance-projects-v4">FEMA OpenFEMA Hazard Mitigation Assistance Projects v4</a>,
     matched to Census incorporated places. Dollars are nominal, not inflation-adjusted.
@@ -469,5 +488,22 @@ fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
     + (e.q?`<div class="q">${e.q}</div>`:'') + `</div>`).join('');
 });
 </script>
+
+<div class="wrap" style="margin-top:40px"><div class="disclaimer" id="reef-disclaimer"></div></div>
+<footer class="reef-footer">
+  <div class="wrap">
+    <p>© 2026 Reef Advocate. Defending the Coast. Framework adapted from
+       <a href="https://johbry17.github.io/Floodlines/">Floodlines</a> by
+       <a href="https://informedwanderer.com/">Bryan C. Johns</a>, MIT licensed.</p>
+    <div class="fl">
+      <a href="https://reefadvocate.com/legalprivacy">Legal/Privacy Terms</a>
+      <span>·</span><a href="../#sources">Data sources</a>
+      <span>·</span><span>Not affiliated with Topsail Reef HOA</span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/reef.js"></script>
+<script>reefStamp('#reef-stamp','./data/nc_hma.json'); reefDisclaimer('#reef-disclaimer');</script>
+
 </body>
 </html>
