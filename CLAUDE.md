@@ -19,6 +19,7 @@ This is the new work, independent of the inherited Vermont pipeline. It does not
 ```
 scripts/build_nc_data.py          stdlib-only builder: fetch → name-match → emit
   ├─ FEMA HMA bulk CSV            fema.gov/api/open/v4/HazardMitigationAssistanceProjects.csv
+  ├─ FEMA declarations v2         fema.gov/api/open/v2/DisasterDeclarationsSummaries (NC, all)
   └─ Census TIGERweb              incorporated-place polygons as GeoJSON, no API key
        ↓
 docs/nc/data/nc_hma.json          single payload: meta + projects[] + boundaries
@@ -34,6 +35,7 @@ Three things matter when editing this:
 - **`TOWNS` in the builder is the comparison frame.** 21 NC Atlantic-facing barrier-island municipalities, mapped to island groups. Changing the comp set means editing that dict, nothing else.
 - **Name matching is the fragile part.** HMA's `subrecipient` is free text — "NORTH TOPSAIL BEACH", "North Topsail Beach", and "Town of North Topsail Beach" are three strings for one town, and NC has 505 distinct spellings. `normalize()` strips case, punctuation, parentheticals, and TOWN/CITY/OF/THE. **Always check `unmatched.csv` after a run** — a comp town silently dropping to zero because of a spelling variant is the failure mode that would most damage the analysis.
 - **Category assignment drives the headline metric.** `is_homeowner_directed()` treats FEMA activity codes 200/202/203/207 (acquisition, elevation, reconstruction of private structures) as homeowner-directed; everything else is municipal asset, planning, or admin. The dashboard's central claim rests on this split, so changes here are substantive, not cosmetic.
+- **`designated` is a join, not a FEMA column.** `designated()` asks whether an award's county was a designated area of the *same declaration that funded it*. `False` is not ineligibility — HMGP is allocated to the state off a declaration and may be awarded anywhere in it, which is exactly what the flag exists to surface. `None` means the question doesn't apply: the competitive programs (FMA/PDM/BRIC/LPDM/RFC/SRL) carry no disaster number. Designation is administrative, not a damage map; for physical impact see HUD CDBG-DR "most impacted and distressed" areas or FEMA MOTF damage assessments.
 
 Frontend conventions: colors come from the `dataviz` skill's validated reference palette, declared as CSS custom properties under `:root` plus both dark scopes (`prefers-color-scheme` and `[data-theme]`). Categorical hues are assigned per entity in fixed order and never cycled; the choropleth uses the single-hue blue sequential ramp. View state (selected towns, year range, metric) round-trips through the URL query string, so any view is shareable.
 

@@ -346,7 +346,7 @@ const EVENTS = [
     t:"The item is never placed on an agenda. No motion is made. No vote is taken. The town files nothing." },
 ];
 
-fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
+fetch('./data/nc_hma.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{
   const ocean = d.meta.oceanfront;
   const rows  = d.projects.filter(p => p.town in ocean && p.fy);
   const years = rows.map(p=>p.fy);

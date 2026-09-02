@@ -2,10 +2,11 @@
 # ==========================================================
 # North Carolina Oceanfront HMA Comparison — Data Builder
 #
-# Fetches FEMA Hazard Mitigation Assistance records and Census
-# place boundaries, matches HMA's free-text `subrecipient` field
-# to NC oceanfront municipalities, and emits a single compact
-# JSON payload for docs/nc/index.html.
+# Fetches FEMA Hazard Mitigation Assistance records, FEMA disaster
+# declarations, and Census place boundaries; matches HMA's free-text
+# `subrecipient` field to NC oceanfront municipalities; flags whether
+# each award's county was inside its own declaration's declared area;
+# and emits a single compact JSON payload for docs/nc/index.html.
 #
 # Stdlib only — no pandas/geopandas required.
 #
@@ -33,15 +34,27 @@ CACHE = os.path.join(ROOT, "data", "raw", "NC")
 OUT = os.path.join(ROOT, "docs", "nc", "data")
 
 HMA_CSV = "https://www.fema.gov/api/open/v4/HazardMitigationAssistanceProjects.csv"
+# One row per designated area per declaration. Gives us, for each disaster
+# number, the counties FEMA actually declared — which is what lets us ask
+# whether an award went to a town inside or outside the impact area.
+DECLARATIONS = "https://www.fema.gov/api/open/v2/DisasterDeclarationsSummaries"
 TIGERWEB = (
     "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
     "Places_CouSub_ConCity_SubMCD/MapServer/4/query"
+)
+# Counties are the unit FEMA designates, so the impact-area overlay needs
+# their polygons — places alone would draw a scatter of dots, not an area.
+TIGERWEB_COUNTIES = (
+    "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
+    "State_County/MapServer/1/query"
 )
 
 # Statewide: every NC incorporated place is included. Geometry is generalized
 # server-side (maxAllowableOffset) — full resolution is 28 MB, too heavy for a
 # web payload; 0.0005 deg holds shape well at 1.8 MB.
 GEOM_OFFSET = "0.0005"
+# Counties are only ever a background wash, so they can be coarser than places.
+COUNTY_GEOM_OFFSET = "0.002"
 
 # NFIP dependency by program. This drives the "could this town even have
 # applied?" question, which matters wherever CBRS restricts flood insurance.
@@ -127,6 +140,44 @@ def is_homeowner_directed(project_type):
     return (project_type or "").split(":")[0].strip().startswith(HOMEOWNER_PREFIXES)
 
 
+def declaration_index(path):
+    """disasterNumber -> {counties, title, type, date} from the declarations feed.
+
+    `designatedArea` arrives as "Buncombe (County)" plus the occasional tribal
+    area; strip the suffix so it compares to HMA's bare `county` field.
+    """
+    with open(path, encoding="utf-8") as fh:
+        rows = json.load(fh)["DisasterDeclarationsSummaries"]
+    idx = {}
+    for r in rows:
+        d = idx.setdefault(str(r["disasterNumber"]), {
+            "counties": set(),
+            "title": r.get("declarationTitle"),
+            "type": r.get("declarationType"),
+            "date": (r.get("declarationDate") or "")[:10] or None,
+        })
+        area = (r.get("designatedArea") or "").replace(" (County)", "").strip()
+        if area:
+            d["counties"].add(area)
+    return idx
+
+
+def designated(disaster, county, idx):
+    """Was this award's county inside the declared area of its own declaration?
+
+    True / False / None, where None means the question does not apply — the
+    competitive programs (FMA, PDM, BRIC, LPDM, RFC, SRL) are not tied to a
+    declaration at all, so they carry no disaster number.
+
+    False is NOT a statement of ineligibility. HMGP funds are allocated to the
+    state off a declaration and the state may award them anywhere in it; that
+    is precisely why an award can land outside the declared counties.
+    """
+    if not disaster or disaster not in idx or not county:
+        return None
+    return county.strip() in idx[disaster]["counties"]
+
+
 def fetch(url, dest, params=None, label=""):
     """Download to dest unless cached. Returns dest path."""
     if os.path.exists(dest) and "--refresh" not in sys.argv:
@@ -177,6 +228,32 @@ def main():
         },
         label="Census TIGERweb NC incorporated places (generalized)",
     )
+    decl_path = fetch(
+        DECLARATIONS,
+        os.path.join(CACHE, "nc_declarations.json"),
+        params={
+            "$filter": "state eq 'NC'",
+            "$select": "disasterNumber,designatedArea,declarationTitle,"
+                       "declarationType,declarationDate",
+            "$top": "10000",
+            "$format": "json",
+        },
+        label="FEMA declared areas for NC (all declarations)",
+    )
+    counties_path = fetch(
+        TIGERWEB_COUNTIES,
+        os.path.join(CACHE, "nc_counties.geojson"),
+        params={
+            "where": "STATE='37'",
+            "outFields": "GEOID,NAME,BASENAME",
+            "returnGeometry": "true",
+            "outSR": "4326",
+            "maxAllowableOffset": COUNTY_GEOM_OFFSET,
+            "f": "geojson",
+        },
+        label="Census TIGERweb NC counties (generalized)",
+    )
+    decl = declaration_index(decl_path)
 
     # ---- Places: every NC incorporated place is a candidate ----------
     with open(places_path, encoding="utf-8") as fh:
@@ -237,6 +314,7 @@ def main():
             "closed": (r.get("dateClosed") or "")[:10] or None,
             "sponsor": r.get("subrecipient"),
             "county": r.get("county"),
+            "designated": designated(r.get("disasterNumber"), r.get("county"), decl),
         })
 
     # reference rows — same record shape, kept out of the municipal comparison
@@ -262,6 +340,7 @@ def main():
             "obligated": (r.get("initialObligationDate") or "")[:10] or None,
             "closed": (r.get("dateClosed") or "")[:10] or None,
             "sponsor": r.get("subrecipient"), "county": r.get("county"),
+            "designated": designated(r.get("disasterNumber"), r.get("county"), decl),
         })
 
     funded = {p["geoid"] for p in projects}
@@ -269,6 +348,38 @@ def main():
     print(f"  {len(funded)} of {len(places['features'])} places have at least one award")
     print(f"  {nonmunicipal['n']} records went to counties/agencies/other "
           f"(${nonmunicipal['fed']:,.0f} federal) — see unmatched.csv")
+
+    # ---- Counties: geometry for the impact-area overlay ---------------
+    with open(counties_path, encoding="utf-8") as fh:
+        county_geo = json.load(fh)
+    county_feats = [{
+        "type": "Feature",
+        "geometry": f["geometry"],
+        "properties": {"name": f["properties"]["BASENAME"], "geoid": f["properties"]["GEOID"]},
+    } for f in county_geo["features"]]
+    county_names = {f["properties"]["name"] for f in county_feats}
+
+    # Carry the declarations the data actually references, so the payload can
+    # name a disaster and shade its declared area without a second lookup.
+    # `unmapped` holds designated areas with no county polygon — tribal areas
+    # such as the Eastern Band of Cherokee Indians — so the overlay can say it
+    # is not drawing them rather than silently dropping them.
+    disasters_meta = {}
+    for d in sorted({p["disaster"] for p in projects + reference if p["disaster"]}):
+        if d not in decl:
+            continue
+        areas = decl[d]["counties"]
+        disasters_meta[d] = {
+            "title": decl[d]["title"], "type": decl[d]["type"], "date": decl[d]["date"],
+            "areas": len(areas),
+            "counties": sorted(areas & county_names),
+            "unmapped": sorted(areas - county_names),
+        }
+    inside = sum(1 for p in projects if p["designated"] is True)
+    outside = sum(1 for p in projects if p["designated"] is False)
+    n_a = sum(1 for p in projects if p["designated"] is None)
+    print(f"  declared-area match: {inside} inside, {outside} outside, "
+          f"{n_a} n/a (no declaration) across {len(disasters_meta)} declarations")
 
     print("\n  Oceanfront comparison set:")
     for t in sorted(OCEANFRONT):
@@ -297,7 +408,8 @@ def main():
 
     payload = {
         "meta": {
-            "source": "FEMA OpenFEMA HMA Projects v4; Census TIGERweb Incorporated Places",
+            "source": "FEMA OpenFEMA HMA Projects v4; FEMA OpenFEMA Disaster "
+                      "Declarations Summaries v2; Census TIGERweb Incorporated Places",
             "note": "Dollars are nominal (not inflation-adjusted). "
                     "federalShareObligated reflects obligated federal funds; "
                     "non-federal share is derived (projectAmount - federalShareObligated) "
@@ -306,6 +418,17 @@ def main():
                          "insurance. HMGP/PDM/BRIC do not, though the community must "
                          "participate in the NFIP for projects in an SFHA. Verify "
                          "against the current fiscal year's HMA guidance.",
+            "designation_note": "'Declared impact area' means the award's county was a "
+                                "designated area of the same declaration that funded it, "
+                                "per FEMA OpenFEMA DisasterDeclarationsSummaries v2. "
+                                "Outside does NOT mean ineligible: HMGP is allocated to "
+                                "the state off a declaration and may be awarded anywhere "
+                                "in it, which is why awards land outside the declared "
+                                "counties. Designation is an administrative determination, "
+                                "not a damage map. The competitive programs (FMA, PDM, "
+                                "BRIC, LPDM, RFC, SRL) carry no disaster number and are "
+                                "recorded as not applicable.",
+            "disasters": disasters_meta,
             "program_nfip": PROGRAM_NFIP,
             "oceanfront": OCEANFRONT,
             "nonmunicipal": {"records": nonmunicipal["n"], "fed": round(nonmunicipal["fed"], 2)},
@@ -314,6 +437,8 @@ def main():
             "built": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
             "fetched": datetime.datetime.fromtimestamp(
                 os.path.getmtime(hma_path), datetime.timezone.utc).strftime("%Y-%m-%d"),
+            "declarations_fetched": datetime.datetime.fromtimestamp(
+                os.path.getmtime(decl_path), datetime.timezone.utc).strftime("%Y-%m-%d"),
             "fy_range": [
                 min((p["fy"] for p in projects if p["fy"]), default=1989),
                 max((p["fy"] for p in projects if p["fy"]), default=2025),
@@ -322,6 +447,7 @@ def main():
         "projects": projects,
         "reference": reference,
         "boundaries": {"type": "FeatureCollection", "features": feats},
+        "counties": {"type": "FeatureCollection", "features": county_feats},
     }
 
     out_json = os.path.join(OUT, "nc_hma.json")

@@ -17,6 +17,19 @@
   --max-width:1200px;
 }
 
+/* The chrome below is always dark, even on a light page. Pages that carry
+   their own palette (docs/nc/*) redefine --text-* on :root and load after
+   this file, which would leave near-black text on the near-black nav — so
+   each dark-surfaced component restates the brand tokens for its subtree.
+   The footer is deliberately excluded: it has no background of its own and
+   should follow whatever palette the page is using. */
+.reef-nav, .stamp, .disclaimer {
+  color-scheme: dark;
+  --bg-depth:#0d1117; --bg-surface:#161b22; --bg-raised:#1c2129;
+  --text-primary:#f0f6fc; --text-secondary:#8b949e; --text-muted:#6e7681;
+  --text-accent:#58a6ff; --border-subtle:#30363d; --critical:#f85149;
+}
+
 *,*::before,*::after { box-sizing:border-box; }
 body {
   margin:0; background:var(--bg-depth); color:var(--text-primary);

@@ -108,8 +108,37 @@ select {
 .toggle { display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-secondary); cursor:pointer; }
 .toggle input { accent-color:var(--accent); width:15px; height:15px; }
 
+/* provenance popover — the designation flag is a join we perform, not a
+   column FEMA ships, so the control says where it comes from */
+#desig-ctl { position:relative; }
+.qmark {
+  width:14px; height:14px; padding:0; margin-left:5px; vertical-align:1px;
+  border:1px solid var(--line-strong); border-radius:50%; background:var(--surface-2);
+  color:var(--text-muted); font:600 9.5px/1 ui-sans-serif,sans-serif; cursor:help;
+}
+.qmark:hover, .qmark[aria-expanded="true"] { border-color:var(--accent); color:var(--accent); }
+.qmark:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.qpop {
+  position:absolute; top:100%; left:0; margin-top:6px; z-index:5;
+  width:min(400px, calc(100vw - 24px));   /* JS nudges `left` to keep it on screen */
+  background:var(--surface-1); border:1px solid var(--line-strong); border-radius:9px;
+  padding:12px 14px; box-shadow:0 6px 20px rgba(0,0,0,.18);
+  font-size:11.5px; line-height:1.55; color:var(--text-secondary);
+}
+.qpop[hidden] { display:none; }
+.qpop b { color:var(--text-primary); font-weight:600; }
+.qpop p { margin:0 0 8px; }
+.qpop p:last-child { margin-bottom:0; }
+.qpop dl { margin:0 0 8px; display:grid; grid-template-columns:auto 1fr; gap:2px 8px; }
+.qpop dt { color:var(--text-primary); font-weight:600; }
+.qpop dd { margin:0; }
+.qpop .src { color:var(--text-muted); font-size:10.5px; }
+
 /* ---------- layout ---------- */
 main { display:grid; grid-template-columns:minmax(0,1fr) 430px; height:calc(100vh - 172px); min-height:520px; }
+/* z-index:0 traps Leaflet's internal stacking (panes and controls run to
+   1000) inside the map, so the provenance popover can sit over it */
+.map-wrap { position:relative; z-index:0; }
 #map { height:100%; background:var(--surface-2); }
 aside {
   border-left:1px solid var(--line); background:var(--surface-1);
@@ -191,6 +220,10 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
 .map-legend .lg-title { font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:600; margin-bottom:5px; }
 .map-legend .sw { display:flex; align-items:center; gap:6px; }
 .map-legend .sw i { width:13px; height:13px; border-radius:3px; display:inline-block; border:1px solid rgba(128,128,128,.35); }
+/* the map wash is 15% alpha — unreadable at 13px, so the key carries the same
+   hue at a legible strength plus the mark's own border */
+.map-legend .lg-impact { background:color-mix(in srgb, var(--s2) 45%, transparent); border-color:var(--s2); }
+.map-legend .lg-sub { color:var(--text-muted); font-size:9.5px; margin:1px 0 0 19px; }
 .hint { position:absolute; bottom:10px; left:10px; z-index:500; font-size:11px; color:var(--text-muted);
   background:var(--surface-1); border:1px solid var(--line); border-radius:7px; padding:5px 9px; }
 </style>
@@ -282,10 +315,18 @@ table.proj tr.ho td:first-child { box-shadow:inset 2px 0 0 var(--s1); padding-le
     <label>&nbsp;</label>
     <label class="toggle"><input type="checkbox" id="hoOnly"> Homeowner-directed only</label>
   </div>
+
+  <div class="ctl" id="desig-ctl">
+    <label>Declared impact area
+      <button type="button" class="qmark" id="desig-q" aria-expanded="false"
+              aria-controls="desig-pop">?</button></label>
+    <label class="toggle"><input type="checkbox" id="outsideOnly"> Outside the declaration only</label>
+    <div class="qpop" id="desig-pop" role="dialog" aria-label="About the declared impact area data" hidden></div>
+  </div>
 </div>
 
 <main>
-  <div style="position:relative"><div id="map"></div><div class="hint">Click a town to select · Shift-click to add · Click water to clear</div></div>
+  <div class="map-wrap"><div id="map"></div><div class="hint">Click a town to select · Shift-click to add · Click water to clear</div></div>
   <aside id="side"></aside>
 </main>
 
@@ -314,12 +355,13 @@ const METRICS = {
   homeownerFed: { label:'Homeowner-directed federal $', fmt:usd, agg:r=>r.homeowner?r.fed:0 },
   nonfed:       { label:'Non-federal share required',fmt:usd,  agg:r=>r.nonfed },
   total:        { label:'Total project cost',       fmt:usd,  agg:r=>r.total },
-  count:        { label:'Projects',                 fmt:n=>String(n), agg:()=>1 },
-  props:        { label:'Properties mitigated',     fmt:n=>String(n), agg:r=>r.props },
+  // round — the legend feeds these interpolated ramp breaks, not whole counts
+  count:        { label:'Projects',                 fmt:n=>String(Math.round(n)), agg:()=>1 },
+  props:        { label:'Properties mitigated',     fmt:n=>String(Math.round(n)), agg:r=>r.props },
   avgShare:     { label:'Avg. federal cost share',  fmt:p=>p?p.toFixed(0)+'%':'—', agg:null },
 };
 
-let DATA, filters, selected = new Set(), map, polyLayer, bubbleLayer;
+let DATA, filters, selected = new Set(), map, polyLayer, bubbleLayer, impactLayer;
 
 function usd(v){
   if(!v) return '$0';
@@ -330,10 +372,15 @@ function usd(v){
 const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 // ---------- boot ----------
-fetch('./data/nc_hma.json').then(r=>r.json()).then(d=>{
+// no-cache = revalidate, not re-download. Neither python -m http.server nor
+// GitHub Pages sends Cache-Control on the payload, so a browser applies
+// heuristic freshness off Last-Modified and can serve a stale payload against
+// freshly deployed HTML — which reads as "every filter returns zero".
+fetch('./data/nc_hma.json',{cache:'no-cache'}).then(r=>r.json()).then(d=>{
   DATA = d;
   const [lo,hi] = d.meta.fy_range;
-  filters = { y0:lo, y1:hi, programs:new Set(), cats:new Set(), statuses:new Set(), hoOnly:false };
+  filters = { y0:lo, y1:hi, programs:new Set(), cats:new Set(), statuses:new Set(),
+              hoOnly:false, outsideOnly:false };
   readURL(lo,hi);
   buildControls(lo,hi);
   initMap();
@@ -351,6 +398,7 @@ function readURL(lo,hi){
   const m=q.get('metric'); if(m && METRICS[m]) document.getElementById('metric').value=m;
   if(q.get('scope')==='all') document.getElementById('scope').value='all';
   if(q.get('homeowner')==='1'){ filters.hoOnly=true; document.getElementById('hoOnly').checked=true; }
+  if(q.get('outside')==='1'){ filters.outsideOnly=true; document.getElementById('outsideOnly').checked=true; }
 }
 function writeURL(){
   const q=new URLSearchParams();
@@ -359,6 +407,7 @@ function writeURL(){
   if(metricKey!=='fed') q.set('metric',metricKey);
   if(document.getElementById('scope').value==='all') q.set('scope','all');
   if(filters.hoOnly) q.set('homeowner','1');
+  if(filters.outsideOnly) q.set('outside','1');
   const s=q.toString();
   history.replaceState(null,'',s?`?${s}`:location.pathname);
 }
@@ -396,6 +445,7 @@ function buildControls(lo,hi){
 
   document.getElementById('metric').addEventListener('change',render);
   document.getElementById('hoOnly').addEventListener('change',e=>{ filters.hoOnly=e.target.checked; render(); });
+  document.getElementById('outsideOnly').addEventListener('change',e=>{ filters.outsideOnly=e.target.checked; render(); });
   document.getElementById('scope').addEventListener('change',()=>{
     // drop selections that fall outside the new scope, then rebuild the layer
     const keep=new Set(DATA.boundaries.features.filter(f=>inScope(f.properties)).map(f=>f.properties.town));
@@ -404,6 +454,8 @@ function buildControls(lo,hi){
     if(!selected.size) map.flyToBounds(polyLayer.getBounds(),{padding:[40,40],duration:.6});
     render();
   });
+
+  buildDesignationNote();
 }
 
 function paintRange(lo,hi){
@@ -434,16 +486,82 @@ function chipSet(id, values, colorMap, active, opts={}){
   });
 }
 
+// The designated flag is a join this project performs, not something FEMA
+// ships on the HMA file — so the control shows its own provenance.
+function buildDesignationNote(){
+  const pop=document.getElementById('desig-pop'), btn=document.getElementById('desig-q');
+  const n=v=>DATA.projects.filter(p=>p.designated===v).length;
+  const decls=Object.keys(DATA.meta.disasters||{}).length;
+
+  pop.innerHTML=`
+    <p><b>Where this comes from.</b> FEMA OpenFEMA <i>Disaster Declarations
+      Summaries v2</i> — one row per designated area per declaration — joined to
+      each award on disaster number + county.</p>
+    <dl>
+      <dt>Inside</dt><dd>${n(true)} awards</dd>
+      <dt>Outside</dt><dd>${n(false)} awards</dd>
+      <dt>n/a</dt><dd>${n(null)} awards — no disaster number; this filter excludes them</dd>
+    </dl>
+    <p>${esc(DATA.meta.designation_note||'')}</p>
+    <p class="src">${decls} declaration${decls===1?'':'s'} referenced ·
+      pulled ${esc(DATA.meta.declarations_fetched||DATA.meta.fetched||'')} ·
+      fema.gov/api/open/v2/DisasterDeclarationsSummaries</p>`;
+
+  // the controls row wraps, so the button lands anywhere across the width —
+  // shift the panel back inside the viewport wherever it ended up
+  const place=()=>{
+    pop.style.left='0px';
+    const r=pop.getBoundingClientRect();
+    let shift=Math.min(0, (innerWidth-12)-r.right);
+    if(r.left+shift < 12) shift = 12-r.left;
+    pop.style.left=shift+'px';
+  };
+  const close=()=>{ pop.hidden=true; btn.setAttribute('aria-expanded','false'); };
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    pop.hidden=!pop.hidden;
+    btn.setAttribute('aria-expanded', pop.hidden?'false':'true');
+    if(!pop.hidden) place();
+  });
+  pop.addEventListener('click',e=>e.stopPropagation());
+  document.addEventListener('click',close);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
+  addEventListener('resize',()=>{ if(!pop.hidden) place(); });
+}
+
 // ---------- filtering + aggregation ----------
-function activeProjects(){
+function activeProjects(opts={}){
   return DATA.projects.filter(p=>
     (p.fy==null || (p.fy>=filters.y0 && p.fy<=filters.y1)) &&
     (!filters.programs.size || filters.programs.has(p.program)) &&
     (!filters.cats.size || filters.cats.has(p.cat)) &&
     (!filters.statuses.size || filters.statuses.has(p.status)) &&
-    (!filters.hoOnly || p.homeowner)
+    (!filters.hoOnly || p.homeowner) &&
+    // strict false — null is "no declaration to be outside of"
+    (!filters.outsideOnly || opts.ignoreOutside || p.designated === false)
   );
 }
+
+// Which declared area to shade. It belongs to the declarations *in view*, not
+// to the outside filter's own output — otherwise the shade would be derived
+// from the very rows it is meant to provide context for. So lift that one
+// filter and read the declarations off everything else the user has selected.
+//
+// Only one declaration gets drawn. Two or more have no common footprint, and a
+// union rendered as a single flat wash would read as one storm's reach — over
+// the full 1989–2025 range that is all 100 counties, which is true of "ever
+// designated" and false of anything the user is looking at.
+function impactArea(){
+  const decls=[...new Set(activeProjects({ignoreOutside:true}).map(p=>p.disaster))]
+    .filter(d=>d && DATA.meta.disasters[d]).sort();
+  if(decls.length!==1) return { decls, counties:new Set(), unmapped:new Set() };
+  const d=DATA.meta.disasters[decls[0]];
+  return { decls, counties:new Set(d.counties), unmapped:new Set(d.unmapped||[]) };
+}
+
+// FEMA ships declaration titles in caps; sentence-case them for display
+const titleCase = s => String(s||'').toLowerCase()
+  .replace(/\b[a-z]/g, c=>c.toUpperCase());
 
 // which places are in play — the oceanfront comp set, or every NC municipality
 function inScope(props){
@@ -488,6 +606,15 @@ function initMap(){
   L.tileLayer(`https://{s}.basemaps.cartocdn.com/${darkMode?'dark':'light'}_nolabels/{z}/{x}/{y}{r}.png`,
     { attribution:'&copy; OpenStreetMap &copy; CARTO', subdomains:'abcd', maxZoom:18 }).addTo(map);
 
+  // own pane under the town polygons (overlayPane is 400) — the impact area is
+  // context, so it must never sit on top of the data or eat a click
+  map.createPane('impact').style.zIndex = 350;
+  map.getPane('impact').style.pointerEvents = 'none';
+  impactLayer = L.geoJSON(DATA.counties||{type:'FeatureCollection',features:[]},{
+    pane:'impact', interactive:false,
+    style:()=>({ weight:0, fillOpacity:0 })
+  }).addTo(map);
+
   buildPolyLayer();
   bubbleLayer = L.layerGroup().addTo(map);
   map.on('click',()=>{ selected.clear(); render(); });
@@ -531,6 +658,11 @@ function styleOne(layer, town){
 }
 
 function drawMap(){
+  const impact = filters.outsideOnly ? impactArea() : null;
+  impactLayer.setStyle(f => impact && impact.counties.has(f.properties.name)
+    ? { weight:.7, color:cssv('--s2'), opacity:.5, fillColor:cssv('--s2'), fillOpacity:.15 }
+    : { weight:0, fillOpacity:0 });
+
   polyLayer.eachLayer(l=>styleOne(l,l.feature.properties.town));
   bubbleLayer.clearLayers();
   const statewide = document.getElementById('scope').value === 'all';
@@ -556,7 +688,24 @@ function drawMap(){
     `<div class="lg-title">${esc(METRICS[metricKey].label)}</div>` +
     `<div class="sw"><i style="background:${ZERO}"></i> none / zero</div>` +
     SEQ.map((c,i)=>`<div class="sw"><i style="background:${c}"></i> ${
-      METRICS[metricKey].fmt(Math.pow((i+1)/SEQ.length,2)*maxV)}</div>`).join('');
+      METRICS[metricKey].fmt(Math.pow((i+1)/SEQ.length,2)*maxV)}</div>`).join('') +
+    impactLegend(impact);
+}
+
+function impactLegend(impact){
+  if(!impact) return '';
+  const head=`<div class="lg-title" style="margin-top:8px">Declared impact area</div>`;
+  if(!impact.decls.length) return head+`<div class="lg-sub">no declaration in view</div>`;
+  if(impact.decls.length>1)
+    return head+`<div class="lg-sub">${impact.decls.length} declarations in view —
+      narrow the year range to map one</div>`;
+  const m=DATA.meta.disasters[impact.decls[0]];
+  const undrawn = impact.unmapped.size
+    ? `<div class="lg-sub">${impact.unmapped.size} tribal area${
+        impact.unmapped.size===1?'':'s'} not drawn</div>` : '';
+  return head +
+    `<div class="sw"><i class="lg-impact"></i> DR-${esc(impact.decls[0])} ${esc(titleCase(m.title))}</div>` +
+    `<div class="lg-sub">${impact.counties.size} counties designated</div>` + undrawn;
 }
 
 function toggleTown(town, additive){

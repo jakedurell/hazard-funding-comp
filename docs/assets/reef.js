@@ -37,7 +37,8 @@ function reefStamp(sel, payloadUrl) {
     return new Date(Date.UTC(y, m - 1, d))
       .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
   };
-  fetch(payloadUrl)
+  // revalidate — a stale payload here shows a wrong "data pulled" date
+  fetch(payloadUrl, { cache: 'no-cache' })
     .then(r => r.json())
     .then(d => {
       const m = d.meta || {};
